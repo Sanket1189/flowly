@@ -74,8 +74,10 @@ button,a{-webkit-tap-highlight-color:transparent}
   h1,.journey-copy h1,.nestly-copy h1,.carely-hero-copy h1{font-size:clamp(44px,13vw,58px);line-height:.98;letter-spacing:-3.6px;overflow-wrap:anywhere}
   .hero-copy>p,.journey-copy>p,.nestly-copy>p,.carely-hero-copy>p{font-size:15px;line-height:1.6}
   .hero-search-wrap,.hero-search{width:100%;max-width:none}
-  .hero-search{gap:7px;padding-left:13px}
-  .hero-search button{min-height:46px;padding-inline:14px}
+  .hero-search{gap:7px;padding-left:13px;overflow:hidden}
+  .hero-search input{min-width:0;text-overflow:ellipsis}
+  .hero-search button{width:48px;min-height:46px;padding:0;flex:0 0 48px;font-size:0;justify-content:center}
+  .hero-search button svg{display:block}
   .quick-links{justify-content:flex-start;text-align:left}
   .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{width:100%;max-width:100%;height:360px;transform:none}
   .orbit-a{width:min(330px,88vw);height:min(330px,88vw)}
@@ -87,7 +89,8 @@ button,a{-webkit-tap-highlight-color:transparent}
   .workflow-section,.journey-programs,.nestly-services,.carely-care{padding:64px 0}
   .section-heading,.journey-section-head,.nestly-section-head,.carely-section-head{gap:22px}
   .section-heading h2,.how h2,.cta h2,.journey-section-head h2,.journey-how h2,.journey-cta h2,.nestly-section-head h2,.nestly-how h2,.nestly-cta h2,.carely-section-head h2,.carely-cta h2{font-size:clamp(34px,10vw,43px);line-height:1.04;letter-spacing:-2.5px}
-  .filters{margin-top:30px;margin-inline:calc(var(--mobile-gutter) * -1);padding-inline:var(--mobile-gutter);scrollbar-width:none}
+  .filters{margin-top:30px;margin-inline:calc(var(--mobile-gutter) * -1);padding-inline:var(--mobile-gutter);padding-bottom:7px;scrollbar-width:none;scroll-snap-type:x proximity;overscroll-behavior-inline:contain}
+  .filters button{flex:0 0 auto;scroll-snap-align:start}
   .filters::-webkit-scrollbar{display:none}
   .workflow-grid,.ready-group .workflow-grid,.demo-grid,.journey-choice-grid,.journey-guide-grid,.journey-output-grid,.service-grid,.carely-services,.carely-doctor-grid{grid-template-columns:1fr}
   .workflow-card,.ready-group .workflow-card{min-height:315px;padding:22px}
@@ -134,7 +137,6 @@ button,a{-webkit-tap-highlight-color:transparent}
 /* Small phones: remove the last squeezed layouts. */
 @media (max-width:420px){
   :root{--mobile-gutter:12px}
-  .hero-search button{font-size:0;width:48px;padding:0;flex:0 0 48px}.hero-search button svg{display:block}
   .quick-links{gap:7px}.quick-links span{width:100%}
   .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{height:325px}
   .center-orb{transform:scale(.86)}
