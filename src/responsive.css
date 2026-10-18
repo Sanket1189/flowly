@@ -158,3 +158,87 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media (hover:none){
   .workflow-card:hover,.journey-choice-grid>button:hover,.service-grid>button:hover,.primary:hover,.journey-primary:hover{transform:none}
 }
+
+/* Editable planner cards: keep every control usable on narrow phones. */
+@media (max-width:600px){
+  .expense-builder,.savings-goal-builder,.planner-panel,.expense-list,.savings-goal-list,.planner-item-list{min-width:0}
+
+  .expense-row{
+    position:relative;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px;
+    padding:62px 14px 16px!important;
+    border:1px solid color-mix(in srgb,var(--j-ink) 10%,transparent);
+    border-radius:16px;
+    background:#f8faf6;
+    margin-top:12px;
+  }
+  .expense-row>span{position:absolute;left:14px;top:14px;width:34px;height:34px}
+  .expense-row:before{content:'BUDGET ITEM';position:absolute;left:58px;top:26px;font-size:8px;letter-spacing:1px;font-weight:850;color:#607b70}
+  .expense-row .expense-name,.expense-row .expense-category-field,.expense-row .expense-amount{
+    grid-column:1!important;
+    width:100%;
+    min-width:0;
+  }
+  .expense-row input,.expense-category-trigger{min-width:0;width:100%}
+  .delete-expense{
+    position:absolute;
+    top:14px;
+    right:14px;
+    grid-column:auto!important;
+    grid-row:auto!important;
+    width:38px;
+    height:34px;
+    align-self:auto;
+  }
+
+  .savings-goal-row{width:100%;min-width:0;gap:12px!important}
+  .savings-goal-row label,.savings-goal-row .goal-name,.savings-goal-row .goal-monthly{width:100%;min-width:0}
+  .savings-goal-row input{min-width:0;width:100%}
+
+  .planner-item-list .study-item{
+    position:relative;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px;
+    padding:62px 14px 16px!important;
+  }
+  .planner-item-list .study-item>b{position:absolute;left:14px;top:14px;margin:0;width:34px;height:34px}
+  .planner-item-list .study-item:before{content:'SUBJECT';position:absolute;left:58px;top:26px;font-size:8px;letter-spacing:1px;font-weight:850;color:color-mix(in srgb,var(--pt-ink) 62%,transparent)}
+  .planner-item-list .study-item label,.planner-item-list .study-item label:first-of-type,.planner-item-list .study-item .priority-field{
+    grid-column:1!important;
+    grid-row:auto!important;
+    width:100%;
+    min-width:0;
+  }
+  .planner-item-list .study-item .priority-field>div{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .planner-item-list .study-item .remove-item{
+    position:absolute;
+    top:14px;
+    right:14px;
+    grid-column:auto!important;
+    grid-row:auto!important;
+    width:42px!important;
+    height:34px;
+    margin:0;
+  }
+
+  .study-session-editor{
+    grid-template-columns:minmax(0,1fr) 42px!important;
+    gap:12px!important;
+    padding:14px!important;
+  }
+  .study-session-editor>label:first-child{grid-column:1!important;grid-row:1!important;min-width:0}
+  .study-session-editor .remove-session{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:42px!important;
+    height:42px;
+    margin:0;
+  }
+  .study-session-editor .session-slot,.study-session-editor .session-duration{
+    grid-column:1/-1!important;
+    grid-row:auto!important;
+    min-width:0;
+  }
+  .study-session-editor .session-slot>span{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
