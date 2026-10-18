@@ -1,0 +1,158 @@
+/* Shared responsive guardrails loaded after every experience stylesheet. */
+html,body,#root{width:100%;max-width:100%;overflow-x:clip}
+body{min-height:100%;-webkit-text-size-adjust:100%}
+button,input,textarea,select{min-width:0}
+button,a{-webkit-tap-highlight-color:transparent}
+.hero-copy,.journey-copy,.nestly-copy,.carely-hero-copy,.self-title,.plan-title,.planner-builder>header,.planner-result-shell>header>div{min-width:0}
+.workflow-card,.journey-choice-grid>button,.service-grid>button,.carely-services>button{min-width:0}
+
+/* Wide desktop: use the space without allowing lines to become too long. */
+@media (min-width:1440px){
+  .shell,.journey-shell,.nestly-shell,.carely-shell{width:min(1280px,calc(100% - 96px))}
+  .hero,.journey-hero,.nestly-hero,.carely-hero{column-gap:96px}
+  .workflow-grid,.journey-choice-grid,.journey-guide-grid,.service-grid,.carely-doctor-grid{gap:20px}
+  .self-form-shell,.self-result-shell,.planner-builder,.planner-result-shell{max-width:1160px}
+}
+
+/* Laptop: retain multi-column layouts, but reduce oversized spacing. */
+@media (min-width:901px) and (max-width:1199px){
+  .shell,.journey-shell,.nestly-shell,.carely-shell{width:calc(100% - 48px)}
+  .hero,.journey-hero,.nestly-hero,.carely-hero{gap:38px}
+  .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{max-width:470px;justify-self:end}
+  .how,.journey-how,.nestly-how{gap:48px;padding:58px}
+  .workflow-section,.journey-programs,.nestly-services,.carely-care{padding-block:88px}
+  .journey-section-head,.nestly-section-head,.carely-section-head{gap:36px}
+  .journey-choice-grid,.journey-guide-grid,.service-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .journey-choice-grid>button,.service-grid>button{padding:21px}
+  .multi-goal-layout{grid-template-columns:1fr!important;max-width:900px!important}
+  .multi-goal-preview{position:static!important}
+}
+
+/* Compact laptops: the illustrative hero needs more room than a half-width column. */
+@media (min-width:901px) and (max-width:1100px){
+  .nav-links,.journey-header nav,.nestly-header nav,.carely-header nav,.journey-actions,.nestly-actions,.carely-actions{display:none}
+  .menu-button,.journey-menu,.nestly-menu,.carely-menu{display:block;margin-left:auto}
+  .nav-links.open,.journey-header nav.open,.nestly-header nav.open,.carely-header nav.open{display:flex;position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:flex-start;padding:20px;border-radius:17px;background:#fff;color:#173b32;box-shadow:0 20px 45px rgba(23,59,50,.15)}
+  .hero,.journey-hero,.nestly-hero,.carely-hero{grid-template-columns:1fr;text-align:center;gap:42px;padding-top:48px}
+  .hero-copy>p,.journey-copy>p,.nestly-copy>p,.carely-hero-copy>p,.hero-search-wrap,.hero-search,.zip-search{margin-left:auto;margin-right:auto}
+  .quick-links,.journey-hero-actions,.journey-proof,.nestly-proof,.carely-hero-actions,.carely-trust{justify-content:center}
+  .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{justify-self:center;width:100%;max-width:620px}
+}
+
+/* Tablet: comfortable two-column cards and single-column primary flows. */
+@media (min-width:601px) and (max-width:900px){
+  .shell,.journey-shell,.nestly-shell,.carely-shell{width:calc(100% - 40px)}
+  .hero,.journey-hero,.nestly-hero,.carely-hero{min-height:auto;padding:54px 0 72px;gap:44px}
+  h1,.journey-copy h1,.nestly-copy h1,.carely-hero-copy h1{font-size:clamp(56px,9vw,76px);letter-spacing:-4.5px}
+  .workflow-section,.journey-programs,.nestly-services,.carely-care{padding-block:78px}
+  .workflow-grid,.ready-group .workflow-grid,.demo-grid,.service-grid,.carely-doctor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workflow-card.featured{grid-column:span 2}
+  .workflow-card{min-height:330px}
+  .how,.journey-how,.nestly-how{width:calc(100% - 40px);padding:50px;margin-inline:auto}
+  .cta,.journey-cta,.nestly-cta,.carely-cta{width:calc(100% - 40px);margin-inline:auto;padding:48px;gap:28px}
+  .planner-builder,.planner-result-shell,.self-form-shell,.self-result-shell,.journey-plan-shell,.home-book-shell{width:calc(100% - 36px)}
+  .self-form-grid,.money-form,.result-hero,.itinerary-layout,.money-map,.plan-final,.booking-final-grid{grid-template-columns:1fr}
+  .itinerary-layout aside,.money-map aside,.multi-goal-preview{position:static!important}
+  .trip-brief-layout,.multi-goal-layout{grid-template-columns:1fr!important}
+  .planner-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .week-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .group-days>div,.day-picker>div{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .journey-plan-footer,.home-book-footer,.self-footer,.planner-footer{padding-inline:20px}
+  .info-dialog,.donation-dialog,.journey-help,.help-panel{max-width:calc(100vw - 40px)}
+}
+
+/* Phone: stack content, enlarge tap targets, and prevent fixed UI from clipping. */
+@media (max-width:600px){
+  :root{--mobile-gutter:16px}
+  .shell,.journey-shell,.nestly-shell,.carely-shell{width:calc(100% - (var(--mobile-gutter) * 2))}
+  .site-header,.journey-header,.nestly-header,.carely-header{height:68px}
+  .logo,.journey-logo,.nestly-logo,.carely-logo{font-size:18px}
+  .logo-mark,.journey-logo>span,.nestly-logo>span,.carely-logo>span{flex:0 0 auto}
+  .nav-links.open,.journey-header nav.open,.nestly-header nav.open,.carely-header nav.open{left:0;right:0;max-height:calc(100svh - 84px);overflow:auto}
+
+  .hero,.journey-hero,.nestly-hero,.carely-hero{min-height:auto;padding:30px 0 58px;gap:30px}
+  h1,.journey-copy h1,.nestly-copy h1,.carely-hero-copy h1{font-size:clamp(44px,13vw,58px);line-height:.98;letter-spacing:-3.6px;overflow-wrap:anywhere}
+  .hero-copy>p,.journey-copy>p,.nestly-copy>p,.carely-hero-copy>p{font-size:15px;line-height:1.6}
+  .hero-search-wrap,.hero-search{width:100%;max-width:none}
+  .hero-search{gap:7px;padding-left:13px}
+  .hero-search button{min-height:46px;padding-inline:14px}
+  .quick-links{justify-content:flex-start;text-align:left}
+  .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{width:100%;max-width:100%;height:360px;transform:none}
+  .orbit-a{width:min(330px,88vw);height:min(330px,88vw)}
+  .orbit-b{width:min(245px,66vw);height:min(245px,66vw)}
+
+  .trust-strip{grid-template-columns:auto 1fr;justify-content:start;gap:9px 14px;padding:20px 0}
+  .trust-strip strong{margin:0;font-size:20px}
+  .trust-strip small{margin:0;text-align:left}
+  .workflow-section,.journey-programs,.nestly-services,.carely-care{padding:64px 0}
+  .section-heading,.journey-section-head,.nestly-section-head,.carely-section-head{gap:22px}
+  .section-heading h2,.how h2,.cta h2,.journey-section-head h2,.journey-how h2,.journey-cta h2,.nestly-section-head h2,.nestly-how h2,.nestly-cta h2,.carely-section-head h2,.carely-cta h2{font-size:clamp(34px,10vw,43px);line-height:1.04;letter-spacing:-2.5px}
+  .filters{margin-top:30px;margin-inline:calc(var(--mobile-gutter) * -1);padding-inline:var(--mobile-gutter);scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .workflow-grid,.ready-group .workflow-grid,.demo-grid,.journey-choice-grid,.journey-guide-grid,.journey-output-grid,.service-grid,.carely-services,.carely-doctor-grid{grid-template-columns:1fr}
+  .workflow-card,.ready-group .workflow-card{min-height:315px;padding:22px}
+  .workflow-card.featured{grid-column:auto}
+  .mini-flow{gap:6px}.mini-step{padding:7px 9px}
+  .group-heading{grid-template-columns:1fr;gap:8px}.group-note{justify-self:stretch;margin-top:10px}
+  .how,.journey-how,.nestly-how{width:calc(100% - (var(--mobile-gutter) * 2));margin-inline:auto;padding:36px 24px;gap:30px}
+  .cta,.journey-cta,.nestly-cta,.carely-cta{width:calc(100% - (var(--mobile-gutter) * 2));margin-inline:auto;padding:34px 24px;gap:26px}
+  .cta-actions,.journey-hero-actions,.carely-hero-actions{width:100%;align-items:stretch}
+  .cta-actions button,.journey-hero-actions button,.carely-hero-actions button{justify-content:center}
+  .footer,.journey-footer,.nestly-footer,.carely-footer{grid-template-columns:1fr;padding:28px 0;gap:17px}
+
+  .planner-tool-head,.self-head,.journey-plan-head,.home-book-head{height:66px;padding-inline:12px;grid-template-columns:44px 1fr 44px}
+  .planner-tool-head>button,.self-head>button,.journey-plan-head>button,.home-book-head>button{min-width:40px;min-height:40px;justify-content:center}
+  .planner-builder,.planner-result-shell,.self-form-shell,.self-result-shell,.journey-plan-shell,.home-book-shell{width:calc(100% - 24px);padding-top:32px;padding-bottom:110px}
+  .planner-builder>header h1,.planner-result-shell>header h1,.self-title h1,.plan-title h1,.journey-success h1,.result-hero h1{font-size:clamp(40px,12vw,50px);line-height:1;letter-spacing:-3px;overflow-wrap:anywhere}
+  .planner-summary,.self-form-grid,.money-form,.result-hero,.itinerary-layout,.money-map,.trip-brief-layout,.multi-goal-layout,.plan-final,.booking-final-grid,.book-service-grid{grid-template-columns:1fr!important}
+  .planner-summary span{padding:15px 17px}
+  .planner-panel,.self-form-card,.savings-goal-builder,.plan-slots,.plan-form{padding:17px}
+  .panel-heading,.savings-goal-head{gap:12px}
+  .salary-card,.budget-bridge{grid-template-columns:1fr!important;text-align:left;align-items:start}
+  .salary-card>span,.budget-bridge>span{display:none}
+  .budget-bridge .available{width:100%;margin:0!important}
+  .saving-only-card{padding:17px!important;align-items:flex-start}
+  .itinerary-layout aside,.money-map aside,.multi-goal-preview{position:static!important}
+  .itinerary-days article{padding:17px;gap:13px}
+  .itinerary-days article .spot-edit-row{grid-template-columns:86px minmax(0,1fr) 36px}
+  .goal-result-list,.money-actions{padding:17px}
+  .money-actions{grid-template-columns:1fr}
+  .week-grid{grid-template-columns:1fr}
+  .group-days>div,.day-picker>div{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .group-activity-list article,.study-session-editor{min-width:0}
+  .routine-group-results>section,.editable-day{min-width:0}
+
+  .journey-plan-footer,.home-book-footer,.self-footer,.planner-footer{min-height:72px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));gap:8px}
+  .journey-plan-footer button,.home-book-footer button,.self-footer button,.planner-footer button{min-height:44px}
+  .info-dialog-backdrop,.journey-overlay,.help-overlay{padding:10px;align-items:flex-end}
+  .info-dialog,.donation-dialog,.journey-help,.help-panel{width:100%;max-width:none;max-height:calc(100svh - 20px);border-radius:24px 24px 16px 16px;padding:19px}
+  .info-dialog-copy h2,.donation-copy h2,.journey-help h2,.help-panel h2{font-size:clamp(32px,10vw,40px);letter-spacing:-2px}
+  .info-dialog>footer,.donation-dialog>footer{position:sticky;bottom:-19px;background:inherit;padding:14px 0 0;flex-wrap:wrap}
+  input,textarea,select{font-size:16px!important}
+}
+
+/* Small phones: remove the last squeezed layouts. */
+@media (max-width:420px){
+  :root{--mobile-gutter:12px}
+  .hero-search button{font-size:0;width:48px;padding:0;flex:0 0 48px}.hero-search button svg{display:block}
+  .quick-links{gap:7px}.quick-links span{width:100%}
+  .orbit-scene,.journey-visual,.nestly-visual,.carely-visual{height:325px}
+  .center-orb{transform:scale(.86)}
+  .float-icon{transform:scale(.84)!important}
+  .workflow-card,.ready-group .workflow-card{min-height:290px;border-radius:21px}
+  .card-meta{align-items:flex-start}.availability-badge{white-space:normal;text-align:center}
+  .donation-amounts{grid-template-columns:1fr 1fr}
+  .info-dialog>footer button,.donation-dialog>footer button{flex:1 1 130px}
+  .planner-item-list article,.planner-item-list .study-item,.group-activity-list article,.study-session-editor{grid-template-columns:1fr!important;padding:13px}
+  .planner-item-list article>b,.planner-item-list article label,.planner-item-list article label:first-of-type,.priority-field,.remove-item,.group-activity-list .activity-name,.group-activity-list .activity-time,.group-activity-list article>label:nth-of-type(3),.group-activity-list article>label:nth-of-type(4),.group-activity-list .remove-item,.study-session-editor>label:first-child,.study-session-editor .session-slot,.study-session-editor .session-duration,.study-session-editor .remove-session{grid-column:1!important;grid-row:auto!important}
+  .remove-item,.group-activity-list .remove-item,.study-session-editor .remove-session{width:100%!important;height:42px}
+  .group-days>div,.day-picker>div{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .itinerary-days article .spot-edit-row{grid-template-columns:1fr 36px}
+  .spot-edit-row>i{grid-column:1/-1}.spot-edit-row>input{grid-column:1}.spot-edit-row>button{grid-column:2}
+  .savings-goal-row{padding-inline:13px!important}.delete-goal{right:13px!important}
+  .journey-confirm>div{align-items:flex-start}.journey-confirm>div>span{width:48px;height:48px}
+}
+
+@media (hover:none){
+  .workflow-card:hover,.journey-choice-grid>button:hover,.service-grid>button:hover,.primary:hover,.journey-primary:hover{transform:none}
+}

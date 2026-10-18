@@ -1,0 +1,79 @@
+/* Keep the self-service library in a balanced two-by-two rhythm. */
+.ready-group .workflow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ready-group .workflow-card.featured{grid-column:auto}
+.ready-group .workflow-card{min-height:380px}
+
+/* Give the two newest tools the same confident card treatment as the existing flows. */
+.workflow-card.flow-study{background:#51466c;border-color:transparent;color:#fffaff}
+.workflow-card.flow-routine{background:#a6533d;border-color:transparent;color:#fffaf6}
+.workflow-card.flow-study p,.workflow-card.flow-routine p{color:rgba(255,255,255,.78)}
+.flow-study .card-tag,.flow-routine .card-tag{color:rgba(255,255,255,.72)}
+.flow-study .card-action{color:#eadff8}
+.flow-routine .card-action{color:#ffe1d5}
+.flow-study .availability-badge.ready,.flow-routine .availability-badge.ready{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.2);color:#fff}
+.flow-study::after{border-color:rgba(229,216,245,.13)!important}
+.flow-routine::after{border-color:rgba(255,225,213,.13)!important}
+
+/* Align each study-row action to the exact baseline of its controls. */
+.planner-item-list .study-item{align-items:end;background:color-mix(in srgb,var(--pt-soft) 18%,#fff)}
+.study-item>b,.study-item>.remove-item{margin-top:0;align-self:end}
+
+/* Keep search answers attached to the search box instead of far down the page. */
+.hero-search-wrap{position:relative;z-index:20;max-width:610px;margin-top:32px}
+.hero-search-wrap .hero-search{max-width:none;margin-top:0}
+.instant-search-results{position:absolute;left:0;right:0;top:calc(100% + 10px);display:grid;gap:6px;padding:10px;border:1px solid rgba(23,59,50,.1);border-radius:18px;background:rgba(255,255,255,.97);box-shadow:0 24px 60px rgba(22,58,48,.18);backdrop-filter:blur(14px)}
+.search-result-label{display:flex;align-items:center;justify-content:space-between;padding:4px 5px 7px;color:#7d8f88;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.instant-search-results>button{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:11px;width:100%;border:0;border-radius:13px;background:transparent;padding:9px;text-align:left;color:var(--ink);cursor:pointer}
+.instant-search-results>button:hover{background:#f0f4ec}
+.instant-search-results .workflow-icon{width:40px;height:40px;border-radius:11px}
+.instant-search-results>button>span:nth-child(2),.instant-search-results strong,.instant-search-results small{display:block}
+.instant-search-results strong{font-size:12px}
+.instant-search-results small{font-size:9px;color:#81918b;margin-top:3px}
+.instant-empty{display:flex;align-items:center;gap:12px;padding:14px;color:#74867f;text-align:left}
+.instant-empty span,.instant-empty strong,.instant-empty small{display:block}.instant-empty strong{font-size:12px}.instant-empty small{font-size:9px;margin-top:3px}
+.cta-actions{display:flex;align-items:center;gap:10px}.support-creator{border:1px solid rgba(23,59,50,.2);background:transparent;color:var(--ink);border-radius:100px;padding:13px 17px;display:flex;align-items:center;gap:8px;font-weight:800;cursor:pointer}
+
+/* Lightweight portal information dialogs. */
+.footer>div>button{border:0;background:none;color:inherit;padding:0;font:inherit;cursor:pointer}
+.footer>div>button:hover{color:var(--ink)}
+.info-dialog-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:rgba(10,30,25,.48);backdrop-filter:blur(8px);animation:dialog-fade .18s ease-out}
+.info-dialog{width:min(590px,100%);max-height:calc(100vh - 48px);overflow:auto;border-radius:28px;background:#f9faf6;color:var(--ink);padding:25px;box-shadow:0 35px 100px rgba(8,31,24,.28);animation:dialog-rise .24s ease-out}
+.info-dialog.support{background:#fff8f2}
+.info-dialog>header{display:flex;align-items:center;justify-content:space-between}
+.info-dialog>header>span{width:48px;height:48px;border-radius:15px;background:#dcebdd;color:#28584a;display:grid;place-items:center}
+.info-dialog.support>header>span{background:#f4dfd2;color:#9b513a}
+.info-dialog>header>button{width:40px;height:40px;border:1px solid rgba(23,59,50,.12);border-radius:50%;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.info-dialog-copy{padding:27px 4px 21px}
+.info-dialog-copy>small{font-size:9px;letter-spacing:1.5px;font-weight:850;color:#6f857d}
+.info-dialog-copy h2{font-size:42px;line-height:1;letter-spacing:-2.5px;margin:10px 0 13px}
+.info-dialog-copy>p{color:#71837c;line-height:1.65;margin:0;max-width:480px}
+.info-dialog-list{display:grid;gap:8px}
+.info-dialog-list article{display:grid;grid-template-columns:34px 1fr;gap:13px;padding:15px;border:1px solid rgba(23,59,50,.09);border-radius:15px;background:rgba(255,255,255,.75)}
+.info-dialog-list article>b{width:30px;height:30px;border-radius:9px;background:#e4edde;display:grid;place-items:center;font-size:8px}
+.info-dialog.support .info-dialog-list article>b{background:#f3e3d8}
+.info-dialog-list h3{font-size:13px;margin:1px 0 5px}
+.info-dialog-list p{color:#71837c;font-size:11px;line-height:1.55;margin:0}
+.info-dialog>footer{display:flex;justify-content:flex-end;gap:9px;padding-top:20px}
+.info-dialog>footer button{border-radius:100px;padding:12px 16px;font-weight:800;cursor:pointer}
+.dialog-secondary{border:1px solid rgba(23,59,50,.14);background:transparent;color:var(--ink)}
+.dialog-primary{border:0;background:var(--ink);color:#fff;display:flex;align-items:center;gap:7px}
+.donation-dialog{width:min(540px,100%);max-height:calc(100vh - 48px);overflow:auto;border-radius:28px;background:#fff8f0;color:var(--ink);padding:25px;box-shadow:0 35px 100px rgba(8,31,24,.28);animation:dialog-rise .24s ease-out}
+.donation-dialog>header{display:flex;align-items:center;justify-content:space-between}.donation-dialog>header>span{width:49px;height:49px;border-radius:15px;background:#ffe0cf;color:#a84e34;display:grid;place-items:center}.donation-dialog>header>button{width:40px;height:40px;border:1px solid rgba(23,59,50,.12);border-radius:50%;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}.donation-copy{padding:27px 4px 21px}.donation-copy small{font-size:9px;letter-spacing:1.5px;font-weight:850;color:#9c6d5d}.donation-copy h2{font-size:48px;line-height:1;letter-spacing:-3px;margin:10px 0 13px}.donation-copy p{color:#7f736d;line-height:1.65;margin:0}.donation-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.donation-amounts button{height:51px;border:1px solid rgba(59,48,43,.13);border-radius:13px;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:850;cursor:pointer}.donation-amounts button.active{background:var(--ink);color:#fff;border-color:var(--ink)}.custom-donation{display:block;margin-top:13px;font-size:9px;font-weight:800}.custom-donation>div{height:48px;margin-top:7px;border:1px solid rgba(59,48,43,.13);border-radius:12px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 13px}.custom-donation input{width:100%;border:0;outline:0;background:transparent;color:var(--ink);font-size:14px;font-weight:800}.donation-note{display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:12px;border-radius:12px;background:#fff0e8;color:#91533e;font-size:9px;line-height:1.5}.donation-note.configured{background:#e8f1e7;color:#376451}.donation-note svg{flex:0 0 auto}.donation-dialog>footer{display:flex;justify-content:flex-end;gap:9px;padding-top:20px}.donation-dialog>footer button{border-radius:100px;padding:12px 16px;font-weight:800;cursor:pointer}.donate-action{border:0;background:var(--ink);color:#fff;display:flex;align-items:center;gap:7px}.donate-action:disabled{cursor:not-allowed;opacity:.44}
+@keyframes dialog-fade{from{opacity:0}to{opacity:1}}
+@keyframes dialog-rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+@media(max-width:600px){
+  .ready-group .workflow-grid{grid-template-columns:1fr}
+  .ready-group .workflow-card{min-height:350px}
+  .info-dialog-backdrop{padding:12px;align-items:end}
+  .info-dialog{border-radius:25px 25px 18px 18px;padding:20px;max-height:calc(100vh - 24px)}
+  .info-dialog-copy h2{font-size:35px}
+  .info-dialog>footer button{flex:1;justify-content:center}
+  .hero-search-wrap{margin-left:auto;margin-right:auto}
+  .instant-search-results{position:relative;top:auto;margin-top:8px}
+  .cta-actions{width:100%;flex-direction:column;align-items:stretch}.cta-actions button{justify-content:center}
+  .donation-dialog{border-radius:25px 25px 18px 18px;padding:20px;max-height:calc(100vh - 24px)}
+  .donation-copy h2{font-size:40px}.donation-amounts{grid-template-columns:1fr 1fr}.donation-dialog>footer button{flex:1;justify-content:center}
+}
+
+@media(max-width:900px){.hero-search-wrap{margin-left:auto;margin-right:auto}}
