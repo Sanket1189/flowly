@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Flowly</title>
+  <g transform="rotate(-8 32 32)">
+    <rect x="7" y="7" width="50" height="50" rx="23" fill="#173b32"/>
+    <rect x="21" y="28" width="22" height="8" rx="4" fill="#c9f06b"/>
+    <rect x="28" y="21" width="8" height="22" rx="4" fill="#c9f06b"/>
+  </g>
+</svg>
