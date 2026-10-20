@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowRight, ArrowUpRight, BookOpenCheck, BriefcaseBusiness, CalendarHeart,
-  Check, ChevronRight, Dumbbell, HeartHandshake, Home, IndianRupee, LifeBuoy, ListChecks, Menu, Plane, Search, ShieldCheck, Sparkles,
+  ArrowRight, ArrowUpRight, BookOpenCheck, Braces, BriefcaseBusiness, CalendarHeart,
+  Check, ChevronRight, Dumbbell, FileJson2, FilePenLine, HeartHandshake, Home, IndianRupee, LifeBuoy, ListChecks, Menu, Plane, Search, ShieldCheck, Sparkles,
   WalletCards, X,
 } from 'lucide-react'
 import MedicalSite from './MedicalSite.jsx'
 import HomeServicesSite from './HomeServicesSite.jsx'
 import { CareerSite, FitnessSite, MoneySite, TravelSite } from './JourneySites.jsx'
 import { RoutineBuilder, StudyPlanner } from './PlannerTools.jsx'
+import PdfMaker from './PdfMaker.jsx'
+import JsonDiffChecker from './JsonDiffChecker.jsx'
+import JsonFormatter from './JsonFormatter.jsx'
 import { cleanUrlHash, currentRoutePath, handleSectionLink, navigateTo, routeUrl, scrollToSection } from './navigation.js'
 import './ui-polish.css'
 
@@ -22,7 +25,15 @@ const workflows = [
   { id: 'career', category: 'Work', title: 'Career mentor', description: 'Preview a focused experience for finding support with roles, interviews, and career decisions.', icon: BriefcaseBusiness, tone: 'peach', tag: 'Provider demo', availability: 'demo' },
 ]
 
-const filters = ['All workflows', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
+const utilities = [
+  { id: 'pdf-maker', category: 'Utilities', title: 'PDF maker', description: 'Build polished PDFs with text, tables, colours, alignment and shapes—entirely in your browser.', icon: FilePenLine, tone: 'lime', tag: 'Browser utility', availability: 'utility' },
+  { id: 'json-diff', category: 'Utilities', title: 'JSON diff checker', description: 'Validate and compare two JSON documents, then inspect every nested change by its exact path.', icon: FileJson2, tone: 'blue', tag: 'Browser utility', availability: 'utility' },
+  { id: 'json-formatter', category: 'Utilities', title: 'JSON formatter', description: 'Validate, beautify, sort or minify JSON, then copy or download the clean result.', icon: Braces, tone: 'peach', tag: 'Browser utility', availability: 'utility' },
+]
+
+const catalog = [...workflows, ...utilities]
+
+const filters = ['All workflows', 'Utilities', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
 const donationUpiId = import.meta.env.VITE_DONATION_UPI_ID || ''
 const donationUrl = import.meta.env.VITE_DONATION_URL || ''
 
@@ -66,7 +77,7 @@ function App() {
   const [donationOpen, setDonationOpen] = useState(false)
   const [donationAmount, setDonationAmount] = useState(199)
   const [customDonation, setCustomDonation] = useState('')
-  const resolvePath = () => ({ '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/study-planner': 'study', '/daily-routine': 'routine' }[currentRoutePath()] || null)
+  const resolvePath = () => ({ '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter' }[currentRoutePath()] || null)
   const [activeWorkflow, setActiveWorkflow] = useState(resolvePath)
 
   useEffect(() => {
@@ -85,12 +96,12 @@ function App() {
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', closeOnEscape) }
   }, [infoDialog, donationOpen])
 
-  const visible = useMemo(() => workflows.filter((item) => {
+  const visible = useMemo(() => catalog.filter((item) => {
     const matchesFilter = filter === 'All workflows' || item.category === filter
     const matchesQuery = `${item.title} ${item.description} ${item.category}`.toLowerCase().includes(query.toLowerCase())
     return matchesFilter && matchesQuery
   }), [filter, query])
-  const searchMatches = useMemo(() => query.trim() ? workflows.filter(item => `${item.title} ${item.description} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 5) : [], [query])
+  const searchMatches = useMemo(() => query.trim() ? catalog.filter(item => `${item.title} ${item.description} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 5) : [], [query])
 
   const launch = (item) => {
     if (item.id === 'medical') {
@@ -105,7 +116,7 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    const paths = { travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine' }
+    const paths = { travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
     if (paths[item.id]) {
       navigateTo(paths[item.id])
       setActiveWorkflow(item.id)
@@ -119,16 +130,17 @@ function App() {
 
   const readyWorkflows = visible.filter((item) => item.availability === 'ready')
   const demoWorkflows = visible.filter((item) => item.availability === 'demo')
+  const utilityWorkflows = visible.filter((item) => item.availability === 'utility')
 
   const renderWorkflowCard = (item) => {
     const Icon = item.icon
-    const isReady = item.availability === 'ready'
+    const isReady = item.availability !== 'demo'
     return <article className={`workflow-card flow-${item.id} ${item.featured ? 'featured' : ''}`} key={item.id}>
       <div className="card-head"><span className={`workflow-icon ${item.tone}`}><Icon size={24} /></span></div>
       <div className="card-meta"><span className="card-tag">{item.tag}</span><span className={`availability-badge ${isReady ? 'ready' : 'demo'}`}>{isReady ? 'Works now' : 'UI concept'}</span></div>
       <h3>{item.title}</h3><p>{item.description}</p>
       {item.featured && <div className="mini-flow"><span className="mini-step done"><Check size={13} /> Set the trip</span><ChevronRight size={13} /><span className="mini-step active">Plan each day</span><ChevronRight size={13} /><span className="mini-step">Download PDF</span></div>}
-      <button className="card-action" onClick={() => launch(item)}>{isReady ? 'Use this tool' : 'View UI demo'} <ArrowUpRight size={17} /></button>
+      <button className="card-action" onClick={() => launch(item)}>{item.availability === 'utility' ? 'Open utility' : isReady ? 'Use this tool' : 'View UI demo'} <ArrowUpRight size={17} /></button>
     </article>
   }
 
@@ -145,6 +157,9 @@ function App() {
   if (activeWorkflow === 'career') return <CareerSite onExit={leaveSite} />
   if (activeWorkflow === 'study') return <StudyPlanner onExit={leaveSite} />
   if (activeWorkflow === 'routine') return <RoutineBuilder onExit={leaveSite} />
+  if (activeWorkflow === 'pdf-maker') return <PdfMaker onExit={leaveSite} />
+  if (activeWorkflow === 'json-diff') return <JsonDiffChecker onExit={leaveSite} />
+  if (activeWorkflow === 'json-formatter') return <JsonFormatter onExit={leaveSite} />
 
   return (
     <main id="top">
@@ -152,6 +167,7 @@ function App() {
         <Logo />
         <nav className={menuOpen ? 'nav-links open' : 'nav-links'}>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows', () => setMenuOpen(false))}>Workflows</a>
+          <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'utilities', () => setMenuOpen(false))}>Utilities</a>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'how', () => setMenuOpen(false))}>How it works</a>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'about', () => setMenuOpen(false))}>About</a>
         </nav>
@@ -170,7 +186,7 @@ function App() {
               <input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={event => event.key === 'Enter' && runSearch()} placeholder="What do you want to get done?" aria-label="Search workflows" autoComplete="off" />
               <button onClick={runSearch}>Find a flow <ArrowRight size={17} /></button>
             </div>
-            {query.trim() && <div className="instant-search-results" aria-live="polite">{searchMatches.length ? <><div className="search-result-label"><span>Best matches</span><small>{searchMatches.length} found</small></div>{searchMatches.map(item => { const ResultIcon = item.icon; return <button key={item.id} onClick={() => launch(item)}><span className={`workflow-icon ${item.tone}`}><ResultIcon size={18}/></span><span><strong>{item.title}</strong><small>{item.category} · {item.availability === 'ready' ? 'Ready to use' : 'UI concept'}</small></span><ArrowUpRight size={16}/></button> })}</> : <div className="instant-empty"><Search size={19}/><span><strong>No close match</strong><small>Try words like trip, money, study or health.</small></span></div>}</div>}
+            {query.trim() && <div className="instant-search-results" aria-live="polite">{searchMatches.length ? <><div className="search-result-label"><span>Best matches</span><small>{searchMatches.length} found</small></div>{searchMatches.map(item => { const ResultIcon = item.icon; return <button key={item.id} onClick={() => launch(item)}><span className={`workflow-icon ${item.tone}`}><ResultIcon size={18}/></span><span><strong>{item.title}</strong><small>{item.category} · {item.availability === 'demo' ? 'UI concept' : item.availability === 'utility' ? 'Browser utility' : 'Ready to use'}</small></span><ArrowUpRight size={16}/></button> })}</> : <div className="instant-empty"><Search size={19}/><span><strong>No close match</strong><small>Try words like trip, money, study or PDF.</small></span></div>}</div>}
           </div>
           <div className="quick-links"><span>Try now:</span><button onClick={() => setQuery('trip')}>Plan a trip</button><button onClick={() => setQuery('money')}>Plan money</button><button onClick={() => setQuery('medical')}>View medical demo</button></div>
         </div>
@@ -183,7 +199,7 @@ function App() {
         </div>
       </section>
 
-      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>tools you can use now</small><strong>4</strong><small>service UI demos</small><strong>0</strong><small>sign-ins required</small></section>
+      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>planning tools</small><strong>3</strong><small>browser utilities</small><strong>4</strong><small>service UI demos</small></section>
 
       <section className="workflow-section shell" id="workflows">
         <div className="section-heading">
@@ -198,6 +214,10 @@ function App() {
             <div className="group-heading"><div><span className="group-dot ready" /><span>SELF-SERVICE TOOLS</span></div><h3 id="ready-tools-title">Use these right now</h3><div className="group-note ready"><span className="group-note-icon"><ShieldCheck size={18}/></span><span><strong>Private by default</strong><small>Plan instantly in your browser—no account needed.</small></span></div></div>
             <div className="workflow-grid">{readyWorkflows.map(renderWorkflowCard)}</div>
           </section>}
+          {utilityWorkflows.length > 0 && <section className="workflow-group utility-group" id="utilities" aria-labelledby="utility-tools-title">
+            <div className="group-heading"><div><span className="group-dot utility" /><span>FLOWLY UTILITIES</span></div><h3 id="utility-tools-title">Useful browser tools</h3><div className="group-note utility"><span className="group-note-icon"><FilePenLine size={18}/></span><span><strong>Made in your browser</strong><small>Work with files and data without uploading your content.</small></span></div></div>
+            <div className="workflow-grid utility-grid">{utilityWorkflows.map(renderWorkflowCard)}</div>
+          </section>}
           {demoWorkflows.length > 0 && <section className="workflow-group demo-group" aria-labelledby="demo-flows-title">
             <div className="group-heading"><div><span className="group-dot demo" /><span>SERVICE EXPERIENCE DEMOS</span></div><h3 id="demo-flows-title">Explore the interface</h3><div className="group-note demo"><span className="group-note-icon"><Sparkles size={18}/></span><span><strong>UI preview</strong><small>Explore the complete experience with sample provider data.</small></span></div></div>
             <div className="workflow-grid demo-grid">{demoWorkflows.map(renderWorkflowCard)}</div>
@@ -211,7 +231,7 @@ function App() {
       </section>
 
       <section className="cta shell" id="about"><div><span className="section-kicker">BUILT TO GROW WITH YOU</span><h2>One home for all<br />your everyday flows.</h2></div><div className="cta-actions"><button className="support-creator" onClick={() => setDonationOpen(true)}><HeartHandshake size={18}/> Support this project</button><button className="primary light" onClick={() => scrollToSection('workflows')}>Explore the library <ArrowRight size={18} /></button></div></section>
-      <footer className="footer shell"><Logo /><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows')}>Workflows</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
+      <footer className="footer shell"><Logo /><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows')}>Workflows</a><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'utilities')}>Utilities</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
       {notice && <div className="toast"><Check size={18} /><span>{notice}</span><button onClick={() => setNotice('')}><X size={16} /></button></div>}
       {infoDialog && <InfoDialog type={infoDialog} onClose={() => setInfoDialog(null)} onBrowse={() => { setInfoDialog(null); window.setTimeout(() => scrollToSection('workflows'), 30) }}/>} 
       {donationOpen && <DonationDialog amount={donationAmount} setAmount={setDonationAmount} customAmount={customDonation} setCustomAmount={setCustomDonation} onClose={() => setDonationOpen(false)}/>} 
