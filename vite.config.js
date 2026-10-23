@@ -83,8 +83,8 @@ export default defineConfig({
         const indexPath = resolve(outputRoot, 'index.html')
         const rootHtml = await readFile(indexPath, 'utf8')
         await writeFile(indexPath, renderPageMetadata(rootHtml, seoPages.home))
-        const utilityPages = Object.values(seoPages).filter(page => page.type === 'utility')
-        for (const page of utilityPages) {
+        const routedPages = Object.values(seoPages).filter(page => page.path !== '/')
+        for (const page of routedPages) {
           const outputPath = resolve(outputRoot, page.path.replace(/^\//, ''), 'index.html')
           await mkdir(dirname(outputPath), { recursive: true })
           await writeFile(outputPath, renderPageMetadata(rootHtml, page))

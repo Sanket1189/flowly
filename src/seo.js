@@ -6,6 +6,13 @@ export const seoPages = {
     heading: 'Flowly',
     type: 'website',
   },
+  utilities: {
+    path: '/utilities',
+    title: 'Free Online Browser Utilities | Flowly',
+    description: 'Use Flowly’s free browser utilities for creating PDFs, comparing JSON and formatting JSON. No account or uploads required.',
+    heading: 'Free Online Browser Utilities',
+    type: 'collection',
+  },
   'pdf-maker': {
     path: '/utilities/pdf-maker',
     title: 'Free Online PDF Maker | Flowly',

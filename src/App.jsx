@@ -34,13 +34,13 @@ const utilities = [
 
 const catalog = [...workflows, ...utilities]
 
-const filters = ['All workflows', 'Utilities', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
-const workflowPaths = { medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
+const filters = ['All workflows', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
+const workflowPaths = { utilities: '/utilities', medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
 const donationUpiId = import.meta.env.VITE_DONATION_UPI_ID || ''
 const donationUrl = import.meta.env.VITE_DONATION_URL || ''
 
-function Logo() {
-  return <a className="logo" href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'top')} aria-label="Flowly home"><span className="logo-mark"><span /></span><span>flowly.</span></a>
+function Logo({ onHome }) {
+  return <a className="logo" href={routeUrl('/')} onClick={(event) => { if (onHome) { event.preventDefault(); onHome(); return }; handleSectionLink(event, 'top') }} aria-label="Flowly home"><span className="logo-mark"><span /></span><span>flowly.</span></a>
 }
 
 function InfoDialog({ type, onClose, onBrowse }) {
@@ -79,7 +79,7 @@ function App() {
   const [donationOpen, setDonationOpen] = useState(false)
   const [donationAmount, setDonationAmount] = useState(199)
   const [customDonation, setCustomDonation] = useState('')
-  const resolvePath = () => ({ '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter' }[currentRoutePath()] || null)
+  const resolvePath = () => ({ '/utilities': 'utilities', '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter' }[currentRoutePath()] || null)
   const [activeWorkflow, setActiveWorkflow] = useState(resolvePath)
 
   useEffect(() => {
@@ -100,7 +100,7 @@ function App() {
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', closeOnEscape) }
   }, [infoDialog, donationOpen])
 
-  const visible = useMemo(() => catalog.filter((item) => {
+  const visible = useMemo(() => workflows.filter((item) => {
     const matchesFilter = filter === 'All workflows' || item.category === filter
     const matchesQuery = `${item.title} ${item.description} ${item.category}`.toLowerCase().includes(query.toLowerCase())
     return matchesFilter && matchesQuery
@@ -133,7 +133,6 @@ function App() {
 
   const readyWorkflows = visible.filter((item) => item.availability === 'ready')
   const demoWorkflows = visible.filter((item) => item.availability === 'demo')
-  const utilityWorkflows = visible.filter((item) => item.availability === 'utility')
 
   const renderWorkflowCard = (item) => {
     const Icon = item.icon
@@ -148,22 +147,66 @@ function App() {
     </article>
   }
 
+  const goHome = (section = 'top') => {
+    navigateTo('/')
+    setActiveWorkflow(null)
+    setMenuOpen(false)
+    window.setTimeout(() => scrollToSection(section), 30)
+  }
+  const openUtilities = () => {
+    navigateTo('/utilities')
+    setActiveWorkflow('utilities')
+    setMenuOpen(false)
+    window.scrollTo(0, 0)
+  }
+  const leaveSite = () => goHome()
+
+  if (activeWorkflow === 'utilities') {
+    return <main className="utilities-page" id="top">
+      <header className="site-header shell">
+        <Logo onHome={() => goHome()} />
+        <nav className={menuOpen ? 'nav-links open' : 'nav-links'}>
+          <a href={routeUrl('/')} onClick={(event) => { event.preventDefault(); goHome('workflows') }}>Workflows</a>
+          <a className="active" href={routeUrl('/utilities')} onClick={(event) => { event.preventDefault(); openUtilities() }}>Utilities</a>
+          <a href={routeUrl('/')} onClick={(event) => { event.preventDefault(); goHome('how') }}>How it works</a>
+          <a href={routeUrl('/')} onClick={(event) => { event.preventDefault(); goHome('about') }}>About</a>
+        </nav>
+        <div className="header-actions"><button className="primary small" onClick={() => goHome()}>Back to home <ArrowRight size={16}/></button></div>
+        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">{menuOpen ? <X/> : <Menu/>}</button>
+      </header>
+      <section className="utilities-hero shell">
+        <div><span className="section-kicker">FLOWLY UTILITIES</span><h1>Useful browser tools,<br/><em>all in one place.</em></h1></div>
+        <div className="utilities-hero-note"><span className="group-note-icon"><ShieldCheck size={20}/></span><span><strong>Made in your browser</strong><small>Work with files and data without uploading your content.</small></span></div>
+      </section>
+      <section className="utilities-catalog shell" aria-labelledby="utility-catalog-title">
+        <div className="utilities-catalog-heading"><div><span className="group-dot utility"/><span>AVAILABLE NOW</span></div><h2 id="utility-catalog-title">Choose a utility</h2><p>Open a focused workspace for documents or JSON. Every tool works without an account.</p></div>
+        <div className="workflow-grid utility-grid">{utilities.map(renderWorkflowCard)}</div>
+      </section>
+      <section className="utilities-promise shell"><div><ShieldCheck size={23}/><span><strong>Private by default</strong><small>Your files and JSON stay in this browser while you work.</small></span></div><button onClick={() => goHome('workflows')}>Explore planning tools <ArrowRight size={17}/></button></section>
+      <footer className="footer shell"><Logo onHome={() => goHome()}/><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => { event.preventDefault(); goHome('workflows') }}>Workflows</a><a href={routeUrl('/utilities')}>Utilities</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
+      {infoDialog && <InfoDialog
+        type={infoDialog}
+        onClose={() => setInfoDialog(null)}
+        onBrowse={() => { setInfoDialog(null); goHome('workflows') }}
+      />}
+    </main>
+  }
+
   if (activeWorkflow === 'medical') {
     return <MedicalSite onExit={() => { navigateTo('/'); setActiveWorkflow(null); window.scrollTo(0, 0) }} />
   }
   if (activeWorkflow === 'home') {
     return <HomeServicesSite onExit={() => { navigateTo('/'); setActiveWorkflow(null); window.scrollTo(0, 0) }} />
   }
-  const leaveSite = () => { navigateTo('/'); setActiveWorkflow(null); window.scrollTo(0, 0) }
   if (activeWorkflow === 'travel') return <TravelSite onExit={leaveSite} />
   if (activeWorkflow === 'fitness') return <FitnessSite onExit={leaveSite} />
   if (activeWorkflow === 'finance') return <MoneySite onExit={leaveSite} />
   if (activeWorkflow === 'career') return <CareerSite onExit={leaveSite} />
   if (activeWorkflow === 'study') return <StudyPlanner onExit={leaveSite} />
   if (activeWorkflow === 'routine') return <RoutineBuilder onExit={leaveSite} />
-  if (activeWorkflow === 'pdf-maker') return <PdfMaker onExit={leaveSite} />
-  if (activeWorkflow === 'json-diff') return <JsonDiffChecker onExit={leaveSite} />
-  if (activeWorkflow === 'json-formatter') return <JsonFormatter onExit={leaveSite} />
+  if (activeWorkflow === 'pdf-maker') return <PdfMaker onExit={openUtilities} />
+  if (activeWorkflow === 'json-diff') return <JsonDiffChecker onExit={openUtilities} />
+  if (activeWorkflow === 'json-formatter') return <JsonFormatter onExit={openUtilities} />
 
   return (
     <main id="top">
@@ -171,7 +214,7 @@ function App() {
         <Logo />
         <nav className={menuOpen ? 'nav-links open' : 'nav-links'}>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows', () => setMenuOpen(false))}>Workflows</a>
-          <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'utilities', () => setMenuOpen(false))}>Utilities</a>
+          <a href={routeUrl('/utilities')} onClick={(event) => { event.preventDefault(); openUtilities() }}>Utilities</a>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'how', () => setMenuOpen(false))}>How it works</a>
           <a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'about', () => setMenuOpen(false))}>About</a>
         </nav>
@@ -218,10 +261,6 @@ function App() {
             <div className="group-heading"><div><span className="group-dot ready" /><span>SELF-SERVICE TOOLS</span></div><h3 id="ready-tools-title">Use these right now</h3><div className="group-note ready"><span className="group-note-icon"><ShieldCheck size={18}/></span><span><strong>Private by default</strong><small>Plan instantly in your browser—no account needed.</small></span></div></div>
             <div className="workflow-grid">{readyWorkflows.map(renderWorkflowCard)}</div>
           </section>}
-          {utilityWorkflows.length > 0 && <section className="workflow-group utility-group" id="utilities" aria-labelledby="utility-tools-title">
-            <div className="group-heading"><div><span className="group-dot utility" /><span>FLOWLY UTILITIES</span></div><h3 id="utility-tools-title">Useful browser tools</h3><div className="group-note utility"><span className="group-note-icon"><FilePenLine size={18}/></span><span><strong>Made in your browser</strong><small>Work with files and data without uploading your content.</small></span></div></div>
-            <div className="workflow-grid utility-grid">{utilityWorkflows.map(renderWorkflowCard)}</div>
-          </section>}
           {demoWorkflows.length > 0 && <section className="workflow-group demo-group" aria-labelledby="demo-flows-title">
             <div className="group-heading"><div><span className="group-dot demo" /><span>SERVICE EXPERIENCE DEMOS</span></div><h3 id="demo-flows-title">Explore the interface</h3><div className="group-note demo"><span className="group-note-icon"><Sparkles size={18}/></span><span><strong>UI preview</strong><small>Explore the complete experience with sample provider data.</small></span></div></div>
             <div className="workflow-grid demo-grid">{demoWorkflows.map(renderWorkflowCard)}</div>
@@ -235,7 +274,7 @@ function App() {
       </section>
 
       <section className="cta shell" id="about"><div><span className="section-kicker">BUILT TO GROW WITH YOU</span><h2>One home for all<br />your everyday flows.</h2></div><div className="cta-actions"><button className="support-creator" onClick={() => setDonationOpen(true)}><HeartHandshake size={18}/> Support this project</button><button className="primary light" onClick={() => scrollToSection('workflows')}>Explore the library <ArrowRight size={18} /></button></div></section>
-      <footer className="footer shell"><Logo /><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows')}>Workflows</a><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'utilities')}>Utilities</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
+      <footer className="footer shell"><Logo /><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => handleSectionLink(event, 'workflows')}>Workflows</a><a href={routeUrl('/utilities')} onClick={(event) => { event.preventDefault(); openUtilities() }}>Utilities</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
       {notice && <div className="toast"><Check size={18} /><span>{notice}</span><button onClick={() => setNotice('')}><X size={16} /></button></div>}
       {infoDialog && <InfoDialog type={infoDialog} onClose={() => setInfoDialog(null)} onBrowse={() => { setInfoDialog(null); window.setTimeout(() => scrollToSection('workflows'), 30) }}/>} 
       {donationOpen && <DonationDialog amount={donationAmount} setAmount={setDonationAmount} customAmount={customDonation} setCustomAmount={setCustomDonation} onClose={() => setDonationOpen(false)}/>} 
