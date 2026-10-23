@@ -6,11 +6,7 @@ import './pdf-maker-studio.css'
 import './pdf-maker-studio-overrides.css'
 
 const nextId = (() => { let value = 30; return () => ++value })()
-const starterBlocks = [
-  { id: 1, type: 'text', content: 'A clear document starts with a strong heading.', fontSize: 22, fontFamily: 'Inter, Arial, sans-serif', color: '#173b32', background: '#e8f3df', align: 'left', bold: true, link: '' },
-  { id: 2, type: 'text', content: 'Drag a component from the left panel and drop it onto this page.', fontSize: 11, fontFamily: 'Inter, Arial, sans-serif', color: '#506961', background: 'transparent', align: 'left', bold: false, link: '' },
-  { id: 3, type: 'table', caption: 'Simple project table', headers: ['Item', 'Owner', 'Status'], rows: [['Research', 'You', 'Done'], ['Draft', 'You', 'In progress']], headerColor: '#173b32', headerTextColor: '#ffffff', rowColor: '#ffffff', textColor: '#173b32', gridColor: '#d9e2dc', align: 'left' },
-]
+const starterBlocks = []
 const tools = [
   { type: 'text', label: 'Text', hint: 'Heading or paragraph', Icon: Type },
   { type: 'list', label: 'List', hint: 'Bullets or numbering', Icon: List },
@@ -21,6 +17,12 @@ const tools = [
   { type: 'pageBreak', label: 'New page', hint: 'Start another page', Icon: Rows3 },
 ]
 const alignments = [{ id: 'left', Icon: AlignLeft }, { id: 'center', Icon: AlignCenter }, { id: 'right', Icon: AlignRight }]
+const dividerStyles = [
+  { id: 'solid', label: 'Solid' },
+  { id: 'dashed', label: 'Dashed' },
+  { id: 'dotted', label: 'Dotted' },
+  { id: 'double', label: 'Double' },
+]
 const shapeOptions = [
   { id: 'rectangle', label: 'Rectangle' },
   { id: 'rounded', label: 'Rounded' },
@@ -56,6 +58,8 @@ function safeLink(value) {
   }
 }
 
+const footerTextForPage = (value, pageNumber) => String(value || '').replace(/\{page\}/gi, String(pageNumber))
+
 function hexToHsv(hex) {
   const match = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''))
   if (!match) return { h: 150, s: 61, v: 23 }
@@ -90,7 +94,7 @@ function makeBlock(type) {
     list: { ...common, items: ['First item', 'Second item', 'Third item'], listStyle: 'disc', fontSize: 12, fontFamily: 'Inter, Arial, sans-serif', color: '#173b32', align: 'left', blockWidth: 55 },
     table: { ...common, caption: 'New table', headers: ['Column 1', 'Column 2'], rows: [['Value', 'Value']], headerColor: '#173b32', headerTextColor: '#ffffff', rowColor: '#ffffff', textColor: '#173b32', gridColor: '#d9e2dc', align: 'left', blockWidth: 70 },
     shape: { ...common, shape: 'rectangle', color: '#c9f06b', width: 220, height: 72, align: 'left', blockWidth: 45 },
-    divider: { ...common, color: '#173b32', thickness: 2, blockWidth: 60 },
+    divider: { ...common, color: '#173b32', thickness: 2, lineStyle: 'solid', blockWidth: 60, position: 'left' },
     spacer: { ...common, height: 48, blockWidth: 100, position: 'left' },
     pageBreak: common,
   }[type]
@@ -271,10 +275,21 @@ function Alignment({ value, onChange }) {
 
 function ElementSizing({ block, set }) {
   const width = Math.max(10, Math.min(100, Number(block.blockWidth) || 100))
+  const alignFreePosition = (position, nextWidth = width) => {
+    if (!block.freePosition) return null
+    const x = position === 'center' ? (100 - nextWidth) / 2 : position === 'right' ? 100 - nextWidth : 0
+    return { ...block.freePosition, x: Math.max(0, x) }
+  }
+  const changeWidth = event => {
+    const blockWidth = Number(event.target.value)
+    const alignedPosition = ['left', 'center', 'right'].includes(block.position) ? block.position : null
+    set({ blockWidth, ...(alignedPosition && block.freePosition ? { freePosition: alignFreePosition(alignedPosition, blockWidth) } : {}) })
+  }
+  const changePosition = position => set({ position, ...(block.freePosition ? { freePosition: alignFreePosition(position) } : {}) })
   return <div className="pdf-studio-element-sizing">
-    <label><span>Element width <output>{Math.round(width)}%</output></span><input type="range" min="10" max="100" step="1" value={width} onChange={event => set({ blockWidth: Number(event.target.value) })}/></label>
+    <label><span>Element width <output>{Math.round(width)}%</output></span><input type="range" min="10" max="100" step="1" value={width} onChange={changeWidth}/></label>
     <span className="pdf-studio-field-label">Element position</span>
-    <Alignment value={block.position || 'left'} onChange={position => set({ position })}/>
+    <Alignment value={block.position || 'left'} onChange={changePosition}/>
     <small>{block.freePosition ? 'Drag this element anywhere on the PDF page to reposition it.' : 'Automatic layout keeps nearby elements tidy. Use “Start on a new row” when you want this element below the previous one.'}</small>
   </div>
 }
@@ -326,8 +341,17 @@ function LayersPanel({ pages, selectedId, select, update, remove }) {
   </div>
 }
 
-function Inspector({ block, update, remove, title, setTitle, pageColor, setPageColor }) {
-  if (!block) return <aside className="pdf-studio-inspector"><div className="pdf-studio-panel-title"><span>DOCUMENT</span><h2>Page settings</h2></div><label>File name<input value={title} placeholder="Untitled document" onChange={event => setTitle(event.target.value)}/><small>Used only when the PDF is downloaded. Add a Text element for a visible heading.</small></label><ColorField label="Page colour" value={pageColor} onChange={setPageColor}/><div className="pdf-studio-empty"><FilePenLine size={23}/><strong>Select an element</strong><p>Click anything on a page to edit its content and appearance here.</p></div></aside>
+function Inspector({ block, update, remove, title, setTitle, pageColor, setPageColor, footerFields, setFooterFields }) {
+  if (!block) return <aside className="pdf-studio-inspector">
+    <div className="pdf-studio-panel-title"><span>DOCUMENT</span><h2>Page settings</h2></div>
+    <label>File name<input value={title} placeholder="Untitled document" onChange={event => setTitle(event.target.value)}/><small>Used only when the PDF is downloaded. Add a Text element for a visible heading.</small></label>
+    <ColorField label="Page colour" value={pageColor} onChange={setPageColor}/>
+    <div className="pdf-studio-footer-editor">
+      <div><strong>Custom footer section</strong><small>Add up to two lines in each column. Use {'{page}'} for the page number.</small></div>
+      {['left', 'center', 'right'].map(position => <label key={position}><span>{position[0].toUpperCase() + position.slice(1)} column</span><textarea rows="2" maxLength="100" value={footerFields[position]} placeholder={position === 'left' ? 'Company or document name' : position === 'center' ? 'Confidential' : 'Page {page}'} onChange={event => setFooterFields(current => ({ ...current, [position]: event.target.value }))}/></label>)}
+    </div>
+    <div className="pdf-studio-empty"><FilePenLine size={23}/><strong>Select an element</strong><p>Click anything on a page to edit its content and appearance here.</p></div>
+  </aside>
   const set = patch => update(block.id, patch)
   const name = block.type === 'pageBreak' ? 'Page break' : block.type === 'spacer' ? 'Empty space' : `${block.type[0].toUpperCase()}${block.type.slice(1)}`
   return <aside className="pdf-studio-inspector"><div className="pdf-studio-panel-title"><span>PROPERTIES</span><h2>{name}</h2></div>
@@ -345,7 +369,7 @@ function Inspector({ block, update, remove, title, setTitle, pageColor, setPageC
         set({ shape: shape.id, blockWidth: circleWidth, blockHeight: circleWidth * 5.808 })
       } else set({ shape: shape.id })
     }} key={shape.id}><span className={`pdf-shape-option-preview ${shape.id}`}/><span>{shape.label}</span></button>)}</div><ColorField label="Fill" value={block.color} onChange={color => set({ color })}/><label>Width<input type="number" min="60" max="511" value={block.width} onChange={event => set({ width: Number(event.target.value) })}/></label><label>Height<input type="number" min="32" max="180" value={block.height} onChange={event => set({ height: Number(event.target.value) })}/></label><span className="pdf-studio-field-label">Alignment</span><Alignment value={block.align} onChange={align => set({ align })}/></>}
-    {block.type === 'divider' && <><ColorField label="Line colour" value={block.color} onChange={color => set({ color })}/><label>Thickness<input type="number" min="1" max="8" value={block.thickness} onChange={event => set({ thickness: Number(event.target.value) })}/></label></>}
+    {block.type === 'divider' && <><span className="pdf-studio-field-label">Line style</span><div className="pdf-studio-divider-styles" role="group" aria-label="Divider style">{dividerStyles.map(style => <button type="button" className={(block.lineStyle || 'solid') === style.id ? 'active' : ''} aria-pressed={(block.lineStyle || 'solid') === style.id} onClick={() => set({ lineStyle: style.id })} key={style.id}><i className={style.id}/><span>{style.label}</span></button>)}</div><ColorField label="Line colour" value={block.color} onChange={color => set({ color })}/><label>Thickness<input type="number" min="1" max="8" value={block.thickness} onChange={event => set({ thickness: Number(event.target.value) })}/></label></>}
     {block.type === 'spacer' && <><label>Empty space height <output>{Math.max(12, Number(block.height) || 48)} px</output><input type="range" min="12" max="220" step="4" value={Math.max(12, Number(block.height) || 48)} onChange={event => set({ height: Number(event.target.value) })}/></label><p className="pdf-studio-note">This creates blank vertical space in both the canvas and downloaded PDF.</p></>}
     {block.type === 'pageBreak' && <p className="pdf-studio-note">Everything after this marker starts on a fresh PDF page.</p>}
     <button type="button" className="pdf-studio-delete" onClick={() => remove(block.id)}><Trash2 size={15}/> Delete element</button>
@@ -374,7 +398,11 @@ function CanvasBlock({ block, selected, onSelect, previewPosition, resizePreview
   }
   else if (block.type === 'table') content = <div className="pdf-canvas-table" style={{ height: contentHeight ? `${contentHeight}px` : undefined, overflow: contentHeight ? 'hidden' : undefined }}><strong style={{ color: block.textColor }}>{block.continued ? `${block.caption || 'Table'} - continued` : block.caption}</strong><table style={{ textAlign: block.align }}><thead style={{ background: block.headerColor, color: block.headerTextColor }}><tr>{block.headers.map((header, index) => <th key={index}>{header}</th>)}</tr></thead><tbody>{block.rows.map((row, rowIndex) => <tr style={{ background: block.rowColor, color: block.textColor }} key={rowIndex}>{block.headers.map((_, index) => <td style={{ borderColor: block.gridColor }} key={index}>{row[index] || ''}</td>)}</tr>)}</tbody></table></div>
   else if (block.type === 'shape') content = <div className={`pdf-canvas-shape ${block.align}`}><span className={`pdf-canvas-shape-fill ${block.shape || 'rectangle'}`} style={{ width: '100%', height: `${contentHeight || Math.max(18, block.height * .45)}px`, background: block.color }}/></div>
-  else content = <hr style={{ borderTopColor: block.color, borderTopWidth: `${block.thickness}px` }}/>
+  else {
+    const lineStyle = block.lineStyle || 'solid'
+    const lineWidth = lineStyle === 'double' ? Math.max(3, Number(block.thickness) * 2) : block.thickness
+    content = <hr style={{ borderTopColor: block.color, borderTopStyle: lineStyle, borderTopWidth: `${lineWidth}px` }}/>
+  }
   const blockPosition = block.position || 'left'
   const effectivePosition = previewPosition || resizePreview?.freePosition || block.freePosition
   const blockStyle = effectivePosition
@@ -389,7 +417,7 @@ function CanvasBlock({ block, selected, onSelect, previewPosition, resizePreview
   return <div data-block-id={id} className={`pdf-canvas-block ${effectivePosition ? 'free-positioned' : ''} ${previewPosition || resizePreview ? 'live-dragging' : ''} ${block.locked ? 'locked' : ''} ${selected ? 'selected' : ''}`} style={blockStyle} onClick={event => { event.stopPropagation(); onSelect(id, event.currentTarget) }} onPointerDown={event => { if (!event.target.closest('.pdf-selection-handle')) onPointerStart(event, id) }} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerCancel}><span className="pdf-canvas-grip">{block.locked ? <Lock size={12}/> : <GripVertical size={14}/>}</span>{content}{resizeHandles}{selected && <span className="pdf-selection-size">{Math.round(blockWidth)}%{blockHeight ? ` × ${Math.round(blockHeight)}px` : ' wide'}</span>}</div>
 }
 
-function Canvas({ pageColor, blocks, selectedId, setSelectedId, dropOnPage, previewDrop, clearGuides, alignmentGuides, dragPreview, resizePreview, onPointerStart, onPointerMove, onPointerEnd, onPointerCancel, onResizeStart }) {
+function Canvas({ pageColor, blocks, footerFields, selectedId, setSelectedId, dropOnPage, previewDrop, clearGuides, alignmentGuides, dragPreview, resizePreview, onPointerStart, onPointerMove, onPointerEnd, onPointerCancel, onResizeStart }) {
   const pages = paginate(blocks)
   const renderBlock = (block, index, prefix = '') => {
     const id = block.sourceId || block.id
@@ -401,12 +429,17 @@ function Canvas({ pageColor, blocks, selectedId, setSelectedId, dropOnPage, prev
       const flowBlocks = pageBlocks.filter(block => !block.isFree)
       const freeBlocks = pageBlocks.filter(block => block.isFree)
       const pageGuides = alignmentGuides?.pageIndex === pageIndex ? alignmentGuides : null
-      return <section className="pdf-studio-page-wrap" key={pageIndex}><span>PAGE {pageIndex + 1}</span><div data-page-index={pageIndex} className="pdf-studio-page" style={{ background: pageColor }} onDragOver={event => { event.preventDefault(); event.currentTarget.classList.add('drop-ready'); previewDrop(event, pageIndex) }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget)) { event.currentTarget.classList.remove('drop-ready'); clearGuides() } }} onDrop={event => { event.currentTarget.classList.remove('drop-ready'); dropOnPage(event, pageIndex) }}>
+      const footerColumns = Object.fromEntries(Object.entries(footerFields).map(([position, value]) => [position, footerTextForPage(value, pageIndex + 1).trim()]))
+      const hasCustomFooter = Object.values(footerColumns).some(Boolean)
+      return <section className="pdf-studio-page-wrap" key={pageIndex}><span>PAGE {pageIndex + 1}</span><div data-page-index={pageIndex} className={`pdf-studio-page ${hasCustomFooter ? 'has-custom-footer' : ''}`} style={{ background: pageColor }} onDragOver={event => { event.preventDefault(); event.currentTarget.classList.add('drop-ready'); previewDrop(event, pageIndex) }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget)) { event.currentTarget.classList.remove('drop-ready'); clearGuides() } }} onDrop={event => { event.currentTarget.classList.remove('drop-ready'); dropOnPage(event, pageIndex) }}>
         {pageGuides?.x != null && <span className="pdf-alignment-guide vertical" style={{ left: `${pageGuides.x}%` }}><em>{pageGuides.xLabel}</em></span>}
         {pageGuides?.y != null && <span className="pdf-alignment-guide horizontal" style={{ top: `${pageGuides.y}%` }}><em>{pageGuides.yLabel}</em></span>}
-        <div className="pdf-canvas-flow">{flowBlocks.map((block, index) => <Fragment key={`${block.sourceId || block.id}-${index}`}>{block.newRow && <span className="pdf-row-break"/>}{renderBlock(block, index)}</Fragment>)}{!pageBlocks.length && <div className="pdf-studio-page-empty"><Plus size={20}/><strong>Drop a component here</strong></div>}</div>
+        <div className="pdf-canvas-flow">{flowBlocks.map((block, index) => {
+          const dedicatedRow = block.type === 'divider'
+          return <Fragment key={`${block.sourceId || block.id}-${index}`}>{(block.newRow || dedicatedRow) && <span className="pdf-row-break"/>}{renderBlock(block, index)}{dedicatedRow && <span className="pdf-row-break"/>}</Fragment>
+        })}{!pageBlocks.length && <div className="pdf-studio-page-empty"><Plus size={20}/><strong>Drop a component here</strong></div>}</div>
         {freeBlocks.map((block, index) => renderBlock(block, index, 'free-'))}
-        <footer>Created with Flowly PDF Maker <span>Page {pageIndex + 1}</span></footer>
+        {hasCustomFooter ? <footer className="custom-section">{['left', 'center', 'right'].map(position => <span className={position} key={position}>{footerColumns[position]}</span>)}</footer> : <footer>Created with Flowly PDF Maker <span>Page {pageIndex + 1}</span></footer>}
       </div></section>
     })}</div>
   </main>
@@ -417,6 +450,7 @@ export default function PdfMaker({ onExit }) {
   const [downloadOpen, setDownloadOpen] = useState(false)
   const [includeWatermark, setIncludeWatermark] = useState(true)
   const [pageColor, setPageColor] = useState('#f7f7f2')
+  const [footerFields, setFooterFields] = useState({ left: '', center: '', right: '' })
   const [blocks, setBlocks] = useState(starterBlocks)
   const [selectedId, setSelectedIdState] = useState(null)
   const [alignmentGuides, setAlignmentGuides] = useState(null)
@@ -452,7 +486,7 @@ export default function PdfMaker({ onExit }) {
     }))
   }
   const selected = blocks.find(block => block.id === selectedId) || null
-  const documentData = useMemo(() => ({ title, pageColor, blocks }), [title, pageColor, blocks])
+  const documentData = useMemo(() => ({ title, pageColor, blocks, footerFields }), [title, pageColor, blocks, footerFields])
   const confirmDownload = event => {
     event.preventDefault()
     const pdfName = title.trim() || 'Untitled document'
@@ -466,8 +500,33 @@ export default function PdfMaker({ onExit }) {
   }), [blocks])
   const update = (id, patch) => setBlocks(current => current.map(block => block.id === id ? { ...block, ...patch } : block))
   const remove = id => { setBlocks(current => current.filter(block => block.id !== id)); setSelectedId(null) }
+  const estimateCanvasHeight = block => {
+    if (block.type === 'spacer') return Math.max(18, Math.max(12, Number(block.height) || 48) * .45) + 10
+    if (block.type === 'shape') return Math.max(18, Math.max(18, (Number(block.height) || 72) * .45)) + 10
+    if (block.type === 'divider') return 28
+    return Math.max(36, estimateHeight(block))
+  }
+  const placeAtVisualBottom = block => {
+    const pages = [...document.querySelectorAll('.pdf-studio-page')]
+    const page = pages.at(-1)
+    if (!page) return block
+    const box = pageContentBox(page)
+    const pageIndex = Number(page.dataset.pageIndex) || 0
+    const pageBlocks = [...page.querySelectorAll('.pdf-canvas-block')]
+    const lowestBottom = pageBlocks.reduce((bottom, element) => {
+      const rect = element.getBoundingClientRect()
+      return Math.max(bottom, rect.bottom - box.top)
+    }, 0)
+    const gap = 9
+    const topAfterContent = pageBlocks.length ? lowestBottom + gap : 0
+    const visualHeight = estimateCanvasHeight(block)
+    const startsNewPage = topAfterContent + visualHeight > box.height - 8
+    const top = startsNewPage ? 0 : Math.max(0, topAfterContent)
+    return { ...block, freePosition: { pageIndex: startsNewPage ? pageIndex + 1 : pageIndex, x: 0, y: top / box.height * 100 } }
+  }
   const addAt = (type, index) => {
-    const block = makeBlock(type)
+    const createdBlock = makeBlock(type)
+    const block = type !== 'pageBreak' && index == null ? placeAtVisualBottom(createdBlock) : createdBlock
     setBlocks(current => {
       const next = [...current]
       next.splice(index ?? next.length, 0, block)
@@ -477,7 +536,7 @@ export default function PdfMaker({ onExit }) {
   }
   const readDrag = event => ({ type: event.dataTransfer.getData('application/x-flowly-tool'), movingId: Number(event.dataTransfer.getData('application/x-flowly-block')) })
   const calculateAtPoint = ({ page, pageIndex, source, movingId, clientX, clientY, offset = {} }) => {
-    if (!source || ['pageBreak', 'spacer'].includes(source.type)) return null
+    if (!source || source.type === 'pageBreak') return null
     const box = pageContentBox(page)
     const movingElement = movingId ? page.querySelector(`[data-block-id="${movingId}"]`) : null
     const movingRect = movingElement?.getBoundingClientRect()
@@ -509,7 +568,7 @@ export default function PdfMaker({ onExit }) {
   const beginPointerDrag = (event, id) => {
     if (event.button !== 0) return
     const source = blocks.find(block => block.id === id)
-    if (!source || source.locked || ['pageBreak', 'spacer'].includes(source.type)) return
+    if (!source || source.locked || source.type === 'pageBreak') return
     const page = event.currentTarget.closest('.pdf-studio-page')
     if (!page) return
     const elementRect = event.currentTarget.getBoundingClientRect()
@@ -540,7 +599,7 @@ export default function PdfMaker({ onExit }) {
     if (active.moved) {
       const source = blocks.find(block => block.id === active.id)
       const placement = calculateAtPoint({ page: active.page, pageIndex: active.pageIndex, source, movingId: active.id, clientX: event.clientX, clientY: event.clientY, offset: active.offset })
-      if (placement) { update(active.id, { freePosition: placement.freePosition }); setAlignmentGuides(placement.guides) }
+      if (placement) { update(active.id, { freePosition: placement.freePosition, position: 'custom' }); setAlignmentGuides(placement.guides) }
     }
     pointerDrag.current = null
     setDragPreview(null)
@@ -643,7 +702,7 @@ export default function PdfMaker({ onExit }) {
     if (!active || active.pointerId !== event.pointerId) return
     if (active.moved) {
       const result = calculateResize(active, event)
-      update(active.id, { blockWidth: result.blockWidth, blockHeight: result.blockHeight, ...(result.freePosition ? { freePosition: result.freePosition } : {}) })
+      update(active.id, { blockWidth: result.blockWidth, blockHeight: result.blockHeight, ...(result.freePosition ? { freePosition: result.freePosition, position: 'custom' } : {}) })
       setAlignmentGuides(result.guides)
     }
     pointerResize.current = null
@@ -661,18 +720,18 @@ export default function PdfMaker({ onExit }) {
     const placement = calculatePlacement(event, pageIndex)
     const source = type ? makeBlock(type) : blocks.find(block => block.id === movingId)
     setAlignmentGuides(placement?.guides || null)
-    if (!source || source.type === 'pageBreak' || source.type === 'spacer') { if (type) addAt(type); return }
+    if (!source || source.type === 'pageBreak') { if (type) addAt(type); return }
     const freePosition = placement?.freePosition
     if (!freePosition) return
-    if (type) { const block = { ...source, freePosition }; setBlocks(current => [...current, block]); setSelectedId(block.id) }
-    else if (movingId) update(movingId, { freePosition })
+    if (type) { const block = { ...source, freePosition, position: 'custom' }; setBlocks(current => [...current, block]); setSelectedId(block.id) }
+    else if (movingId) update(movingId, { freePosition, position: 'custom' })
   }
   return <main className="pdf-studio">
     <header className="pdf-studio-header"><button type="button" onClick={onExit}><ArrowLeft size={17}/> Flowly</button><a href={routeUrl('/utilities/pdf-maker')}><span><FilePenLine size={18}/></span><h1><em>Free Online </em>PDF Maker</h1></a><div><span>Created locally</span><button type="button" onClick={() => setDownloadOpen(true)}><Download size={16}/> Download PDF</button></div></header>
     <div className="pdf-studio-workspace">
       <aside className="pdf-studio-tools"><div className="pdf-studio-sidebar-tabs" role="tablist" aria-label="PDF Maker sidebar"><button type="button" role="tab" aria-selected={leftPanel === 'components'} className={leftPanel === 'components' ? 'active' : ''} onClick={() => setLeftPanel('components')}><Plus size={15}/> Add</button><button type="button" role="tab" aria-selected={leftPanel === 'layers'} className={leftPanel === 'layers' ? 'active' : ''} onClick={() => setLeftPanel('layers')}><Layers3 size={15}/> Layers</button></div>{leftPanel === 'components' ? <><div className="pdf-studio-panel-title"><span>COMPONENTS</span><h2>Add to page</h2><p>Click to add at the bottom, or drag onto an exact position.</p></div><div className="pdf-studio-tool-list">{tools.map(({ type, label, hint, Icon }) => <button type="button" draggable onDragStart={event => { event.dataTransfer.effectAllowed = 'copy'; event.dataTransfer.setData('application/x-flowly-tool', type) }} onClick={() => addAt(type)} key={type}><span><Icon size={18}/></span><div><strong>{label}</strong><small>{hint}</small></div><GripVertical size={15}/></button>)}</div><div className="pdf-studio-tip"><strong>Alignment suggestions</strong><p>Blue and red guides show matching edges and centres. They never snap or move your element.</p></div></> : <LayersPanel pages={layerPages} selectedId={selectedId} select={setSelectedId} update={update} remove={remove}/>}</aside>
-      <Canvas pageColor={pageColor} blocks={blocks} selectedId={selectedId} setSelectedId={setSelectedId} dropOnPage={dropOnPage} previewDrop={previewDrop} clearGuides={() => setAlignmentGuides(null)} alignmentGuides={alignmentGuides} dragPreview={dragPreview} resizePreview={resizePreview} onPointerStart={beginPointerDrag} onPointerMove={event => { movePointerDrag(event); movePointerResize(event) }} onPointerEnd={event => { endPointerDrag(event); endPointerResize(event) }} onPointerCancel={event => { cancelPointerDrag(event); cancelPointerResize(event) }} onResizeStart={beginPointerResize}/>
-      <Inspector block={selected} update={update} remove={remove} title={title} setTitle={setTitle} pageColor={pageColor} setPageColor={setPageColor}/>
+      <Canvas pageColor={pageColor} blocks={blocks} footerFields={footerFields} selectedId={selectedId} setSelectedId={setSelectedId} dropOnPage={dropOnPage} previewDrop={previewDrop} clearGuides={() => setAlignmentGuides(null)} alignmentGuides={alignmentGuides} dragPreview={dragPreview} resizePreview={resizePreview} onPointerStart={beginPointerDrag} onPointerMove={event => { movePointerDrag(event); movePointerResize(event) }} onPointerEnd={event => { endPointerDrag(event); endPointerResize(event) }} onPointerCancel={event => { cancelPointerDrag(event); cancelPointerResize(event) }} onResizeStart={beginPointerResize}/>
+      <Inspector block={selected} update={update} remove={remove} title={title} setTitle={setTitle} pageColor={pageColor} setPageColor={setPageColor} footerFields={footerFields} setFooterFields={setFooterFields}/>
     </div>
     {downloadOpen && <div className="pdf-download-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setDownloadOpen(false) }}>
       <form className="pdf-download-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-download-title" onSubmit={confirmDownload}>

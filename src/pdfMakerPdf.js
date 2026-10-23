@@ -26,6 +26,16 @@ const rgb = value => {
 const fillRect = (x, y, width, height, color) => `${rgb(color)} rg ${x} ${y} ${width} ${height} re f`
 const strokeRect = (x, y, width, height, color, lineWidth = 1) => `${rgb(color)} RG ${lineWidth} w ${x} ${y} ${width} ${height} re S`
 const line = (x1, y1, x2, y2, color, lineWidth = 1) => `${rgb(color)} RG ${lineWidth} w ${x1} ${y1} m ${x2} ${y2} l S`
+const dividerLine = (x1, y, x2, color, lineWidth = 1, style = 'solid') => {
+  const width = clamp(lineWidth, 1, 8)
+  if (style === 'double') {
+    const strokeWidth = Math.max(1, width / 2)
+    const offset = Math.max(2, width)
+    return `q ${rgb(color)} RG ${strokeWidth} w ${x1} ${y - offset / 2} m ${x2} ${y - offset / 2} l S ${x1} ${y + offset / 2} m ${x2} ${y + offset / 2} l S Q`
+  }
+  const pattern = style === 'dashed' ? '[8 5] 0 d' : style === 'dotted' ? '[1 4] 0 d 1 J' : '[] 0 d'
+  return `q ${rgb(color)} RG ${width} w ${pattern} ${x1} ${y} m ${x2} ${y} l S Q`
+}
 const circle = (cx, cy, radius, color) => {
   const c = radius * .5522848
   return `${rgb(color)} rg ${cx + radius} ${cy} m ${cx + radius} ${cy + c} ${cx + c} ${cy + radius} ${cx} ${cy + radius} c ${cx - c} ${cy + radius} ${cx - radius} ${cy + c} ${cx - radius} ${cy} c ${cx - radius} ${cy - c} ${cx - c} ${cy - radius} ${cx} ${cy - radius} c ${cx + c} ${cy - radius} ${cx + radius} ${cy - c} ${cx + radius} ${cy} c h f`
@@ -138,6 +148,7 @@ export function buildCustomPdf(document) {
   const title = ascii(document.title || 'Untitled document')
   const pages = []
   const pageLinks = []
+  const hasCustomFooter = Object.values(document.footerFields || {}).some(value => String(value || '').trim())
   let commands = []
   let currentLinks = []
   let y = PAGE_HEIGHT - MARGIN
@@ -148,12 +159,25 @@ export function buildCustomPdf(document) {
     y = PAGE_HEIGHT - MARGIN
   }
   const finishPage = () => {
-    if (document.includeWatermark !== false) commands.push(text(`Created with Flowly PDF Maker  |  Page ${pages.length + 1}`, MARGIN, 22, { size: 7, color: '#71847d' }))
+    const pageNumber = pages.length + 1
+    if (hasCustomFooter) {
+      const availableWidth = PAGE_WIDTH - MARGIN * 2
+      const columnWidth = availableWidth / 3
+      ;['left', 'center', 'right'].forEach((position, columnIndex) => {
+        const value = String(document.footerFields?.[position] || '').replace(/\{page\}/gi, String(pageNumber))
+        const lines = value.split(/\r?\n/).map(entry => ascii(entry).slice(0, 45)).filter(Boolean).slice(0, 2)
+        lines.forEach((entry, lineIndex) => {
+          const x = alignedX(entry, MARGIN + columnIndex * columnWidth, columnWidth, 7, position, false)
+          commands.push(text(entry, x, 27 - lineIndex * 10, { size: 7, color: '#506961' }))
+        })
+      })
+    }
+    if (document.includeWatermark !== false) commands.push(text(`Created with Flowly PDF Maker  |  Page ${pageNumber}`, MARGIN, hasCustomFooter ? 7 : 22, { size: 7, color: '#71847d' }))
     pages.push(commands.join('\n'))
     pageLinks.push(currentLinks)
   }
   const nextPage = () => { finishPage(); startPage() }
-  const ensure = height => { if (y - height < 48) nextPage() }
+  const ensure = height => { if (y - height < (hasCustomFooter ? 72 : 48)) nextPage() }
   const addLink = (target, block, x, bottom, width, height) => {
     const uri = safeLink(block.link)
     if (uri) target.push({ x1: x, y1: bottom, x2: x + width, y2: bottom + height, uri })
@@ -165,7 +189,7 @@ export function buildCustomPdf(document) {
   for (let index = 0; index < flowBlocks.length;) {
     const block = flowBlocks[index]
     const width = clamp(block.blockWidth ?? 100, 10, 100)
-    const canShare = block.type !== 'pageBreak' && (block.position || 'left') === 'left' && width < 100
+    const canShare = block.type !== 'pageBreak' && block.type !== 'divider' && (block.position || 'left') === 'left' && width < 100
     if (!canShare) { layoutItems.push(block); index += 1; continue }
     const row = [block]
     let used = width
@@ -173,7 +197,7 @@ export function buildCustomPdf(document) {
     while (cursor < flowBlocks.length) {
       const candidate = flowBlocks[cursor]
       const candidateWidth = clamp(candidate.blockWidth ?? 100, 10, 100)
-      const candidateCanShare = candidate.type !== 'pageBreak' && (candidate.position || 'left') === 'left' && candidateWidth < 100
+      const candidateCanShare = candidate.type !== 'pageBreak' && candidate.type !== 'divider' && (candidate.position || 'left') === 'left' && candidateWidth < 100
       if (candidate.newRow || !candidateCanShare || used + candidateWidth > 100) break
       row.push(candidate)
       used += candidateWidth
@@ -341,7 +365,7 @@ export function buildCustomPdf(document) {
     if (block.type === 'divider') {
       const layout = blockLayout(block)
       ensure(24)
-      commands.push(line(layout.x, y - 10, layout.x + layout.width, y - 10, block.color || '#173b32', clamp(block.thickness, 1, 8)))
+      commands.push(dividerLine(layout.x, y - 10, layout.x + layout.width, block.color || '#173b32', block.thickness, block.lineStyle))
       y -= 24
     }
   })
@@ -378,7 +402,7 @@ export function buildCustomPdf(document) {
       const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth : x
       freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color))
     } else if (block.type === 'divider') {
-      freeCommands.push(line(x, top - 10, x + width, top - 10, block.color || '#173b32', clamp(block.thickness, 1, 8)))
+      freeCommands.push(dividerLine(x, top - 10, x + width, block.color || '#173b32', block.thickness, block.lineStyle))
     } else if (block.type === 'table') {
       const headers = (block.headers || []).map(item => ascii(item || 'Column'))
       const columns = Math.max(1, headers.length)
