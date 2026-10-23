@@ -161,7 +161,7 @@ export default function JsonDiffChecker({ onExit }) {
 
   return <main className="json-diff-app">
     <header className="json-diff-header"><button type="button" onClick={onExit}><ArrowLeft size={17}/> Flowly</button><a href={routeUrl('/utilities/json-diff')}><span><FileJson2 size={18}/></span>JSON Diff Checker</a><p><Braces size={15}/> Runs locally</p></header>
-    <section className="json-diff-intro"><div><span>FLOWLY UTILITY</span><h1>Spot every JSON<br/>difference clearly.</h1></div><p>Paste two JSON documents. Flowly validates them, compares nested values and shows exactly what changed—without uploading your data.</p></section>
+    <section className="json-diff-intro"><div><span>FLOWLY UTILITY</span><h1>Visual JSON<br/>diff checker.</h1></div><p>Paste two JSON documents. Flowly validates them, compares nested values and shows exactly what changed—without uploading your data.</p></section>
     <section className="json-diff-toolbar" aria-label="JSON comparison controls"><div><button type="button" onClick={swap}><ArrowRightLeft size={16}/> Swap sides</button><button type="button" onClick={reset}><RotateCcw size={16}/> Reset sample</button></div><button type="button" className="json-compare-button" disabled={!ready} onClick={() => setCompared(true)}><GitCompareArrows size={17}/> Compare JSON</button></section>
     {copied && <div className="json-copy-toast" role="status"><Check size={15}/> {copied} JSON copied</div>}
     <section className="json-editor-grid">

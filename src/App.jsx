@@ -12,6 +12,7 @@ import PdfMaker from './PdfMaker.jsx'
 import JsonDiffChecker from './JsonDiffChecker.jsx'
 import JsonFormatter from './JsonFormatter.jsx'
 import { cleanUrlHash, currentRoutePath, handleSectionLink, navigateTo, routeUrl, scrollToSection } from './navigation.js'
+import { applySeoPage } from './seo.js'
 import './ui-polish.css'
 
 const workflows = [
@@ -34,6 +35,7 @@ const utilities = [
 const catalog = [...workflows, ...utilities]
 
 const filters = ['All workflows', 'Utilities', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
+const workflowPaths = { medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
 const donationUpiId = import.meta.env.VITE_DONATION_UPI_ID || ''
 const donationUrl = import.meta.env.VITE_DONATION_URL || ''
 
@@ -87,6 +89,8 @@ function App() {
     return () => window.removeEventListener('popstate', syncRoute)
   }, [])
 
+  useEffect(() => { applySeoPage(activeWorkflow || 'home') }, [activeWorkflow])
+
   useEffect(() => {
     if (!infoDialog && !donationOpen) return undefined
     const closeOnEscape = event => { if (event.key === 'Escape') { setInfoDialog(null); setDonationOpen(false) } }
@@ -116,9 +120,8 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    const paths = { travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
-    if (paths[item.id]) {
-      navigateTo(paths[item.id])
+    if (workflowPaths[item.id]) {
+      navigateTo(workflowPaths[item.id])
       setActiveWorkflow(item.id)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -135,12 +138,13 @@ function App() {
   const renderWorkflowCard = (item) => {
     const Icon = item.icon
     const isReady = item.availability !== 'demo'
+    const actionLabel = item.availability === 'utility' ? 'Open utility' : isReady ? 'Use this tool' : 'View UI demo'
     return <article className={`workflow-card flow-${item.id} ${item.featured ? 'featured' : ''}`} key={item.id}>
       <div className="card-head"><span className={`workflow-icon ${item.tone}`}><Icon size={24} /></span></div>
       <div className="card-meta"><span className="card-tag">{item.tag}</span><span className={`availability-badge ${isReady ? 'ready' : 'demo'}`}>{isReady ? 'Works now' : 'UI concept'}</span></div>
       <h3>{item.title}</h3><p>{item.description}</p>
       {item.featured && <div className="mini-flow"><span className="mini-step done"><Check size={13} /> Set the trip</span><ChevronRight size={13} /><span className="mini-step active">Plan each day</span><ChevronRight size={13} /><span className="mini-step">Download PDF</span></div>}
-      <button className="card-action" onClick={() => launch(item)}>{item.availability === 'utility' ? 'Open utility' : isReady ? 'Use this tool' : 'View UI demo'} <ArrowUpRight size={17} /></button>
+      {workflowPaths[item.id] ? <a className="card-action" href={routeUrl(workflowPaths[item.id])} onClick={(event) => { event.preventDefault(); launch(item) }}>{actionLabel} <ArrowUpRight size={17} /></a> : <button className="card-action" onClick={() => launch(item)}>{actionLabel} <ArrowUpRight size={17} /></button>}
     </article>
   }
 

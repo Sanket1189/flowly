@@ -76,7 +76,7 @@ export default function JsonFormatter({ onExit }) {
 
   return <main className="json-format-app">
     <header className="json-format-header"><button type="button" onClick={onExit}><ArrowLeft size={17}/> Flowly</button><a href={routeUrl('/utilities/json-formatter')}><span><Braces size={18}/></span>JSON Formatter</a><p><Check size={15}/> Browser only</p></header>
-    <section className="json-format-intro"><div><span>FLOWLY UTILITY</span><h1>Clean JSON,<br/>without the clutter.</h1></div><p>Format, validate, sort or minify JSON instantly. Your content stays entirely inside your browser.</p></section>
+    <section className="json-format-intro"><div><span>FLOWLY UTILITY</span><h1>Free JSON formatter<br/>and validator.</h1></div><p>Format, validate, sort or minify JSON instantly. Your content stays entirely inside your browser.</p></section>
     <section className="json-format-controls" aria-label="JSON formatting options">
       <div className="json-indent-control"><span>Output style</span><div role="group" aria-label="Output indentation">{[['2','2 spaces'],['4','4 spaces'],['tab','Tabs'],['minify','Minify']].map(([value, label]) => <button type="button" className={indent === value ? 'active' : ''} aria-pressed={indent === value} onClick={() => changeIndent(value)} key={value}>{label}</button>)}</div></div>
       <label className="json-sort-toggle"><input type="checkbox" checked={sortKeys} onChange={event => changeSort(event.target.checked)}/><span><strong>Sort keys</strong><small>Alphabetically, including nested objects</small></span></label>

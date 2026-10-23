@@ -8,9 +8,14 @@ export function routeUrl(path = '/') {
 }
 
 export function currentRoutePath(pathname = window.location.pathname) {
-  if (!basePrefix) return pathname || '/'
-  if (pathname === basePrefix || pathname === `${basePrefix}/`) return '/'
-  return pathname.startsWith(`${basePrefix}/`) ? pathname.slice(basePrefix.length) : pathname
+  const withoutBase = !basePrefix
+    ? pathname || '/'
+    : pathname === basePrefix || pathname === `${basePrefix}/`
+      ? '/'
+      : pathname.startsWith(`${basePrefix}/`)
+        ? pathname.slice(basePrefix.length)
+        : pathname
+  return withoutBase.length > 1 ? withoutBase.replace(/\/+$/, '') : withoutBase
 }
 
 export function navigateTo(path, { replace = false } = {}) {
