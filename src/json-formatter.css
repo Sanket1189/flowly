@@ -25,3 +25,13 @@
 .json-format-note{max-width:1176px;margin:16px auto 0;padding:18px 20px;display:flex;align-items:center;gap:12px;border:1px solid #dbe5d5;border-radius:17px;background:#eaf3e4}.json-format-note svg{flex:0 0 auto}.json-format-note strong{font-size:.8rem}.json-format-note p{margin:3px 0 0;color:var(--jf-muted);font-size:.72rem}
 @media(max-width:900px){.json-format-controls{margin-left:20px;margin-right:20px;grid-template-columns:1fr auto}.json-format-primary{grid-column:1/-1}.json-format-grid{grid-template-columns:1fr;padding:0 20px}.json-format-note{margin-left:20px;margin-right:20px}}
 @media(max-width:650px){.json-format-header{height:62px;grid-template-columns:auto 1fr auto;padding:0 12px}.json-format-header>button{font-size:0}.json-format-header>a{justify-self:center;font-size:.92rem}.json-format-header>a span{width:36px;height:36px}.json-format-header>p{font-size:0}.json-format-intro{padding:38px 15px 25px;grid-template-columns:1fr;gap:18px}.json-format-intro h1{font-size:2.6rem}.json-format-intro h1 br{display:none}.json-format-controls{margin-left:10px;margin-right:10px;grid-template-columns:1fr;gap:13px}.json-indent-control{align-items:flex-start;flex-direction:column}.json-indent-control>div{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}.json-sort-toggle{padding:5px 2px}.json-format-primary{grid-column:auto}.json-format-grid{padding:0 10px}.json-format-panel-head{align-items:flex-start;flex-direction:column}.json-format-panel-head>div:last-child{width:100%}.json-format-panel-head button{flex:1;justify-content:center}.json-format-status{align-items:flex-start;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}.json-format-status small{width:100%;margin-left:21px}.json-format-panel textarea{height:340px}.json-format-note{margin-left:10px;margin-right:10px}}
+
+@media(max-width:520px){
+  .json-format-header{padding:0 10px}
+  .json-format-header>a{gap:7px;white-space:nowrap}
+  .json-format-intro{padding-left:14px;padding-right:14px}
+  .json-format-panel{border-radius:16px}
+  .json-format-panel textarea{height:300px;padding:14px;font-size:.72rem}
+  .json-format-note{align-items:flex-start;padding:15px}
+  .json-format-note p{line-height:1.5}
+}

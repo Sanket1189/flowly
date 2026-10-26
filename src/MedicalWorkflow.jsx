@@ -49,12 +49,12 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
   }
 
   const next = () => {
-    if (step === 4 && (!form.name.trim() || !form.email.trim())) {
-      setError('Please add your name and email to continue.')
+    if (step === 4 && (!form.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))) {
+      setError('Please add your name and a valid email to continue.')
       return
     }
     setError('')
-    setStep((current) => Math.min(current + 1, 5))
+    setStep((current) => Math.min(current + 1, 6))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -71,9 +71,9 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
         <button className="med-close" onClick={onExit} aria-label="Close booking"><X size={20} /></button>
       </header>
 
-      {step < 5 && <div className="med-progress-wrap">
-        <div className="med-progress-labels"><span>Appointment details</span><strong>{step} of 4</strong></div>
-        <div className="med-progress"><span style={{ width: `${step * 25}%` }} /></div>
+      {step < 6 && <div className="med-progress-wrap">
+        <div className="med-progress-labels"><span>Care · Doctor · Time · Details · Review</span><strong>{step} of 5</strong></div>
+        <div className="med-progress"><span style={{ width: `${step * 20}%` }} /></div>
       </div>}
 
       <div className="medical-shell">
@@ -125,7 +125,20 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
           </div>
         </section>}
 
-        {step === 5 && <section className="med-success">
+        {step === 5 && <section className="med-step med-review-step">
+          <div className="med-title"><span className="med-kicker">REVIEW YOUR REQUEST</span><h1>Everything look right?</h1><p>Check the appointment details before sending your request.</p></div>
+          <div className="med-review-card">
+            <div className="med-review-person"><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><span><small>DOCTOR</small><strong>{selectedDoctor.name}</strong><p>{selectedCare.name} · {selectedDoctor.field}</p></span><button onClick={() => setStep(2)}>Edit</button></div>
+            <div className="med-review-grid">
+              <div><small>DATE & TIME</small><strong>{dates[date].day}, {schedules[month].long} {dates[date].date}, 2026</strong><span>{time}</span><button onClick={() => setStep(3)}>Edit schedule</button></div>
+              <div><small>PATIENT</small><strong>{form.name}</strong><span>{form.email}</span><button onClick={() => setStep(4)}>Edit details</button></div>
+            </div>
+            {form.reason.trim() && <div className="med-review-note"><small>NOTE FOR THE DOCTOR</small><p>{form.reason}</p></div>}
+            <div className="med-demo-notice"><ShieldCheck size={17}/><span>This is a UI demo. Confirming will not contact a doctor or create an appointment.</span></div>
+          </div>
+        </section>}
+
+        {step === 6 && <section className="med-success">
           <div className="success-icon"><CheckCircle2 size={45} /></div><span className="med-kicker">APPOINTMENT REQUESTED</span><h1>You’re all set.</h1><p>We’ve saved your appointment details. This is a UI demo, so no real appointment was created.</p>
           <div className="confirmation-card">
             <div><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><span><small>APPOINTMENT WITH</small><strong>{selectedDoctor.name}</strong><p>{selectedDoctor.field}</p></span></div>
@@ -135,7 +148,7 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
         </section>}
       </div>
 
-      {step < 5 && <footer className="med-footer"><div><span className="mobile-step">Step {step} of 4</span><span className="med-summary-line">{selectedCare?.name} {step > 1 && `· ${selectedDoctor.name}`} {step > 2 && `· ${dates[date].day} ${dates[date].date}, ${time}`}</span></div><button className="med-primary" onClick={next}>{step === 4 ? 'Request appointment' : 'Continue'} <ArrowRight size={17} /></button></footer>}
+      {step < 6 && <footer className="med-footer"><div><span className="mobile-step">Step {step} of 5</span><span className="med-summary-line">{selectedCare?.name} {step > 1 && `· ${selectedDoctor.name}`} {step > 2 && `· ${dates[date].day} ${dates[date].date}, ${time}`}</span></div><button className="med-primary" onClick={next}>{step === 5 ? 'Confirm request' : step === 4 ? 'Review appointment' : 'Continue'} <ArrowRight size={17} /></button></footer>}
     </main>
   )
 }

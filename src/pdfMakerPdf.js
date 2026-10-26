@@ -17,6 +17,32 @@ const safeLink = value => {
   }
 }
 
+const jpegFromDataUrl = value => {
+  const match = /^data:image\/jpeg;base64,(.+)$/i.exec(String(value || ''))
+  if (!match) return null
+  try {
+    const binary = atob(match[1])
+    return binary || null
+  } catch {
+    return null
+  }
+}
+
+const drawImage = (resource, x, top, frameWidth, frameHeight, fit = 'contain', opacityResource = '') => {
+  if (!resource) return ''
+  const imageRatio = resource.width / Math.max(1, resource.height)
+  const frameRatio = frameWidth / Math.max(1, frameHeight)
+  const cover = fit === 'cover'
+  const useWidth = cover ? imageRatio < frameRatio : imageRatio > frameRatio
+  const width = useWidth ? frameWidth : frameHeight * imageRatio
+  const height = useWidth ? frameWidth / imageRatio : frameHeight
+  const left = x + (frameWidth - width) / 2
+  const bottom = top - frameHeight + (frameHeight - height) / 2
+  const clip = cover ? `${x.toFixed(2)} ${(top - frameHeight).toFixed(2)} ${frameWidth.toFixed(2)} ${frameHeight.toFixed(2)} re W n ` : ''
+  const opacity = opacityResource ? `/${opacityResource} gs ` : ''
+  return `q ${opacity}${clip}${width.toFixed(2)} 0 0 ${height.toFixed(2)} ${left.toFixed(2)} ${bottom.toFixed(2)} cm /${resource.name} Do Q`
+}
+
 const rgb = value => {
   const hex = String(value || '#173b32').replace('#', '').padEnd(6, '0').slice(0, 6)
   const parts = [0, 2, 4].map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
@@ -53,6 +79,35 @@ const roundedRect = (x, y, width, height, radius, color) => {
   const r = Math.min(radius, width / 2, height / 2)
   const c = r * .5522848
   return `${rgb(color)} rg ${x + r} ${y} m ${x + width - r} ${y} l ${x + width - r + c} ${y} ${x + width} ${y + r - c} ${x + width} ${y + r} c ${x + width} ${y + height - r} l ${x + width} ${y + height - r + c} ${x + width - r + c} ${y + height} ${x + width - r} ${y + height} c ${x + r} ${y + height} l ${x + r - c} ${y + height} ${x} ${y + height - r + c} ${x} ${y + height - r} c ${x} ${y + r} l ${x} ${y + r - c} ${x + r - c} ${y} ${x + r} ${y} c h f`
+}
+
+const resolvedCornerRadii = block => {
+  if (typeof block.borderRadius === 'number') {
+    const radius = clamp(block.borderRadius, 0, 80)
+    return { topLeft: radius, topRight: radius, bottomRight: radius, bottomLeft: radius }
+  }
+  const value = block.borderRadius || {}
+  return {
+    topLeft: clamp(value.topLeft || 0, 0, 80),
+    topRight: clamp(value.topRight || 0, 0, 80),
+    bottomRight: clamp(value.bottomRight || 0, 0, 80),
+    bottomLeft: clamp(value.bottomLeft || 0, 0, 80),
+  }
+}
+
+const roundedRectCorners = (x, y, width, height, radii, color) => {
+  const limit = Math.min(width / 2, height / 2)
+  const tl = Math.min(radii.topLeft, limit)
+  const tr = Math.min(radii.topRight, limit)
+  const br = Math.min(radii.bottomRight, limit)
+  const bl = Math.min(radii.bottomLeft, limit)
+  const k = .5522848
+  return `${rgb(color)} rg ${x + bl} ${y} m ${x + width - br} ${y} l ${x + width - br + br * k} ${y} ${x + width} ${y + br - br * k} ${x + width} ${y + br} c ${x + width} ${y + height - tr} l ${x + width} ${y + height - tr + tr * k} ${x + width - tr + tr * k} ${y + height} ${x + width - tr} ${y + height} c ${x + tl} ${y + height} l ${x + tl - tl * k} ${y + height} ${x} ${y + height - tl + tl * k} ${x} ${y + height - tl} c ${x} ${y + bl} l ${x} ${y + bl - bl * k} ${x + bl - bl * k} ${y} ${x + bl} ${y} c h f`
+}
+
+const fillBlockBackground = (block, x, y, width, height, color) => {
+  const radii = resolvedCornerRadii(block)
+  return Object.values(radii).some(Boolean) ? roundedRectCorners(x, y, width, height, radii, color) : fillRect(x, y, width, height, color)
 }
 
 const shapePoints = {
@@ -143,6 +198,19 @@ const drawList = (target, block, x, width, top, description = describeList(block
 export function buildCustomPdf(document) {
   const pageColor = document.pageColor || '#f7f7f2'
   const blocks = Array.isArray(document.blocks) ? document.blocks : []
+  const imageResources = []
+  const imageByData = new Map()
+  blocks.filter(block => block.type === 'image' && block.imageData).forEach(block => {
+    if (imageByData.has(block.imageData)) return
+    const binary = jpegFromDataUrl(block.imageData)
+    if (!binary) return
+    const resource = { name: `Im${imageResources.length + 1}`, binary, width: Math.max(1, Number(block.imageWidth) || 1), height: Math.max(1, Number(block.imageHeight) || 1) }
+    imageResources.push(resource)
+    imageByData.set(block.imageData, resource)
+  })
+  const opacityValues = [...new Set(blocks.filter(block => block.type === 'image').map(block => Math.max(10, Math.min(100, Number(block.opacity) || 100))).filter(value => value < 100))]
+  const opacityResources = new Map(opacityValues.map((value, index) => [value, { name: `GS${index + 1}`, value }]))
+  const imageOpacityName = block => opacityResources.get(Math.max(10, Math.min(100, Number(block.opacity) || 100)))?.name || ''
   const flowBlocks = blocks.filter(block => !block.freePosition)
   const freeBlocks = blocks.filter(block => block.freePosition && !['pageBreak', 'spacer'].includes(block.type))
   const title = ascii(document.title || 'Untitled document')
@@ -228,6 +296,7 @@ export function buildCustomPdf(document) {
         const rows = Array.isArray(block.rows) ? block.rows : []
         descriptions.push({ block, x, width, height: (block.caption ? 22 : 0) + 30 + rows.length * 30 + 12, rows })
       } else if (block.type === 'shape') descriptions.push({ block, x, width, height: clamp(block.height, 32, 180) + 12 })
+      else if (block.type === 'image') descriptions.push({ block, x, width, height: clamp(block.blockHeight || block.height, 54, 420) })
       else if (block.type === 'spacer') descriptions.push({ block, x, width, height: clamp(block.height, 12, 220) })
       else descriptions.push({ block, x, width, height: 24 })
     })
@@ -237,7 +306,7 @@ export function buildCustomPdf(document) {
     descriptions.forEach(item => {
       const { block, x, width } = item
       if (block.type === 'text') {
-        if (block.background && block.background !== 'transparent') commands.push(fillRect(x + 4, top - item.height, width - 8, item.height, block.background))
+        if (block.background && block.background !== 'transparent') commands.push(fillBlockBackground(block, x + 4, top - item.height, width - 8, item.height, block.background))
         item.lines.forEach((entry, lineIndex) => {
           const tx = alignedX(entry, x + 10, width - 20, item.size, block.align, block.bold)
           commands.push(text(entry, tx, top - 18 - lineIndex * item.leading, { size: item.size, bold: block.bold, color: block.color, fontFamily: block.fontFamily }))
@@ -269,6 +338,9 @@ export function buildCustomPdf(document) {
         const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
         const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth - 4 : x + 4
         commands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color))
+      } else if (block.type === 'image') {
+        commands.push(drawImage(imageByData.get(block.imageData), x + 4, top, width - 8, item.height, block.fit, imageOpacityName(block)))
+        addLink(currentLinks, block, x + 4, top - item.height, width - 8, item.height)
       } else if (block.type !== 'spacer') commands.push(line(x + 4, top - 10, x + width - 4, top - 10, block.color || '#173b32', clamp(block.thickness, 1, 8)))
     })
     y -= rowHeight + 10
@@ -299,7 +371,7 @@ export function buildCustomPdf(document) {
       const lines = wrap(block.content, layout.width - 24, size, block.bold)
       const height = Math.max(44, lines.length * leading + 24)
       ensure(height + 10)
-      if (block.background && block.background !== 'transparent') commands.push(fillRect(layout.x, y - height, layout.width, height, block.background))
+      if (block.background && block.background !== 'transparent') commands.push(fillBlockBackground(block, layout.x, y - height, layout.width, height, block.background))
       lines.forEach((entry, index) => {
         const tx = alignedX(entry, layout.x + 12, layout.width - 24, size, block.align, block.bold)
         commands.push(text(entry, tx, y - 18 - index * leading, { size, bold: block.bold, color: block.color, fontFamily: block.fontFamily }))
@@ -362,6 +434,16 @@ export function buildCustomPdf(document) {
       return
     }
 
+    if (block.type === 'image') {
+      const layout = blockLayout(block)
+      const height = clamp(block.blockHeight || block.height, 54, 420)
+      ensure(height + 12)
+      commands.push(drawImage(imageByData.get(block.imageData), layout.x, y, layout.width, height, block.fit, imageOpacityName(block)))
+      addLink(currentLinks, block, layout.x, y - height, layout.width, height)
+      y -= height + 12
+      return
+    }
+
     if (block.type === 'divider') {
       const layout = blockLayout(block)
       ensure(24)
@@ -390,7 +472,7 @@ export function buildCustomPdf(document) {
       const leading = size * 1.42
       const lines = wrap(block.content, width - 20, size, block.bold)
       const height = Math.max(44, lines.length * leading + 24)
-      if (block.background && block.background !== 'transparent') freeCommands.push(fillRect(x, top - height, width, height, block.background))
+      if (block.background && block.background !== 'transparent') freeCommands.push(fillBlockBackground(block, x, top - height, width, height, block.background))
       lines.forEach((entry, index) => freeCommands.push(text(entry, alignedX(entry, x + 10, width - 20, size, block.align, block.bold), top - 18 - index * leading, { size, bold: block.bold, color: block.color, fontFamily: block.fontFamily })))
       addLink(linkTarget, block, x, top - height, width, height)
     } else if (block.type === 'list') {
@@ -401,6 +483,10 @@ export function buildCustomPdf(document) {
       const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
       const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth : x
       freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color))
+    } else if (block.type === 'image') {
+      const height = clamp(block.blockHeight || block.height, 54, 420)
+      freeCommands.push(drawImage(imageByData.get(block.imageData), x, top, width, height, block.fit, imageOpacityName(block)))
+      addLink(linkTarget, block, x, top - height, width, height)
     } else if (block.type === 'divider') {
       freeCommands.push(dividerLine(x, top - 10, x + width, block.color || '#173b32', block.thickness, block.lineStyle))
     } else if (block.type === 'table') {
@@ -438,6 +524,14 @@ export function buildCustomPdf(document) {
     objects[id] = `<< /Type /Annot /Subtype /Link /Rect [${linkItem.x1.toFixed(2)} ${linkItem.y1.toFixed(2)} ${linkItem.x2.toFixed(2)} ${linkItem.y2.toFixed(2)}] /Border [0 0 0] /A << /S /URI /URI (${escapePdf(linkItem.uri)}) >> >>`
     return id
   }))
+  imageResources.forEach(resource => {
+    resource.id = nextObjectId++
+    objects[resource.id] = `<< /Type /XObject /Subtype /Image /Width ${resource.width} /Height ${resource.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${resource.binary.length} >>\nstream\n${resource.binary}\nendstream`
+  })
+  opacityResources.forEach(resource => {
+    resource.id = nextObjectId++
+    objects[resource.id] = `<< /Type /ExtGState /ca ${(resource.value / 100).toFixed(3)} /CA ${(resource.value / 100).toFixed(3)} >>`
+  })
   objects[1] = '<< /Type /Catalog /Pages 2 0 R >>'
   objects[2] = `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] /Count ${pages.length} >>`
   objects[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'
@@ -450,7 +544,9 @@ export function buildCustomPdf(document) {
     const pageId = 9 + index * 2
     const contentId = pageId + 1
     const annots = annotationIds[index]?.length ? ` /Annots [${annotationIds[index].map(id => `${id} 0 R`).join(' ')}]` : ''
-    objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R /F6 8 0 R >> >> /Contents ${contentId} 0 R${annots} >>`
+    const xObjects = imageResources.length ? ` /XObject << ${imageResources.map(resource => `/${resource.name} ${resource.id} 0 R`).join(' ')} >>` : ''
+    const extStates = opacityResources.size ? ` /ExtGState << ${[...opacityResources.values()].map(resource => `/${resource.name} ${resource.id} 0 R`).join(' ')} >>` : ''
+    objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R /F6 8 0 R >>${xObjects}${extStates} >> /Contents ${contentId} 0 R${annots} >>`
     objects[contentId] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`
   })
   let pdf = '%PDF-1.4\n%1234\n'
@@ -464,7 +560,10 @@ export function buildCustomPdf(document) {
 }
 
 export function downloadCustomPdf(document) {
-  const blob = new Blob([buildCustomPdf(document)], { type: 'application/pdf' })
+  const binary = buildCustomPdf(document)
+  const bytes = new Uint8Array(binary.length)
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index) & 0xff
+  const blob = new Blob([bytes], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const link = documentRef => {
     const anchor = documentRef.createElement('a')
