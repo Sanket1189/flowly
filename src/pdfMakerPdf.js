@@ -130,9 +130,17 @@ const shapePoints = {
   arrow: [[0, .3], [.65, .3], [.65, 0], [1, .5], [.65, 1], [.65, .7], [0, .7]],
   chevron: [[0, 0], [.6, 0], [1, .5], [.6, 1], [0, 1], [.4, .5]],
   parallelogram: [[.2, 0], [1, 0], [.8, 1], [0, 1]],
+  octagon: [[.3, 0], [.7, 0], [1, .3], [1, .7], [.7, 1], [.3, 1], [0, .7], [0, .3]],
+  heart: [[.5, 1], [.08, .58], [0, .28], [.12, .06], [.34, 0], [.5, .18], [.66, 0], [.88, .06], [1, .28], [.92, .58]],
+  cloud: [[.08, .72], [0, .55], [.07, .38], [.25, .34], [.31, .12], [.5, .05], [.67, .18], [.82, .17], [1, .38], [.94, .68], [.72, .76], [.3, .77]],
+  speech: [[0, 0], [1, 0], [1, .75], [.42, .75], [.2, 1], [.25, .75], [0, .75]],
+  badge: [[.5, 0], [.62, .18], [.85, .15], [.82, .38], [1, .5], [.82, .62], [.85, .85], [.62, .82], [.5, 1], [.38, .82], [.15, .85], [.18, .62], [0, .5], [.18, .38], [.15, .15], [.38, .18]],
+  cross: [[.34, 0], [.66, 0], [.66, .34], [1, .34], [1, .66], [.66, .66], [.66, 1], [.34, 1], [.34, .66], [0, .66], [0, .34], [.34, .34]],
+  plus: [[.4, 0], [.6, 0], [.6, .4], [1, .4], [1, .6], [.6, .6], [.6, 1], [.4, 1], [.4, .6], [0, .6], [0, .4], [.4, .4]],
+  lightning: [[.56, 0], [.18, .55], [.46, .55], [.32, 1], [.84, .38], [.55, .38]],
 }
 
-const drawShape = (shape, x, top, width, height, color, opacityResource = '') => {
+const drawShape = (shape, x, top, width, height, color, opacityResource = '', strokeColor = '#173b32', strokeWidth = 0, rotation = 0, flipX = false, flipY = false) => {
   let drawing
   if (shape === 'circle') {
     const diameter = Math.min(width, height)
@@ -142,7 +150,18 @@ const drawShape = (shape, x, top, width, height, color, opacityResource = '') =>
   else if (shape === 'rounded') drawing = roundedRect(x, top - height, width, height, Math.min(18, height * .3), color)
   else if (shapePoints[shape]) drawing = polygon(shapePoints[shape], x, top, width, height, color)
   else drawing = fillRect(x, top - height, width, height, color)
-  return opacityResource ? `q /${opacityResource} gs ${drawing} Q` : drawing
+  const outline = clamp(strokeWidth, 0, 12)
+  if (outline > 0) drawing = `${rgb(strokeColor)} RG ${outline} w ${drawing.replace(/ f$/, ' B')}`
+  const angle = -(Number(rotation) || 0) * Math.PI / 180
+  const cos = Math.cos(angle) * (flipX ? -1 : 1)
+  const sin = Math.sin(angle) * (flipX ? -1 : 1)
+  const c = -Math.sin(angle) * (flipY ? -1 : 1)
+  const d = Math.cos(angle) * (flipY ? -1 : 1)
+  const cx = x + width / 2
+  const cy = top - height / 2
+  const transform = rotation || flipX || flipY ? `1 0 0 1 ${cx.toFixed(2)} ${cy.toFixed(2)} cm ${cos.toFixed(6)} ${sin.toFixed(6)} ${c.toFixed(6)} ${d.toFixed(6)} 0 0 cm 1 0 0 1 ${(-cx).toFixed(2)} ${(-cy).toFixed(2)} cm ` : ''
+  const opacity = opacityResource ? `/${opacityResource} gs ` : ''
+  return transform || opacity || outline > 0 ? `q ${opacity}${transform}${drawing} Q` : drawing
 }
 
 const estimateWidth = (value, size, bold = false) => ascii(value).length * size * (bold ? .56 : .51)
@@ -312,7 +331,7 @@ export function buildCustomPdf(document) {
       } else if (block.type === 'table') {
         const rows = Array.isArray(block.rows) ? block.rows : []
         descriptions.push({ block, x, width, height: (block.caption ? 22 : 0) + 30 + rows.length * 30 + 12, rows })
-      } else if (block.type === 'shape') descriptions.push({ block, x, width, height: clamp(block.height, 32, 180) + 12 })
+      } else if (block.type === 'shape') descriptions.push({ block, x, width, height: clamp(block.blockHeight || block.height, 32, 420) + 12 })
       else if (block.type === 'image') descriptions.push({ block, x, width, height: clamp(block.blockHeight || block.height, 54, 420) })
       else if (block.type === 'spacer') descriptions.push({ block, x, width, height: clamp(block.height, 12, 220) })
       else descriptions.push({ block, x, width, height: 24 })
@@ -350,11 +369,11 @@ export function buildCustomPdf(document) {
           localY -= 30
         })
       } else if (block.type === 'shape') {
-        const height = clamp(block.height, 32, 180)
-        const shapeWidth = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), width - 8)
+        const height = clamp(block.blockHeight || block.height, 32, 420)
+        const shapeWidth = Math.max(12, width - 8)
         const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
         const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth - 4 : x + 4
-        commands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block)))
+        commands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block), block.strokeColor, block.strokeWidth, block.rotation, block.flipX, block.flipY))
       } else if (block.type === 'image') {
         commands.push(drawImage(imageByData.get(block.imageData), x + 4, top, width - 8, item.height, block.fit, opacityName(block)))
         addLink(currentLinks, block, x + 4, top - item.height, width - 8, item.height)
@@ -441,12 +460,12 @@ export function buildCustomPdf(document) {
 
     if (block.type === 'shape') {
       const layout = blockLayout(block)
-      const height = clamp(block.height, 32, 180)
+      const height = clamp(block.blockHeight || block.height, 32, 420)
       ensure(height + 12)
-      const width = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), layout.width)
+      const width = layout.width
       const renderedWidth = block.shape === 'circle' ? Math.min(width, height) : width
       const x = block.align === 'center' ? layout.x + (layout.width - renderedWidth) / 2 : block.align === 'right' ? layout.x + layout.width - renderedWidth : layout.x
-      commands.push(drawShape(block.shape, x, y, renderedWidth, height, block.color, opacityName(block)))
+      commands.push(drawShape(block.shape, x, y, renderedWidth, height, block.color, opacityName(block), block.strokeColor, block.strokeWidth, block.rotation, block.flipX, block.flipY))
       y -= height + 12
       return
     }
@@ -503,15 +522,19 @@ export function buildCustomPdf(document) {
     } else if (block.type === 'list') {
       drawList(freeCommands, block, x, width, top)
     } else if (block.type === 'shape') {
-      const height = clamp(block.height, 32, 180)
-      const shapeWidth = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), width)
+      const height = clamp(block.blockHeight || block.height, 32, 420)
+      const shapeWidth = width
       const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
       const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth : x
-      freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block)))
+      freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block), block.strokeColor, block.strokeWidth, block.rotation, block.flipX, block.flipY))
     } else if (block.type === 'image') {
-      const height = clamp(block.blockHeight || block.height, 54, 420)
-      freeCommands.push(drawImage(imageByData.get(block.imageData), x, top, width, height, block.fit, opacityName(block)))
-      addLink(linkTarget, block, x, top - height, width, height)
+      const background = block.importedPdfPage
+      const imageX = background ? 0 : x
+      const imageTop = background ? PAGE_HEIGHT : top
+      const imageWidth = background ? PAGE_WIDTH : width
+      const height = background ? PAGE_HEIGHT : clamp(block.blockHeight || block.height, 54, 420)
+      freeCommands.push(drawImage(imageByData.get(block.imageData), imageX, imageTop, imageWidth, height, background ? 'cover' : block.fit, opacityName(block)))
+      addLink(linkTarget, block, imageX, imageTop - height, imageWidth, height)
     } else if (block.type === 'divider') {
       if (block.orientation === 'vertical') {
         const height = clamp(block.blockHeight || block.height, 32, 400)
@@ -542,7 +565,9 @@ export function buildCustomPdf(document) {
 
   freeBlocks.forEach(block => {
     const pageIndex = Math.max(0, Math.min(pages.length - 1, Math.round(Number(block.freePosition?.pageIndex) || 0)))
-    pages[pageIndex] += `\n${renderFreeBlock(block, pageLinks[pageIndex])}`
+    const rendered = renderFreeBlock(block, pageLinks[pageIndex])
+    if (block.importedPdfPage) pages[pageIndex] = `${rendered}\n${pages[pageIndex]}`
+    else pages[pageIndex] += `\n${rendered}`
   })
 
   const objects = []
