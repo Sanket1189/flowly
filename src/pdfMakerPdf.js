@@ -62,6 +62,17 @@ const dividerLine = (x1, y, x2, color, lineWidth = 1, style = 'solid') => {
   const pattern = style === 'dashed' ? '[8 5] 0 d' : style === 'dotted' ? '[1 4] 0 d 1 J' : '[] 0 d'
   return `q ${rgb(color)} RG ${width} w ${pattern} ${x1} ${y} m ${x2} ${y} l S Q`
 }
+const verticalDividerLine = (x, top, bottom, color, lineWidth = 1, style = 'solid') => {
+  const width = clamp(lineWidth, 1, 8)
+  if (style === 'double') {
+    const strokeWidth = Math.max(1, width / 2)
+    const offset = Math.max(2, width) / 2
+    return `q ${rgb(color)} RG ${strokeWidth} w ${x - offset} ${top} m ${x - offset} ${bottom} l S ${x + offset} ${top} m ${x + offset} ${bottom} l S Q`
+  }
+  const pattern = style === 'dashed' ? '[8 5] 0 d' : style === 'dotted' ? '[1 4] 0 d 1 J' : '[] 0 d'
+  return `q ${rgb(color)} RG ${width} w ${pattern} ${x} ${top} m ${x} ${bottom} l S Q`
+}
+const verticalDividerX = (block, x, width) => block.align === 'right' ? x + width : block.align === 'left' ? x : x + width / 2
 const circle = (cx, cy, radius, color) => {
   const c = radius * .5522848
   return `${rgb(color)} rg ${cx + radius} ${cy} m ${cx + radius} ${cy + c} ${cx + c} ${cy + radius} ${cx} ${cy + radius} c ${cx - c} ${cy + radius} ${cx - radius} ${cy + c} ${cx - radius} ${cy} c ${cx - radius} ${cy - c} ${cx - c} ${cy - radius} ${cx} ${cy - radius} c ${cx + c} ${cy - radius} ${cx + radius} ${cy - c} ${cx + radius} ${cy} c h f`
@@ -121,15 +132,17 @@ const shapePoints = {
   parallelogram: [[.2, 0], [1, 0], [.8, 1], [0, 1]],
 }
 
-const drawShape = (shape, x, top, width, height, color) => {
+const drawShape = (shape, x, top, width, height, color, opacityResource = '') => {
+  let drawing
   if (shape === 'circle') {
     const diameter = Math.min(width, height)
-    return circle(x + diameter / 2, top - diameter / 2, diameter / 2, color)
+    drawing = circle(x + diameter / 2, top - diameter / 2, diameter / 2, color)
   }
-  if (shape === 'ellipse') return ellipse(x + width / 2, top - height / 2, width / 2, height / 2, color)
-  if (shape === 'rounded') return roundedRect(x, top - height, width, height, Math.min(18, height * .3), color)
-  if (shapePoints[shape]) return polygon(shapePoints[shape], x, top, width, height, color)
-  return fillRect(x, top - height, width, height, color)
+  else if (shape === 'ellipse') drawing = ellipse(x + width / 2, top - height / 2, width / 2, height / 2, color)
+  else if (shape === 'rounded') drawing = roundedRect(x, top - height, width, height, Math.min(18, height * .3), color)
+  else if (shapePoints[shape]) drawing = polygon(shapePoints[shape], x, top, width, height, color)
+  else drawing = fillRect(x, top - height, width, height, color)
+  return opacityResource ? `q /${opacityResource} gs ${drawing} Q` : drawing
 }
 
 const estimateWidth = (value, size, bold = false) => ascii(value).length * size * (bold ? .56 : .51)
@@ -208,9 +221,13 @@ export function buildCustomPdf(document) {
     imageResources.push(resource)
     imageByData.set(block.imageData, resource)
   })
-  const opacityValues = [...new Set(blocks.filter(block => block.type === 'image').map(block => Math.max(10, Math.min(100, Number(block.opacity) || 100))).filter(value => value < 100))]
+  const resolvedOpacity = block => {
+    const value = Number(block.opacity)
+    return clamp(Number.isFinite(value) ? value : 100, block.type === 'image' ? 10 : 0, 100)
+  }
+  const opacityValues = [...new Set(blocks.filter(block => ['image', 'shape'].includes(block.type)).map(resolvedOpacity).filter(value => value < 100))]
   const opacityResources = new Map(opacityValues.map((value, index) => [value, { name: `GS${index + 1}`, value }]))
-  const imageOpacityName = block => opacityResources.get(Math.max(10, Math.min(100, Number(block.opacity) || 100)))?.name || ''
+  const opacityName = block => opacityResources.get(resolvedOpacity(block))?.name || ''
   const flowBlocks = blocks.filter(block => !block.freePosition)
   const freeBlocks = blocks.filter(block => block.freePosition && !['pageBreak', 'spacer'].includes(block.type))
   const title = ascii(document.title || 'Untitled document')
@@ -337,9 +354,9 @@ export function buildCustomPdf(document) {
         const shapeWidth = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), width - 8)
         const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
         const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth - 4 : x + 4
-        commands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color))
+        commands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block)))
       } else if (block.type === 'image') {
-        commands.push(drawImage(imageByData.get(block.imageData), x + 4, top, width - 8, item.height, block.fit, imageOpacityName(block)))
+        commands.push(drawImage(imageByData.get(block.imageData), x + 4, top, width - 8, item.height, block.fit, opacityName(block)))
         addLink(currentLinks, block, x + 4, top - item.height, width - 8, item.height)
       } else if (block.type !== 'spacer') commands.push(line(x + 4, top - 10, x + width - 4, top - 10, block.color || '#173b32', clamp(block.thickness, 1, 8)))
     })
@@ -429,7 +446,7 @@ export function buildCustomPdf(document) {
       const width = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), layout.width)
       const renderedWidth = block.shape === 'circle' ? Math.min(width, height) : width
       const x = block.align === 'center' ? layout.x + (layout.width - renderedWidth) / 2 : block.align === 'right' ? layout.x + layout.width - renderedWidth : layout.x
-      commands.push(drawShape(block.shape, x, y, renderedWidth, height, block.color))
+      commands.push(drawShape(block.shape, x, y, renderedWidth, height, block.color, opacityName(block)))
       y -= height + 12
       return
     }
@@ -438,7 +455,7 @@ export function buildCustomPdf(document) {
       const layout = blockLayout(block)
       const height = clamp(block.blockHeight || block.height, 54, 420)
       ensure(height + 12)
-      commands.push(drawImage(imageByData.get(block.imageData), layout.x, y, layout.width, height, block.fit, imageOpacityName(block)))
+      commands.push(drawImage(imageByData.get(block.imageData), layout.x, y, layout.width, height, block.fit, opacityName(block)))
       addLink(currentLinks, block, layout.x, y - height, layout.width, height)
       y -= height + 12
       return
@@ -446,9 +463,17 @@ export function buildCustomPdf(document) {
 
     if (block.type === 'divider') {
       const layout = blockLayout(block)
-      ensure(24)
-      commands.push(dividerLine(layout.x, y - 10, layout.x + layout.width, block.color || '#173b32', block.thickness, block.lineStyle))
-      y -= 24
+      if (block.orientation === 'vertical') {
+        const height = clamp(block.height, 32, 400)
+        ensure(height + 12)
+        const x = verticalDividerX(block, layout.x, layout.width)
+        commands.push(verticalDividerLine(x, y, y - height, block.color || '#173b32', block.thickness, block.lineStyle))
+        y -= height + 12
+      } else {
+        ensure(24)
+        commands.push(dividerLine(layout.x, y - 10, layout.x + layout.width, block.color || '#173b32', block.thickness, block.lineStyle))
+        y -= 24
+      }
     }
   })
 
@@ -482,13 +507,17 @@ export function buildCustomPdf(document) {
       const shapeWidth = Math.min(clamp(block.width, 60, PAGE_WIDTH - MARGIN * 2), width)
       const renderedWidth = block.shape === 'circle' ? Math.min(shapeWidth, height) : shapeWidth
       const shapeX = block.align === 'center' ? x + (width - renderedWidth) / 2 : block.align === 'right' ? x + width - renderedWidth : x
-      freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color))
+      freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block)))
     } else if (block.type === 'image') {
       const height = clamp(block.blockHeight || block.height, 54, 420)
-      freeCommands.push(drawImage(imageByData.get(block.imageData), x, top, width, height, block.fit, imageOpacityName(block)))
+      freeCommands.push(drawImage(imageByData.get(block.imageData), x, top, width, height, block.fit, opacityName(block)))
       addLink(linkTarget, block, x, top - height, width, height)
     } else if (block.type === 'divider') {
-      freeCommands.push(dividerLine(x, top - 10, x + width, block.color || '#173b32', block.thickness, block.lineStyle))
+      if (block.orientation === 'vertical') {
+        const height = clamp(block.blockHeight || block.height, 32, 400)
+        const lineX = verticalDividerX(block, x, width)
+        freeCommands.push(verticalDividerLine(lineX, top, top - height, block.color || '#173b32', block.thickness, block.lineStyle))
+      } else freeCommands.push(dividerLine(x, top - 10, x + width, block.color || '#173b32', block.thickness, block.lineStyle))
     } else if (block.type === 'table') {
       const headers = (block.headers || []).map(item => ascii(item || 'Column'))
       const columns = Math.max(1, headers.length)
