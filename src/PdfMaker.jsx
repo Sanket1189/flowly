@@ -16,6 +16,7 @@ const draftDatabaseName = 'flowly-pdf-maker'
 const draftStoreName = 'drafts'
 const projectStoreName = 'projects'
 const draftKey = 'current-document'
+const onboardingKey = 'flowly-pdf-maker-onboarding-v1'
 
 function openDraftDatabase() {
   return new Promise((resolve, reject) => {
@@ -348,6 +349,7 @@ async function renderPdfPages(file, onProgress) {
       context.fillStyle = '#ffffff'
       context.fillRect(0, 0, canvas.width, canvas.height)
       await page.render({ canvasContext: context, canvas, viewport }).promise
+      const originalImageData = canvas.toDataURL('image/jpeg', .92)
       const textContent = await page.getTextContent()
       const rawText = textContent.items.map(item => {
         const value = String(item.str || '').trim()
@@ -377,7 +379,8 @@ async function renderPdfPages(file, onProgress) {
           .map(([x, y]) => [Math.max(0, Math.min(canvas.width - 1, Math.round(x))), Math.max(0, Math.min(canvas.height - 1, Math.round(y)))])
         const colors = samplePoints.map(([x, y]) => [...context.getImageData(x, y, 1, 1).data])
         const average = channel => Math.round(colors.reduce((total, color) => total + color[channel], 0) / Math.max(1, colors.length))
-        context.fillStyle = `rgb(${average(0)},${average(1)},${average(2)})`
+        item.backgroundColor = `#${[average(0), average(1), average(2)].map(channel => channel.toString(16).padStart(2, '0')).join('')}`
+        context.fillStyle = item.backgroundColor
         context.fillRect(left, top, Math.max(1, right - left), Math.max(1, bottom - top))
       })
       const mergedText = []
@@ -397,7 +400,7 @@ async function renderPdfPages(file, onProgress) {
         previous.breakAfter = item.breakAfter
         previous.bold = previous.bold || item.bold
       })
-      pages.push({ imageData: canvas.toDataURL('image/jpeg', .9), imageWidth: canvas.width, imageHeight: canvas.height, textItems: mergedText })
+      pages.push({ imageData: canvas.toDataURL('image/jpeg', .9), originalImageData, imageWidth: canvas.width, imageHeight: canvas.height, textItems: mergedText })
       page.cleanup()
     }
     return pages
@@ -429,8 +432,13 @@ function autoFormatImportedBlocks(blocks) {
       const width = Math.max(10, Number(block.blockWidth) || 10)
       const x = Math.max(0, Number(block.freePosition?.x) || 0)
       const visuallyCentered = Math.abs(x + width / 2 - 50) <= 7
+      const safetyWidth = Math.min(100 - x, Math.max(width, width * 1.14 + 1))
+      const headingWidth = heading ? Math.min(92, Math.max(safetyWidth, 32 + String(block.content || '').length * 1.2)) : safetyWidth
+      const formattedX = heading && visuallyCentered ? Math.max(0, (100 - headingWidth) / 2) : x
       return {
         ...block,
+        blockWidth: headingWidth,
+        freePosition: { ...block.freePosition, x: formattedX },
         bold: heading || block.bold,
         align: heading && visuallyCentered ? 'center' : block.align || 'left',
         lineHeight: heading ? 1.12 : 1.32,
@@ -1038,7 +1046,7 @@ function PositioningPanel({ block, set, alignOnPage, reorderLayer }) {
     <span className="pdf-studio-field-label">Align to page</span>
     <div className="pdf-position-align-grid" role="group" aria-label="Align element to page"><button type="button" onClick={() => alignOnPage(block.id, 'horizontal', 'start')}>Left</button><button type="button" onClick={() => alignOnPage(block.id, 'horizontal', 'center')}>Centre</button><button type="button" onClick={() => alignOnPage(block.id, 'horizontal', 'end')}>Right</button><button type="button" onClick={() => alignOnPage(block.id, 'vertical', 'start')}>Top</button><button type="button" onClick={() => alignOnPage(block.id, 'vertical', 'center')}>Middle</button><button type="button" onClick={() => alignOnPage(block.id, 'vertical', 'end')}>Bottom</button></div>
     <span className="pdf-studio-field-label">Layer order</span>
-    <div className="pdf-layer-order-controls"><button type="button" onClick={() => reorderLayer(block.id, 'back')}>Send to back</button><button type="button" onClick={() => reorderLayer(block.id, 'front')}>Bring to front</button></div>
+    <div className="pdf-layer-order-controls"><button type="button" onClick={() => reorderLayer(block.id, 'backward')}>Send backward</button><button type="button" onClick={() => reorderLayer(block.id, 'forward')}>Bring forward</button><button type="button" onClick={() => reorderLayer(block.id, 'back')}>Send to back</button><button type="button" onClick={() => reorderLayer(block.id, 'front')}>Bring to front</button></div>
     <button type="button" className="pdf-return-layout" onClick={() => set({ freePosition: null })}>Return to automatic layout</button>
   </div>
 }
@@ -1157,7 +1165,7 @@ function layerName(block) {
   return 'Page break'
 }
 
-function LayersPanel({ pages, selectedId, selectedIds, select, update, remove }) {
+function LayersPanel({ pages, selectedId, selectedIds, select, update, remove, reorderLayer }) {
   return <div className="pdf-studio-layers">
     <div className="pdf-studio-panel-title"><span>DOCUMENT</span><h2>Layers</h2><p>Select hidden or overlapping elements without moving them.</p></div>
     {pages.map((pageBlocks, pageIndex) => <details open className="pdf-studio-layer-page" key={pageIndex}>
@@ -1166,7 +1174,7 @@ function LayersPanel({ pages, selectedId, selectedIds, select, update, remove })
         const id = block.sourceId || block.id
         return <div className={`pdf-studio-layer-row ${selectedIds.includes(id) ? 'selected' : ''}`} key={`${pageIndex}-${id}`}>
           <button type="button" className="pdf-studio-layer-select" aria-current={selectedIds.includes(id) ? 'true' : undefined} onClick={event => select(id, null, event.shiftKey)}><i>{block.type === 'text' ? 'T' : block.type === 'list' ? '≡' : block.type === 'table' ? '▦' : block.type === 'image' ? '▧' : block.type === 'divider' ? '—' : block.type === 'shape' ? '□' : block.type === 'spacer' ? '↕' : '↳'}</i><span title={layerName(block)}>{layerName(block)}</span></button>
-          {block.type !== 'pageBreak' && <button type="button" className={block.locked ? 'pdf-studio-layer-action active' : 'pdf-studio-layer-action'} aria-label={block.locked ? `Unlock ${layerName(block)}` : `Lock ${layerName(block)}`} title={block.locked ? 'Unlock layer' : 'Lock layer'} onClick={() => update(id, { locked: !block.locked })}>{block.locked ? <Lock size={14}/> : <Unlock size={14}/>}</button>}
+          {block.type !== 'pageBreak' && <><button type="button" className="pdf-studio-layer-action" aria-label={`Send ${layerName(block)} backward`} title="Send backward one layer" onClick={() => reorderLayer(id, 'backward')}>↓</button><button type="button" className="pdf-studio-layer-action" aria-label={`Bring ${layerName(block)} forward`} title="Bring forward one layer" onClick={() => reorderLayer(id, 'forward')}>↑</button><button type="button" className={block.locked ? 'pdf-studio-layer-action active' : 'pdf-studio-layer-action'} aria-label={block.locked ? `Unlock ${layerName(block)}` : `Lock ${layerName(block)}`} title={block.locked ? 'Unlock layer' : 'Lock layer'} onClick={() => update(id, { locked: !block.locked })}>{block.locked ? <Lock size={14}/> : <Unlock size={14}/>}</button></>}
           <button type="button" className="pdf-studio-layer-action delete" disabled={block.locked} aria-label={block.locked ? `Unlock ${layerName(block)} before deleting` : `Delete ${layerName(block)}`} title={block.locked ? 'Unlock layer before deleting' : 'Delete layer'} onClick={() => remove(id)}><Trash2 size={14}/></button>
         </div>
       })}</div>
@@ -1318,7 +1326,7 @@ function CanvasBlock({ block, selected, editing, onSelect, onDelete, suppressSel
     const link = safeLink(block.link)
     const textContent = block.content || 'Your text'
     const richHtml = block.richHtml ? sanitizeRichHtml(block.richHtml) : ''
-    const textStyle = { color: block.color, background: 'transparent', textAlign: block.align, fontFamily: block.fontFamily || fontOptions[0].value, fontSize: `${Math.max(8, block.fontSize) * (block.importedPdfText ? 1.14 : .62)}px`, fontWeight: block.bold ? 800 : 500, textDecoration: block.underline ? 'underline' : undefined, lineHeight: Number(block.lineHeight) || 1.45, letterSpacing: `${Number(block.letterSpacing) || 0}px`, height: contentHeight ? `${contentHeight}px` : undefined, overflow: contentHeight ? 'hidden' : undefined }
+    const textStyle = { color: block.color, background: 'transparent', opacity: block.importedPdfText && !block.importedPdfOverlayActive ? 0 : 1, textAlign: block.align, fontFamily: block.fontFamily || fontOptions[0].value, fontSize: `${Math.max(8, block.fontSize) * (block.importedPdfText ? 1.14 : .62)}px`, fontWeight: block.bold ? 800 : 500, textDecoration: block.underline ? 'underline' : undefined, lineHeight: Number(block.lineHeight) || 1.45, letterSpacing: `${Number(block.letterSpacing) || 0}px`, height: contentHeight ? `${contentHeight}px` : undefined, overflow: contentHeight ? 'hidden' : undefined }
     content = <>{editing && <div className="pdf-rich-text-toolbar" role="toolbar" aria-label="Rich text formatting"><button type="button" title="Bold selection" onPointerDown={event => runRichTextCommand(event, 'bold')}><b>B</b></button><button type="button" title="Italic selection" onPointerDown={event => runRichTextCommand(event, 'italic')}><i>I</i></button><button type="button" title="Underline selection" onPointerDown={event => runRichTextCommand(event, 'underline')}><u>U</u></button><button type="button" title="Bullet list" onPointerDown={event => runRichTextCommand(event, 'insertUnorderedList')}>• List</button><button type="button" title="Numbered list" onPointerDown={event => runRichTextCommand(event, 'insertOrderedList')}>1. List</button><button type="button" title="Link selected text" onPointerDown={createSelectionLink}>Link</button><button type="button" title="Remove link" onPointerDown={event => runRichTextCommand(event, 'unlink')}>Unlink</button></div>}<div ref={inlineEditorRef} className={`pdf-canvas-text ${editing ? 'inline-editing' : ''}`} contentEditable={editing} suppressContentEditableWarning spellCheck="true" title={editing ? 'Select text, then use the formatting toolbar. Press Ctrl+Enter to finish.' : 'Double-click to edit text'} onDoubleClick={event => { event.preventDefault(); event.stopPropagation(); onBeginInlineEdit(id) }} onBlur={event => {
       if (!editing) return
       if (ignoreNextInlineBlur.current) {
@@ -1394,7 +1402,7 @@ function CanvasBlock({ block, selected, editing, onSelect, onDelete, suppressSel
   return <div data-block-id={id} className={`pdf-canvas-block ${effectivePosition ? 'free-positioned' : ''} ${block.importedPdfPage ? 'imported-pdf-background' : ''} ${previewPosition || resizePreview ? 'live-dragging' : ''} ${draggingAway ? 'dragging-away' : ''} ${block.locked ? 'locked' : ''} ${selected ? 'selected' : ''} ${editing ? 'editing-text' : ''}`} style={blockStyle} onClick={event => { event.stopPropagation(); if (suppressSelectionClick.current) { suppressSelectionClick.current = false; return } if (event.detail >= 2 && supportsInlineEditing && !block.locked) onBeginInlineEdit(id); else onSelect(id, event.currentTarget, event.shiftKey) }} onDoubleClick={event => { if (!supportsInlineEditing || block.locked) return; event.preventDefault(); event.stopPropagation(); onBeginInlineEdit(id) }} onPointerDown={event => { if (event.target.closest('[contenteditable="true"]')) return; if (!event.target.closest('.pdf-selection-handle, .pdf-element-actions')) onPointerStart(event, id) }} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerCancel}><span className="pdf-canvas-grip">{block.locked ? <Lock size={12}/> : <GripVertical size={14}/>}</span><div className="pdf-canvas-content-box" style={boxModelStyle}>{content}{selected && !block.locked && !editing && <span className="pdf-element-actions"><button type="button" className="pdf-quick-delete" aria-label={`Delete ${elementLabel}`} title="Delete element" onPointerDown={event => { event.preventDefault(); event.stopPropagation() }} onClick={event => { event.preventDefault(); event.stopPropagation(); onDelete(id) }}><Trash2 size={13}/></button>{supportsInlineEditing && <button type="button" className="pdf-inline-edit-button" aria-label={`Edit ${editorLabel} directly on page`} title={`Edit ${editorLabel} directly`} onPointerDown={event => { event.preventDefault(); event.stopPropagation() }} onClick={event => { event.preventDefault(); event.stopPropagation(); onBeginInlineEdit(id) }}><Type size={12}/> Edit {editorLabel}</button>}</span>}{resizeHandles}{selected && !editing && <span className={`pdf-selection-size ${displayedHeight ? 'fixed-height' : 'auto-height'}`}>{Math.round(blockWidth)}%{displayedHeight ? ` × ${Math.round(displayedHeight)}px fixed` : ' · auto height'}</span>}</div></div>
 }
 
-function Canvas({ pageColor, blocks, footerFields, selectedId, selectedIds, editingId, setSelectedId, selectByMarquee, removeBlock, suppressCanvasClear, beginInlineEdit, finishInlineEdit, endInlineEdit, inlineUpdate, dropOnPage, previewDrop, clearGuides, alignmentGuides, dragPreview, resizePreview, onPointerStart, onPointerMove, onPointerEnd, onPointerCancel, onResizeStart, zoom, setZoom, activePage, setActivePage, undo, redo, canUndo, canRedo, copySelected, duplicateSelected, duplicatePage, deletePage, movePage, hasImportedText, autoFormatImported, saveStatus }) {
+function Canvas({ pageColor, blocks, footerFields, selectedId, selectedIds, editingId, setSelectedId, selectByMarquee, removeBlock, suppressCanvasClear, beginInlineEdit, finishInlineEdit, endInlineEdit, inlineUpdate, dropOnPage, previewDrop, clearGuides, alignmentGuides, dragPreview, resizePreview, onPointerStart, onPointerMove, onPointerEnd, onPointerCancel, onResizeStart, zoom, setZoom, activePage, setActivePage, undo, redo, canUndo, canRedo, copySelected, duplicateSelected, duplicatePage, deletePage, movePage, hasImportedText, autoFormatImported, saveStatus, snapEnabled, setSnapEnabled, gridVisible, setGridVisible, gridSize, setGridSize }) {
   const canvasRef = useRef(null)
   const pageRefs = useRef([])
   const marqueePointer = useRef(null)
@@ -1505,6 +1513,7 @@ function Canvas({ pageColor, blocks, footerFields, selectedId, selectedIds, edit
         <span className="pdf-toolbar-group"><button type="button" aria-label="Undo" title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={15}/></button><button type="button" aria-label="Redo" title="Redo (Ctrl+Y)" disabled={!canRedo} onClick={redo}><Redo2 size={15}/></button></span>
         {hasImportedText && <span className="pdf-toolbar-group pdf-auto-format-group"><button type="button" aria-label="Auto-format imported PDF text" title="Auto-format imported PDF text" onClick={autoFormatImported}><WandSparkles size={15}/><em>Auto format</em></button></span>}
         <span className="pdf-toolbar-group"><button type="button" aria-label="Copy selected element" title="Copy (Ctrl+C)" disabled={!selectedIds.length} onClick={copySelected}><Copy size={15}/></button><button type="button" aria-label="Duplicate selected element" title="Duplicate (Ctrl+D)" disabled={!selectedIds.length} onClick={duplicateSelected}><Plus size={15}/></button>{selectedIds.length > 1 && <output className="pdf-selection-count">{selectedIds.length} selected</output>}</span>
+        <span className="pdf-toolbar-group pdf-grid-controls"><button type="button" className={gridVisible ? 'active' : ''} aria-pressed={gridVisible} title="Show or hide positioning grid" onClick={() => setGridVisible(value => !value)}>Grid</button><button type="button" className={snapEnabled ? 'active' : ''} aria-pressed={snapEnabled} title="Snap dragged and resized elements to the grid" onClick={() => setSnapEnabled(value => !value)}>Snap</button><label title="Grid spacing"><span>Size</span><select aria-label="Grid spacing" value={gridSize} onChange={event => setGridSize(Number(event.target.value))}><option value="4">4</option><option value="8">8</option><option value="12">12</option><option value="16">16</option><option value="24">24</option></select></label></span>
         <span className="pdf-toolbar-group zoom"><button type="button" aria-label="Zoom out" onClick={() => changeZoom(zoom - 10)}><ZoomOut size={15}/></button><output aria-label="Canvas zoom">{zoom}%</output><button type="button" aria-label="Zoom in" onClick={() => changeZoom(zoom + 10)}><ZoomIn size={15}/></button><button type="button" aria-label="Fit page" title="Fit page" onClick={fitPage}><Maximize2 size={15}/></button></span>
         <span className="pdf-toolbar-group pages"><button type="button" aria-label="Previous page" disabled={activePage === 0} onClick={() => jumpToPage(activePage - 1)}><ChevronLeft size={15}/></button><output>{activePage + 1} / {pages.length}</output><button type="button" aria-label="Next page" disabled={activePage >= pages.length - 1} onClick={() => jumpToPage(activePage + 1)}><ChevronRight size={15}/></button></span>
       </div>
@@ -1518,7 +1527,7 @@ function Canvas({ pageColor, blocks, footerFields, selectedId, selectedIds, edit
       const crossPageGhosts = Object.entries(dragPreview?.positions || {}).filter(([, position]) => Number(position.pageIndex) === pageIndex && !pageBlocks.some(block => String(block.sourceId || block.id) === String(position.id))).map(([id, position]) => ({ id, position, block: blocks.find(block => String(block.id) === String(id)), size: dragPreview?.sizes?.[id] }))
       const footerColumns = Object.fromEntries(Object.entries(footerFields).map(([position, value]) => [position, footerTextForPage(value, pageIndex + 1).trim()]))
       const hasCustomFooter = Object.values(footerColumns).some(Boolean)
-      return <section className="pdf-studio-page-wrap" ref={element => { pageRefs.current[pageIndex] = element }} key={pageIndex}><span>PAGE {pageIndex + 1}</span><div data-page-index={pageIndex} className={`pdf-studio-page ${hasCustomFooter ? 'has-custom-footer' : ''} ${selectionMarquee?.pageIndex === pageIndex ? 'marquee-active' : ''} ${dragPreview?.targetPageIndex === pageIndex ? 'pointer-drop-target' : ''}`} style={{ background: pageColor }} onPointerDown={event => { setActivePage(pageIndex); beginMarquee(event, pageIndex) }} onPointerMove={moveMarquee} onPointerUp={finishMarquee} onPointerCancel={cancelMarquee} onDragOver={event => { event.preventDefault(); event.currentTarget.classList.add('drop-ready'); previewDrop(event, pageIndex) }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget)) { event.currentTarget.classList.remove('drop-ready'); clearGuides() } }} onDrop={event => { event.currentTarget.classList.remove('drop-ready'); dropOnPage(event, pageIndex) }}>
+      return <section className="pdf-studio-page-wrap" ref={element => { pageRefs.current[pageIndex] = element }} key={pageIndex}><span>PAGE {pageIndex + 1}</span><div data-page-index={pageIndex} className={`pdf-studio-page ${gridVisible ? 'grid-visible' : ''} ${hasCustomFooter ? 'has-custom-footer' : ''} ${selectionMarquee?.pageIndex === pageIndex ? 'marquee-active' : ''} ${dragPreview?.targetPageIndex === pageIndex ? 'pointer-drop-target' : ''}`} style={{ backgroundColor: pageColor, '--pdf-grid-size': `${gridSize}px` }} onPointerDown={event => { setActivePage(pageIndex); beginMarquee(event, pageIndex) }} onPointerMove={moveMarquee} onPointerUp={finishMarquee} onPointerCancel={cancelMarquee} onDragOver={event => { event.preventDefault(); event.currentTarget.classList.add('drop-ready'); previewDrop(event, pageIndex) }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget)) { event.currentTarget.classList.remove('drop-ready'); clearGuides() } }} onDrop={event => { event.currentTarget.classList.remove('drop-ready'); dropOnPage(event, pageIndex) }}>
         {pageGuides?.x != null && <span className="pdf-alignment-guide vertical" style={{ left: `${pageGuides.x}%` }}><em>{pageGuides.xLabel}</em></span>}
         {pageGuides?.y != null && <span className="pdf-alignment-guide horizontal" style={{ top: `${pageGuides.y}%` }}><em>{pageGuides.yLabel}</em></span>}
         {selectionBounds.filter(bounds => bounds.pageIndex === pageIndex).map(bounds => <span className="pdf-multi-selection-box" style={{ left: `${bounds.left}%`, top: `${bounds.top}%`, width: `${bounds.width}%`, height: `${bounds.height}%` }} key={`${bounds.pageIndex}-${bounds.count}`}><em>{bounds.count} selected</em></span>)}
@@ -1569,6 +1578,12 @@ export default function PdfMaker({ onExit }) {
   const [zoom, setZoom] = useState(100)
   const [activePage, setActivePage] = useState(0)
   const [saveStatus, setSaveStatus] = useState('Checking for saved work…')
+  const [saveError, setSaveError] = useState('')
+  const [storageUsage, setStorageUsage] = useState('')
+  const [onboardingOpen, setOnboardingOpen] = useState(false)
+  const [snapEnabled, setSnapEnabled] = useState(false)
+  const [gridVisible, setGridVisible] = useState(false)
+  const [gridSize, setGridSize] = useState(8)
   const [recoveryDraft, setRecoveryDraft] = useState(null)
   const [recoveryOpen, setRecoveryOpen] = useState(false)
   const [draftReady, setDraftReady] = useState(false)
@@ -1600,6 +1615,7 @@ export default function PdfMaker({ onExit }) {
       } else {
         setDraftReady(true)
         setSaveStatus('Ready')
+        try { if (window.localStorage.getItem(onboardingKey) !== 'seen') setOnboardingOpen(true) } catch { /* onboarding is optional */ }
       }
     }).catch(() => {
       if (!active) return
@@ -1608,6 +1624,11 @@ export default function PdfMaker({ onExit }) {
     })
     return () => { active = false }
   }, [])
+
+  const closeOnboarding = () => {
+    setOnboardingOpen(false)
+    try { window.localStorage.setItem(onboardingKey, 'seen') } catch { /* onboarding is optional */ }
+  }
 
   useEffect(() => {
     if (!downloadOpen) return undefined
@@ -1621,6 +1642,12 @@ export default function PdfMaker({ onExit }) {
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [projectsOpen])
+  useEffect(() => {
+    if (!onboardingOpen) return undefined
+    const closeOnEscape = event => { if (event.key === 'Escape') closeOnboarding() }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [onboardingOpen])
   const setSelectedId = (id, element = null, additive = false) => {
     setEditingId(current => current != null && current !== id ? null : current)
     if (id == null || id !== selectedId) setInspectorCollapsed(false)
@@ -1848,6 +1875,7 @@ export default function PdfMaker({ onExit }) {
   useEffect(() => {
     if (!draftReady || recoveryOpen) return undefined
     setSaveStatus('Saving…')
+    setSaveError('')
     const timeout = window.setTimeout(async () => {
       try {
         await writeSavedDraft({ ...cloneDocument(documentData), savedAt: Date.now(), version: 1 })
@@ -1856,8 +1884,15 @@ export default function PdfMaker({ onExit }) {
           await writeSavedProject({ id: activeProjectId, name: title.trim() || 'Untitled project', createdAt: savedProjects.find(project => project.id === activeProjectId)?.createdAt || now, updatedAt: now, document: cloneDocument(documentData), version: 1 })
         }
         setSaveStatus('Saved')
-      } catch {
-        setSaveStatus('Local save failed')
+        setSaveError('')
+        try {
+          const estimate = await navigator.storage?.estimate?.()
+          if (estimate?.usage && estimate?.quota) setStorageUsage(`${Math.max(1, Math.round(estimate.usage / estimate.quota * 100))}% browser storage used`)
+        } catch { /* storage estimate is optional */ }
+      } catch (error) {
+        const full = error?.name === 'QuotaExceededError' || /quota|storage|space/i.test(String(error?.message || ''))
+        setSaveStatus(full ? 'Storage full' : 'Local save failed')
+        setSaveError(full ? 'Browser storage is full. Export a .flowly project now so your latest work has a separate backup.' : 'Flowly could not save this draft in the browser. Export a .flowly backup before closing this page.')
       }
     }, 650)
     return () => window.clearTimeout(timeout)
@@ -1885,7 +1920,8 @@ export default function PdfMaker({ onExit }) {
     setExporting(true)
     try {
       const customFamilies = new Set(customFonts.map(font => font.value))
-      const exportBlocks = await Promise.all(blocks.map(block => {
+      const visibleBlocks = blocks.filter(block => !(block.importedPdfText && !block.importedPdfOverlayActive))
+      const exportBlocks = await Promise.all(visibleBlocks.map(block => {
         if (block.type === 'text' && block.richHtml) return rasterizeRichTextBlock(block, pageColor)
         if (block.type === 'shape' && block.svgMarkup) return rasterizeSvgShape(block)
         if (customFamilies.has(block.fontFamily) && ['text', 'list'].includes(block.type)) return rasterizeCustomFontBlock(block, pageColor)
@@ -1978,8 +2014,16 @@ export default function PdfMaker({ onExit }) {
     setSelectedId(copy.id)
     setActivePage(pageIndex)
   }
-  const update = (id, patch) => setBlocks(current => current.map(block => block.id === id ? { ...block, ...patch } : block))
-  const inlineUpdate = (id, patch) => setBlocks(current => current.map(block => block.id === id ? { ...block, ...(typeof patch === 'function' ? patch(block) : patch) } : block))
+  const importedVisualKeys = new Set(['content', 'richHtml', 'fontSize', 'fontFamily', 'bold', 'underline', 'color', 'align', 'lineHeight', 'letterSpacing', 'background'])
+  const activateImportedOverlay = (block, patch) => block.importedPdfText && Object.keys(patch || {}).some(key => importedVisualKeys.has(key))
+    ? { ...patch, importedPdfOverlayActive: true, background: block.background && block.background !== 'transparent' ? block.background : block.importedPdfBackgroundColor || '#ffffff' }
+    : patch
+  const update = (id, patch) => setBlocks(current => current.map(block => block.id === id ? { ...block, ...activateImportedOverlay(block, patch) } : block))
+  const inlineUpdate = (id, patch) => setBlocks(current => current.map(block => {
+    if (block.id !== id) return block
+    const resolved = typeof patch === 'function' ? patch(block) : patch
+    return { ...block, ...activateImportedOverlay(block, resolved) }
+  }))
   const alignOnPage = (id, axis, alignment) => {
     const block = blocks.find(item => item.id === id)
     if (!block?.freePosition || block.locked) return
@@ -1996,9 +2040,24 @@ export default function PdfMaker({ onExit }) {
   const reorderLayer = (id, direction) => setBlocks(current => {
     const index = current.findIndex(block => block.id === id)
     if (index < 0) return current
+    const page = layerPages.find(pageBlocks => pageBlocks.some(block => (block.sourceId || block.id) === id)) || []
+    const pageIds = new Set(page.map(block => block.sourceId || block.id))
+    const siblingIndexes = current.map((block, blockIndex) => pageIds.has(block.id) && block.type !== 'pageBreak' ? blockIndex : -1).filter(blockIndex => blockIndex >= 0)
+    const siblingPosition = siblingIndexes.indexOf(index)
+    if (direction === 'forward' || direction === 'backward') {
+      const targetPosition = siblingPosition + (direction === 'forward' ? 1 : -1)
+      if (siblingPosition < 0 || targetPosition < 0 || targetPosition >= siblingIndexes.length) return current
+      const targetIndex = siblingIndexes[targetPosition]
+      const next = [...current]
+      ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+      return next
+    }
     const next = [...current]
     const [block] = next.splice(index, 1)
-    direction === 'front' ? next.push(block) : next.unshift(block)
+    if (!siblingIndexes.length) return current
+    const anchorIndex = direction === 'front' ? siblingIndexes.at(-1) : siblingIndexes[0]
+    const adjustedAnchor = anchorIndex > index ? anchorIndex - 1 : anchorIndex
+    next.splice(direction === 'front' ? adjustedAnchor + 1 : adjustedAnchor, 0, block)
     return next
   })
   const selectionMetrics = ids => ids.map(id => {
@@ -2059,6 +2118,7 @@ export default function PdfMaker({ onExit }) {
     const block = blocks.find(item => item.id === id)
     if (!block || !['text', 'list', 'table'].includes(block.type) || block.locked) return
     setSelectedId(id)
+    if (block.importedPdfText && !block.importedPdfOverlayActive) update(id, { importedPdfOverlayActive: true, background: block.importedPdfBackgroundColor || '#ffffff' })
     setEditingId(id)
   }
   const finishInlineEdit = (id, content) => {
@@ -2208,7 +2268,7 @@ export default function PdfMaker({ onExit }) {
         const offsetY = (pageHeight - renderedHeight) / 2
         const background = {
           ...makeBlock('image'),
-          imageData: page.imageData,
+          imageData: page.originalImageData || page.imageData,
           imageWidth: page.imageWidth,
           imageHeight: page.imageHeight,
           imageName: `${file.name} · page ${index + 1} graphics`,
@@ -2246,6 +2306,8 @@ export default function PdfMaker({ onExit }) {
             margin: { ...emptyBoxSides },
             border: { ...emptyBoxSides },
             importedPdfText: true,
+            importedPdfOverlayActive: false,
+            importedPdfBackgroundColor: item.backgroundColor || '#ffffff',
             position: 'custom',
             freePosition: { pageIndex, x, y },
           }
@@ -2259,8 +2321,8 @@ export default function PdfMaker({ onExit }) {
       setSelectedId(null)
       setActivePage(firstPageIndex)
       const textCount = pages.reduce((total, page) => total + (page.textItems?.length || 0), 0)
-      setPdfImportStatus(`${pages.length} page${pages.length === 1 ? '' : 's'} imported and auto-formatted with ${textCount} editable text element${textCount === 1 ? '' : 's'}`)
-      window.setTimeout(() => setPdfImportStatus(''), 4500)
+      setPdfImportStatus(`${pages.length} page${pages.length === 1 ? '' : 's'} imported with ${textCount} editable text element${textCount === 1 ? '' : 's'}. Review the reconstructed layout before export.`)
+      window.setTimeout(() => setPdfImportStatus(''), 8000)
       requestAnimationFrame(() => document.querySelector(`.pdf-studio-page[data-page-index="${firstPageIndex}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     } catch (error) {
       setPdfImportStatus('')
@@ -2309,8 +2371,12 @@ export default function PdfMaker({ onExit }) {
     const movingHeight = Number(offset.height) || movingRect?.height || 56
     let left = clientX - box.left - (Number(offset.x) || 0)
     let top = clientY - box.top - (Number(offset.y) || 0)
-    const x = Math.max(0, Math.min(100 - widthPercent, left / box.width * 100))
-    const y = Math.max(0, Math.min(100 - movingHeight / box.height * 100, top / box.height * 100))
+    let x = Math.max(0, Math.min(100 - widthPercent, left / box.width * 100))
+    let y = Math.max(0, Math.min(100 - movingHeight / box.height * 100, top / box.height * 100))
+    if (snapEnabled) {
+      x = Math.max(0, Math.min(100 - widthPercent, Math.round((x / 100 * box.width) / gridSize) * gridSize / box.width * 100))
+      y = Math.max(0, Math.min(100 - movingHeight / box.height * 100, Math.round((y / 100 * box.height) / gridSize) * gridSize / box.height * 100))
+    }
     left = box.width * x / 100
     top = box.height * y / 100
     return {
@@ -2520,6 +2586,13 @@ export default function PdfMaker({ onExit }) {
       top = fromTop ? fixedBottom - side : active.top
       bottom = fromTop ? fixedBottom : active.top + side
     }
+    if (snapEnabled) {
+      const snap = value => Math.round(value / gridSize) * gridSize
+      if (fromLeft) left = Math.max(0, Math.min(fixedRight - minWidth, snap(left)))
+      else right = Math.max(active.left + minWidth, Math.min(active.pageWidth, snap(right)))
+      if (fromTop) top = Math.max(0, Math.min(fixedBottom - minHeight, snap(top)))
+      else bottom = Math.max(active.top + minHeight, Math.min(active.pageHeight, snap(bottom)))
+    }
     const width = right - left
     const height = bottom - top
     const blockWidth = (width + active.marginLeft + active.marginRight) / active.pageWidth * 100
@@ -2599,6 +2672,7 @@ export default function PdfMaker({ onExit }) {
       if (command && key === 'c' && selectedId) { event.preventDefault(); copySelected(); return }
       if (command && key === 'v' && clipboardBlock.current) { event.preventDefault(); pasteCopied(); return }
       if (command && key === 'd' && selectedId) { event.preventDefault(); duplicateSelected(); return }
+      if (event.key === 'Escape' && selectedId) { event.preventDefault(); setSelectedId(null); return }
       if (selectedId && ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) {
         const movableIds = selectedIds.filter(id => { const block = blocks.find(item => item.id === id); return block?.freePosition && !block.locked })
         if (!movableIds.length) return
@@ -2619,11 +2693,13 @@ export default function PdfMaker({ onExit }) {
     return () => window.removeEventListener('keydown', handleShortcuts)
   }, [selectedId, selectedIds, blocks, documentData, historyVersion])
   return <main className="pdf-studio">
-    <header className="pdf-studio-header"><button type="button" onClick={onExit}><ArrowLeft size={17}/> Flowly</button><a href={routeUrl('/utilities/pdf-maker')}><span><FilePenLine size={18}/></span><h1><em>Free Online </em>PDF Maker</h1></a><div><span>{activeProjectId ? 'Project autosaved' : 'Created locally'}</span><input ref={pdfUploadRef} className="pdf-studio-file-input" type="file" accept=".pdf,application/pdf" onChange={uploadPdf}/><button type="button" className="pdf-import-button" title="Import PDF with editable text" disabled={pdfImporting} onClick={() => pdfUploadRef.current?.click()}><Upload size={16}/> {pdfImporting ? 'Importing…' : 'Import PDF'}</button><button type="button" className="pdf-projects-button" onClick={openProjects}><Layers3 size={16}/> Projects</button><button type="button" onClick={() => setDownloadOpen(true)}><Download size={16}/> Download PDF</button></div></header>
+    <header className="pdf-studio-header"><button type="button" onClick={onExit}><ArrowLeft size={17}/> Flowly</button><a href={routeUrl('/utilities/pdf-maker')}><span><FilePenLine size={18}/></span><h1><em>Free Online </em>PDF Maker</h1></a><div><span className={saveError ? 'save-error' : ''}><strong>{saveStatus}</strong>{storageUsage && !saveError ? <small>{storageUsage}</small> : null}</span><button type="button" className="pdf-help-button" onClick={() => setOnboardingOpen(true)}>Help</button><input ref={pdfUploadRef} className="pdf-studio-file-input" type="file" accept=".pdf,application/pdf" onChange={uploadPdf}/><button type="button" className="pdf-import-button" title="Import PDF with editable text" disabled={pdfImporting} onClick={() => pdfUploadRef.current?.click()}><Upload size={16}/><span>{pdfImporting ? 'Importing…' : 'Import PDF'}</span></button><button type="button" className="pdf-projects-button" onClick={openProjects}><Layers3 size={16}/><span>Projects</span></button><button type="button" className="pdf-download-button" onClick={() => setDownloadOpen(true)}><Download size={16}/><span>Download PDF</span></button></div></header>
+    {saveError && <div className="pdf-save-error" role="alert"><strong>Your draft needs a backup</strong><span>{saveError}</span><button type="button" onClick={() => { setProjectsOpen(true); setProjectsTab('saved') }}>Export .flowly</button></div>}
     {(pdfImportStatus || pdfImportError) && <div className={`pdf-import-notice ${pdfImportError ? 'error' : ''}`} role={pdfImportError ? 'alert' : 'status'}><strong>{pdfImportError ? 'PDF import failed' : 'PDF import'}</strong><span>{pdfImportError || pdfImportStatus}</span>{pdfImportError && <button type="button" aria-label="Dismiss PDF import error" onClick={() => setPdfImportError('')}>×</button>}</div>}
+    {!pdfImportStatus && !pdfImportError && blocks.some(block => block.importedPdfPage) && <div className="pdf-import-notice guidance" role="note"><strong>Imported PDF</strong><span>Editable text and layout are reconstructed approximately. Review alignment, fonts and page breaks before downloading.</span></div>}
     <div className="pdf-studio-workspace">
-      <aside className="pdf-studio-tools"><input ref={imageUploadRef} className="pdf-studio-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" onChange={uploadImage}/><input ref={shapeUploadRef} className="pdf-studio-file-input" type="file" accept=".svg,image/svg+xml" onChange={uploadShapeSvg}/><input ref={fontUploadRef} className="pdf-studio-file-input" type="file" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" onChange={uploadFont}/><div className="pdf-studio-sidebar-tabs" role="tablist" aria-label="PDF Maker sidebar"><button type="button" role="tab" aria-selected={leftPanel === 'components'} className={leftPanel === 'components' ? 'active' : ''} onClick={() => setLeftPanel('components')}><Plus size={15}/> Add</button><button type="button" role="tab" aria-selected={leftPanel === 'layers'} className={leftPanel === 'layers' ? 'active' : ''} onClick={() => setLeftPanel('layers')}><Layers3 size={15}/> Layers</button></div>{leftPanel === 'components' ? <><div className="pdf-studio-panel-title"><span>COMPONENTS</span><h2>Add to page</h2><p>Click to add at the bottom, or drag onto an exact position.</p></div><div className="pdf-studio-tool-list">{tools.map(({ type, label, hint, Icon }) => <button type="button" draggable={type !== 'image'} onDragStart={event => { if (type === 'image') return; event.dataTransfer.effectAllowed = 'copy'; event.dataTransfer.setData('application/x-flowly-tool', type) }} onClick={() => type === 'image' ? chooseImage() : addAt(type)} key={type}><span><Icon size={18}/></span><div><strong>{label}</strong><small>{hint}</small></div>{type === 'image' ? <Upload size={15}/> : <GripVertical size={15}/>}</button>)}</div>{imageError && <p className="pdf-studio-upload-error" role="alert">{imageError}</p>}<div className="pdf-studio-tip"><strong>Select and align</strong><p>Drag across empty page space to select several elements. Blue and red guides suggest matching edges and centres without moving anything automatically.</p></div></> : <LayersPanel pages={layerPages} selectedId={selectedId} selectedIds={selectedIds} select={setSelectedId} update={update} remove={remove}/>}</aside>
-      <Canvas pageColor={pageColor} blocks={blocks} footerFields={footerFields} selectedId={selectedId} selectedIds={selectedIds} editingId={editingId} setSelectedId={setSelectedId} selectByMarquee={selectByMarquee} removeBlock={remove} suppressCanvasClear={suppressCanvasClear} beginInlineEdit={beginInlineEdit} finishInlineEdit={finishInlineEdit} endInlineEdit={() => setEditingId(null)} inlineUpdate={inlineUpdate} dropOnPage={dropOnPage} previewDrop={previewDrop} clearGuides={() => setAlignmentGuides(null)} alignmentGuides={alignmentGuides} dragPreview={dragPreview} resizePreview={resizePreview} onPointerStart={beginPointerDrag} onPointerMove={event => { movePointerDrag(event); movePointerResize(event) }} onPointerEnd={event => { endPointerDrag(event); endPointerResize(event) }} onPointerCancel={event => { cancelPointerDrag(event); cancelPointerResize(event) }} onResizeStart={beginPointerResize} zoom={zoom} setZoom={setZoom} activePage={activePage} setActivePage={setActivePage} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} copySelected={copySelected} duplicateSelected={duplicateSelected} duplicatePage={duplicatePage} deletePage={deletePage} movePage={movePage} hasImportedText={blocks.some(block => block.importedPdfText)} autoFormatImported={autoFormatImported} saveStatus={saveStatus}/>
+      <aside className="pdf-studio-tools"><input ref={imageUploadRef} className="pdf-studio-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" onChange={uploadImage}/><input ref={shapeUploadRef} className="pdf-studio-file-input" type="file" accept=".svg,image/svg+xml" onChange={uploadShapeSvg}/><input ref={fontUploadRef} className="pdf-studio-file-input" type="file" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" onChange={uploadFont}/><div className="pdf-studio-sidebar-tabs" role="tablist" aria-label="PDF Maker sidebar"><button type="button" role="tab" aria-selected={leftPanel === 'components'} className={leftPanel === 'components' ? 'active' : ''} onClick={() => setLeftPanel('components')}><Plus size={15}/> Add</button><button type="button" role="tab" aria-selected={leftPanel === 'layers'} className={leftPanel === 'layers' ? 'active' : ''} onClick={() => setLeftPanel('layers')}><Layers3 size={15}/> Layers</button></div>{leftPanel === 'components' ? <><div className="pdf-studio-panel-title"><span>COMPONENTS</span><h2>Add to page</h2><p>Click to add at the bottom, or drag onto an exact position.</p></div><div className="pdf-studio-tool-list">{tools.map(({ type, label, hint, Icon }) => <button type="button" draggable={type !== 'image'} onDragStart={event => { if (type === 'image') return; event.dataTransfer.effectAllowed = 'copy'; event.dataTransfer.setData('application/x-flowly-tool', type) }} onClick={() => type === 'image' ? chooseImage() : addAt(type)} key={type}><span><Icon size={18}/></span><div><strong>{label}</strong><small>{hint}</small></div>{type === 'image' ? <Upload size={15}/> : <GripVertical size={15}/>}</button>)}</div>{imageError && <p className="pdf-studio-upload-error" role="alert">{imageError}</p>}<div className="pdf-studio-tip"><strong>Select and align</strong><p>Drag across empty page space to select several elements. Blue and red guides suggest matching edges and centres without moving anything automatically.</p></div><div className="pdf-studio-tip keyboard"><strong>Keyboard shortcuts</strong><p>Arrow keys move 1 step; Shift + arrows move 5. Use Ctrl/Cmd + C, V, D, Z or Y. Delete removes and Escape deselects.</p></div></> : <LayersPanel pages={layerPages} selectedId={selectedId} selectedIds={selectedIds} select={setSelectedId} update={update} remove={remove} reorderLayer={reorderLayer}/>}</aside>
+      <Canvas pageColor={pageColor} blocks={blocks} footerFields={footerFields} selectedId={selectedId} selectedIds={selectedIds} editingId={editingId} setSelectedId={setSelectedId} selectByMarquee={selectByMarquee} removeBlock={remove} suppressCanvasClear={suppressCanvasClear} beginInlineEdit={beginInlineEdit} finishInlineEdit={finishInlineEdit} endInlineEdit={() => setEditingId(null)} inlineUpdate={inlineUpdate} dropOnPage={dropOnPage} previewDrop={previewDrop} clearGuides={() => setAlignmentGuides(null)} alignmentGuides={alignmentGuides} dragPreview={dragPreview} resizePreview={resizePreview} onPointerStart={beginPointerDrag} onPointerMove={event => { movePointerDrag(event); movePointerResize(event) }} onPointerEnd={event => { endPointerDrag(event); endPointerResize(event) }} onPointerCancel={event => { cancelPointerDrag(event); cancelPointerResize(event) }} onResizeStart={beginPointerResize} zoom={zoom} setZoom={setZoom} activePage={activePage} setActivePage={setActivePage} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} copySelected={copySelected} duplicateSelected={duplicateSelected} duplicatePage={duplicatePage} deletePage={deletePage} movePage={movePage} hasImportedText={blocks.some(block => block.importedPdfText)} autoFormatImported={autoFormatImported} saveStatus={saveStatus} snapEnabled={snapEnabled} setSnapEnabled={setSnapEnabled} gridVisible={gridVisible} setGridVisible={setGridVisible} gridSize={gridSize} setGridSize={setGridSize}/>
       {selectedIds.length > 1
         ? <MultiSelectionPanel count={selectedIds.length} grouped={selectedIds.every(id => blocks.find(block => block.id === id)?.groupId && blocks.find(block => block.id === id)?.groupId === blocks.find(block => block.id === selectedIds[0])?.groupId)} allLocked={selectedIds.every(id => blocks.find(block => block.id === id)?.locked)} alignSelection={alignSelection} distributeSelection={distributeSelection} groupSelection={groupSelection} ungroupSelection={ungroupSelection} lockSelection={lockSelection} duplicateSelection={duplicateSelected} deleteSelection={deleteSelection}/>
         : <Inspector block={selected} update={update} remove={remove} title={title} setTitle={setTitle} pageColor={pageColor} setPageColor={setPageColor} footerFields={footerFields} setFooterFields={setFooterFields} close={() => setSelectedId(null)} collapsed={inspectorCollapsed} toggleCollapsed={() => setInspectorCollapsed(value => !value)} chooseImage={chooseImage} chooseShapeSvg={chooseShapeSvg} customFonts={customFonts} chooseFont={chooseFont} fontError={fontError} alignOnPage={alignOnPage} reorderLayer={reorderLayer} pageCount={layerPages.length} currentPageIndex={selected ? layerPages.findIndex(page => page.some(block => (block.sourceId || block.id) === selected.id)) : -1} duplicateElementToPage={duplicateElementToPage}/>}
@@ -2652,6 +2728,20 @@ export default function PdfMaker({ onExit }) {
         <div className={`pdf-download-preview ${includeWatermark ? '' : 'removed'}`}>{includeWatermark ? <><span>Created with Flowly PDF Maker</span><em>Page 1</em></> : <span>Watermark will not be included</span>}</div>
         <div className="pdf-download-actions"><button type="button" disabled={exporting} onClick={() => setDownloadOpen(false)}>Cancel</button><button type="submit" disabled={exporting}><Download size={16}/> {exporting ? 'Preparing…' : 'Download PDF'}</button></div>
       </form>
+    </div>}
+    {onboardingOpen && !recoveryOpen && <div className="pdf-onboarding-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) closeOnboarding() }}>
+      <section className="pdf-onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-onboarding-title">
+        <header><div><p>QUICK START</p><h2 id="pdf-onboarding-title">Build confidently in Flowly</h2></div><button type="button" aria-label="Close quick start" onClick={closeOnboarding}>×</button></header>
+        <div className="pdf-onboarding-steps">
+          <article><span>1</span><div><strong>Add and edit</strong><p>Click a component to place it below existing content, or drag it onto an exact page position.</p></div></article>
+          <article><span>2</span><div><strong>Position precisely</strong><p>Use blue/red guides as suggestions. Turn on Grid and Snap only when you want fixed spacing.</p></div></article>
+          <article><span>3</span><div><strong>Select and arrange</strong><p>Shift-click or drag over several items to align, distribute, group or lock them together.</p></div></article>
+          <article><span>4</span><div><strong>Your work autosaves</strong><p>Watch the save status above the pages. Projects and drafts stay in this browser.</p></div></article>
+          <article><span>5</span><div><strong>Keep a portable backup</strong><p>Use Projects → Export current to save an editable .flowly file outside the browser.</p></div></article>
+        </div>
+        <aside><strong>Useful keys</strong><span>Arrows move · Shift + arrows move farther · Ctrl/Cmd + D duplicates · Delete removes · Escape deselects</span></aside>
+        <footer><button type="button" onClick={() => { closeOnboarding(); setProjectsOpen(true); setProjectsTab('templates') }}>Browse templates</button><button type="button" className="primary" autoFocus onClick={closeOnboarding}>Start editing</button></footer>
+      </section>
     </div>}
     {recoveryOpen && <div className="pdf-recovery-backdrop" role="presentation">
       <section className="pdf-recovery-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-recovery-title">

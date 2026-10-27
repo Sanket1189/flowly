@@ -507,17 +507,21 @@ export function buildCustomPdf(document) {
   const renderFreeBlock = (block, linkTarget) => {
     const position = block.freePosition || {}
     const availableWidth = PAGE_WIDTH - MARGIN * 2
-    const width = availableWidth * (clamp(block.blockWidth ?? 100, 10, 100) / 100)
-    const x = MARGIN + availableWidth * (clamp(position.x, 0, 75) / 100)
-    const top = PAGE_HEIGHT - MARGIN - (PAGE_HEIGHT - MARGIN * 2) * (clamp(position.y, 0, 88) / 100)
+    const widthPercent = clamp(block.blockWidth ?? 100, 10, 100)
+    const width = availableWidth * (widthPercent / 100)
+    const x = MARGIN + availableWidth * (clamp(position.x, 0, Math.max(0, 100 - widthPercent)) / 100)
+    const top = PAGE_HEIGHT - MARGIN - (PAGE_HEIGHT - MARGIN * 2) * (clamp(position.y, 0, 100) / 100)
     const freeCommands = []
     if (block.type === 'text') {
       const size = clamp(block.fontSize, 8, 32)
-      const leading = size * 1.42
-      const lines = wrap(block.content, width - 20, size, block.bold)
-      const height = Math.max(44, lines.length * leading + 24)
+      const imported = Boolean(block.importedPdfText)
+      const horizontalInset = imported ? 0 : 10
+      const verticalInset = imported ? 0 : 18
+      const leading = size * (imported ? clamp(block.lineHeight || 1.08, 1, 1.6) : 1.42)
+      const lines = wrap(block.content, Math.max(1, width - horizontalInset * 2), size, block.bold)
+      const height = imported ? Math.max(size, lines.length * leading) : Math.max(44, lines.length * leading + 24)
       if (block.background && block.background !== 'transparent') freeCommands.push(fillBlockBackground(block, x, top - height, width, height, block.background))
-      lines.forEach((entry, index) => freeCommands.push(text(entry, alignedX(entry, x + 10, width - 20, size, block.align, block.bold), top - 18 - index * leading, { size, bold: block.bold, color: block.color, fontFamily: block.fontFamily })))
+      lines.forEach((entry, index) => freeCommands.push(text(entry, alignedX(entry, x + horizontalInset, width - horizontalInset * 2, size, block.align, block.bold), top - verticalInset - size * (imported ? .82 : 0) - index * leading, { size, bold: block.bold, color: block.color, fontFamily: block.fontFamily })))
       addLink(linkTarget, block, x, top - height, width, height)
     } else if (block.type === 'list') {
       drawList(freeCommands, block, x, width, top)
@@ -566,7 +570,12 @@ export function buildCustomPdf(document) {
   freeBlocks.forEach(block => {
     const pageIndex = Math.max(0, Math.min(pages.length - 1, Math.round(Number(block.freePosition?.pageIndex) || 0)))
     const rendered = renderFreeBlock(block, pageLinks[pageIndex])
-    if (block.importedPdfPage) pages[pageIndex] = `${rendered}\n${pages[pageIndex]}`
+    if (block.importedPdfPage) {
+      const baseEnd = pages[pageIndex].indexOf('\n')
+      pages[pageIndex] = baseEnd >= 0
+        ? `${pages[pageIndex].slice(0, baseEnd + 1)}${rendered}\n${pages[pageIndex].slice(baseEnd + 1)}`
+        : `${pages[pageIndex]}\n${rendered}`
+    }
     else pages[pageIndex] += `\n${rendered}`
   })
 
