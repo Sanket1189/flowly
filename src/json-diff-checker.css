@@ -96,3 +96,6 @@
   .json-diff-scroll{max-height:520px}
   .json-copy-toast{right:10px;bottom:10px;max-width:calc(100vw - 20px)}
 }
+/* Tool-first header: title and purpose without a landing-page hero. */
+.json-diff-intro{padding:16px 32px 14px;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:32px}.json-diff-intro h1{font-size:clamp(1.55rem,2.3vw,2.15rem);line-height:1.05;letter-spacing:-.035em}.json-diff-intro h1 br{display:none}.json-diff-intro>p{font-size:.78rem;line-height:1.45;margin-bottom:1px}
+@media(max-width:800px){.json-diff-intro{padding:13px 14px 12px;grid-template-columns:1fr;gap:5px}.json-diff-intro h1{font-size:1.6rem}.json-diff-intro>p{font-size:.74rem;line-height:1.45}}

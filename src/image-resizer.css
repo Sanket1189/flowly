@@ -1,0 +1,33 @@
+.image-resizer-workspace{grid-template-columns:340px minmax(0,1fr)}
+.image-resizer-settings{padding-bottom:20px}
+.image-resizer-unit-row{display:grid;grid-template-columns:1fr;gap:10px}.image-resizer-unit-row .flow-select-field{margin-top:18px}.image-resizer-unit-row>label{display:grid;gap:7px;color:#173b32;font-size:.76rem;font-weight:900}.image-resizer-unit-row>label span{display:flex;justify-content:space-between}.image-resizer-unit-row>label small{color:#7a8d86;font-size:.65rem}.image-resizer-unit-row>label input{width:100%;height:44px;padding:0 11px;border:1px solid #cddbd4;border-radius:12px;background:#fff;color:#173b32;font-weight:800;outline:0}
+.image-resizer-dimensions{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:end;gap:8px;margin-top:18px}
+.image-resizer-dimensions label{display:grid;gap:7px;color:#173b32;font-size:.76rem;font-weight:900}
+.image-resizer-dimensions label span{display:flex;align-items:center;justify-content:space-between}
+.image-resizer-dimensions label small{color:#7a8d86;font-size:.65rem;text-transform:uppercase}
+.image-resizer-dimensions input{width:100%;height:44px;padding:0 11px;border:1px solid #cddbd4;border-radius:12px;background:#fff;color:#173b32;font:800 .92rem/1 inherit;outline:none}
+.image-resizer-dimensions input:focus{border-color:#173b32;box-shadow:0 0 0 3px rgba(23,59,50,.09)}
+.image-resizer-dimensions>button{display:grid;place-items:center;width:38px;height:44px;border:1px solid #cddbd4;border-radius:12px;background:#fff;color:#71857e}
+.image-resizer-dimensions>button.active{border-color:#173b32;background:#173b32;color:#c9f06b}
+.image-resizer-scale,.image-resizer-presets,.image-resizer-fit{display:grid;gap:9px;margin-top:19px}
+.image-resizer-scale>span,.image-resizer-presets>span,.image-resizer-fit>span{color:#173b32;font-size:.74rem;font-weight:900}
+.image-resizer-scale>div{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.image-resizer-scale button,.image-resizer-fit button{height:36px;border:1px solid #d3dfda;border-radius:10px;background:#fff;color:#50675f;font-weight:850}
+.image-resizer-scale button:hover:not(:disabled),.image-resizer-fit button:hover,.image-resizer-fit button.active{border-color:#173b32;background:#173b32;color:#fff}
+.image-resizer-scale button:disabled{cursor:not-allowed;opacity:.45}
+.image-resizer-presets>div{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.image-resizer-presets button{display:grid;gap:2px;min-height:55px;padding:9px 10px;border:1px solid #d3dfda;border-radius:12px;background:#fff;color:#173b32;text-align:left}
+.image-resizer-presets button strong{font-size:.72rem}.image-resizer-presets button small{color:#71857e;font-size:.65rem}
+.image-resizer-presets button:hover,.image-resizer-presets button.active{border-color:#173b32;box-shadow:inset 0 0 0 1px #173b32}
+.image-resizer-fit>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.image-resizer-fit button{height:auto;min-height:42px;padding:6px;font-size:.67rem;line-height:1.15}
+.image-resizer-background{display:grid;gap:10px;margin-top:17px;padding:13px;border:1px solid #d6e1dc;border-radius:14px;background:#f7faf7}
+.image-resizer-background>label:first-child{display:flex;align-items:center;gap:8px;color:#173b32;font-size:.73rem;font-weight:850}
+.image-resizer-background>label:last-child{display:none;grid-template-columns:1fr 32px auto;align-items:center;gap:9px;color:#536a62;font-size:.7rem;font-weight:800}
+.image-resizer-background>label.visible{display:grid}
+.image-resizer-background input[type="checkbox"]{accent-color:#173b32}
+.image-resizer-background input[type="color"]{width:32px;height:28px;padding:2px;border:1px solid #cbd8d2;border-radius:8px;background:#fff}
+.image-resizer-background code{font-size:.68rem}
+@media(max-width:980px){.image-resizer-workspace{grid-template-columns:1fr}.image-resizer-settings{border-right:0;border-bottom:1px solid #d6e1dc}}
+@media(max-width:600px){.image-resizer-settings{padding:20px 16px}.image-resizer-presets>div{grid-template-columns:1fr 1fr}.image-resizer-fit>div{grid-template-columns:1fr}.image-resizer-fit button{min-height:38px}}
+@media(max-width:390px){.image-resizer-dimensions{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:5px}.image-resizer-dimensions>button{width:34px}.image-resizer-presets>div{grid-template-columns:1fr}}

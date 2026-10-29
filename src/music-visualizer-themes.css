@@ -1,0 +1,233 @@
+.music-visualizer-app .flow-select-popover button.selected {
+  background: #143f38;
+  color: #fff;
+}
+
+.music-visualizer-app .flow-select-popover button.selected small {
+  color: #c9ddd5;
+}
+
+.music-layer-preview.embers::before,
+.music-layer-preview.plankton::before,
+.music-layer-preview.champagne::before,
+.music-layer-preview.retro-stars::before {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--theme-b);
+  box-shadow: 9px -7px 0 var(--theme-a), -8px -5px 0 #fff, 7px 8px 0 var(--theme-b), -9px 7px 0 var(--theme-a);
+}
+
+.music-layer-preview.flame::before,
+.music-layer-preview.sonar::before,
+.music-layer-preview.fine-ring::before,
+.music-layer-preview.gold-halo::before,
+.music-layer-preview.orbit-arcs::before {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--theme-a);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-b) 50%, transparent);
+}
+
+.music-layer-preview.fire-bars::before,
+.music-layer-preview.tide-bars::before,
+.music-layer-preview.mono-bars::before,
+.music-layer-preview.block-eq::before {
+  inset: auto 5px 5px;
+  height: 17px;
+  background: repeating-linear-gradient(90deg, var(--theme-a) 0 3px, transparent 3px 6px);
+  clip-path: polygon(0 80%,10% 45%,20% 70%,30% 15%,40% 55%,50% 5%,60% 38%,70% 18%,80% 65%,90% 35%,100% 75%,100% 100%,0 100%);
+}
+
+.music-layer-preview.heat::before,
+.music-layer-preview.current::before,
+.music-layer-preview.clean-wave::before {
+  width: 24px;
+  height: 8px;
+  border-top: 2px solid var(--theme-a);
+  border-bottom: 2px solid var(--theme-b);
+  border-radius: 50%;
+  transform: skewY(-14deg);
+}
+
+.music-layer-preview.spark-burst::before,
+.music-layer-preview.deco-rays::before {
+  width: 26px;
+  height: 26px;
+  background: repeating-conic-gradient(var(--theme-b) 0 3deg, transparent 3deg 22deg);
+  mask: radial-gradient(circle, transparent 0 30%, #000 33%);
+}
+
+.music-layer-preview.fire-glow::before,
+.music-layer-preview.deep-glow::before,
+.music-layer-preview.soft-vignette::before,
+.music-layer-preview.tape-glow::before,
+.music-layer-preview.velvet::before {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--theme-a);
+  filter: blur(4px);
+  box-shadow: 0 0 10px var(--theme-b);
+}
+
+.music-layer-preview.caustic::before {
+  width: 23px;
+  height: 16px;
+  border: 2px solid var(--theme-b);
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+
+.music-layer-preview.bubble-trail::before {
+  width: 6px;
+  height: 6px;
+  border: 2px solid var(--theme-b);
+  border-radius: 50%;
+  box-shadow: 7px -8px 0 -1px #101927, 7px -8px 0 1px var(--theme-a), -6px 8px 0 -1px #101927, -6px 8px 0 1px var(--theme-b);
+}
+
+.music-layer-preview.dot-grid {
+  background-color: #101927;
+  background-image: radial-gradient(circle, var(--theme-b) 1px, transparent 1.5px);
+  background-size: 6px 6px;
+}
+
+.music-layer-preview.corner-marks::before {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--theme-a);
+  clip-path: polygon(0 0, 35% 0, 35% 10%, 10% 10%, 10% 35%, 0 35%, 0 0, 100% 0, 100% 35%, 90% 35%, 90% 10%, 65% 10%, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 90%, 90% 90%, 90% 65%, 100% 65%, 100% 100%, 0 100%, 0 65%, 10% 65%, 10% 90%, 35% 90%, 35% 100%, 0 100%);
+}
+
+.music-layer-preview.retro-sun::before {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(0deg, var(--theme-a) 0 3px, transparent 3px 5px), linear-gradient(var(--theme-b), var(--theme-a));
+}
+
+.music-layer-preview.retro-grid {
+  background: linear-gradient(#101927 48%, transparent), repeating-linear-gradient(90deg, transparent 0 7px, var(--theme-a) 7px 8px), repeating-linear-gradient(0deg, transparent 0 6px, var(--theme-b) 6px 7px);
+  background-color: #101927;
+}
+
+.music-layer-preview.vhs-lines::before {
+  width: 24px;
+  height: 18px;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, var(--theme-b) 3px 4px);
+}
+
+.music-layer-preview.gold-shimmer::before {
+  width: 24px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--theme-b), #fff, var(--theme-a), transparent);
+  transform: rotate(-28deg);
+  box-shadow: 0 0 7px var(--theme-b);
+}
+
+.music-layer-preview.core-disc::before {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.55), var(--theme-b) 28%, color-mix(in srgb,var(--theme-a) 36%,#101927) 70%);
+  box-shadow: 0 0 8px var(--theme-b);
+}
+
+.music-layer-preview.energy-wave::before {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--theme-a);
+  border-radius: 44% 56% 48% 52%;
+  box-shadow: 0 0 0 3px color-mix(in srgb,var(--theme-b) 30%,transparent);
+}
+
+.music-layer-preview.beat-markers::before {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--theme-a);
+  box-shadow: 0 -10px 0 var(--theme-b), 0 10px 0 var(--theme-a), 10px 0 0 var(--theme-b), -10px 0 0 var(--theme-a), 7px 7px 0 var(--theme-b), -7px -7px 0 var(--theme-a);
+}
+
+.music-layer-preview.event-horizon::before {
+  width: 21px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #03050c;
+  box-shadow: 0 0 0 3px color-mix(in srgb,var(--theme-a) 45%,transparent), 0 0 8px var(--theme-b);
+  transform: rotate(-12deg);
+}
+
+.music-layer-preview.aurora-band::before {
+  width: 25px;
+  height: 10px;
+  border-top: 5px solid var(--theme-b);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+  filter: blur(1px);
+  box-shadow: 0 -3px 7px var(--theme-a);
+}
+
+.music-layer-preview.shooting-stars::before {
+  width: 22px;
+  height: 2px;
+  background: linear-gradient(90deg,transparent,#fff);
+  transform: rotate(25deg);
+  box-shadow: 0 8px 0 -1px var(--theme-b), 0 -8px 0 -1px var(--theme-a);
+}
+
+.music-layer-preview.city::before {
+  inset: auto 4px 4px;
+  height: 20px;
+  background: linear-gradient(90deg,var(--theme-a) 0 12%,transparent 12% 17%,var(--theme-b) 17% 31%,transparent 31% 36%,var(--theme-a) 36% 51%,transparent 51% 56%,var(--theme-b) 56% 72%,transparent 72% 77%,var(--theme-a) 77%);
+  clip-path: polygon(0 45%,12% 45%,12% 20%,31% 20%,31% 62%,51% 62%,51% 4%,72% 4%,72% 38%,100% 38%,100% 100%,0 100%);
+}
+
+.music-layer-preview.neon-frame::before {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--theme-a);
+  clip-path: polygon(0 0,40% 0,40% 10%,10% 10%,10% 40%,0 40%,0 0,100% 0,100% 40%,90% 40%,90% 10%,60% 10%,60% 0,100% 0,100% 100%,60% 100%,60% 90%,90% 90%,90% 60%,100% 60%,100% 100%,0 100%,0 60%,10% 60%,10% 90%,40% 90%,40% 100%,0 100%);
+  filter: drop-shadow(0 0 3px var(--theme-a));
+}
+
+.music-layer-preview.light-trails::before {
+  width: 25px;
+  height: 10px;
+  border-top: 2px solid var(--theme-a);
+  border-bottom: 2px solid var(--theme-b);
+  border-radius: 50%;
+  transform: skewY(-11deg);
+  box-shadow: 0 0 5px var(--theme-b);
+}
+
+.music-layer-preview.liquid-lens::before {
+  width: 21px;
+  height: 20px;
+  border: 1px solid color-mix(in srgb,var(--theme-b) 80%,#fff);
+  border-radius: 45% 55% 52% 48% / 58% 43% 57% 42%;
+  background: radial-gradient(circle at 32% 25%,rgba(255,255,255,.7),var(--theme-b) 19%,color-mix(in srgb,var(--theme-a) 55%,#10201f) 68%);
+  box-shadow: 0 0 8px color-mix(in srgb,var(--theme-b) 70%,transparent);
+}
+
+.music-layer-preview.cellular-flow::before {
+  width: 7px;
+  height: 6px;
+  border: 1px solid var(--theme-b);
+  border-radius: 50%;
+  box-shadow: 8px -6px 0 1px color-mix(in srgb,var(--theme-a) 48%,transparent), -8px -4px 0 2px color-mix(in srgb,var(--theme-b) 40%,transparent), 6px 8px 0 2px color-mix(in srgb,var(--theme-a) 45%,transparent), -7px 8px 0 0 var(--theme-b);
+}
+
+.music-layer-preview.surface-ripples::before {
+  width: 22px;
+  height: 7px;
+  border: 1px solid var(--theme-b);
+  border-radius: 50%;
+  box-shadow: 0 3px 0 -1px var(--theme-a), 0 -3px 0 -1px color-mix(in srgb,var(--theme-b) 55%,transparent);
+}

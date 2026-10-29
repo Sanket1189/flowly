@@ -35,3 +35,6 @@
   .json-format-note{align-items:flex-start;padding:15px}
   .json-format-note p{line-height:1.5}
 }
+/* Tool-first header: title and purpose without a landing-page hero. */
+.json-format-intro{padding:16px 32px 14px;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:32px}.json-format-intro h1{font-size:clamp(1.55rem,2.3vw,2.15rem);line-height:1.05;letter-spacing:-.035em}.json-format-intro h1 br{display:none}.json-format-intro>p{font-size:.78rem;line-height:1.45;margin-bottom:1px}
+@media(max-width:650px){.json-format-intro{padding:13px 12px 12px;grid-template-columns:1fr;gap:5px}.json-format-intro h1{font-size:1.6rem}.json-format-intro>p{font-size:.74rem;line-height:1.45}}

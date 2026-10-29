@@ -389,7 +389,12 @@ export function buildCustomPdf(document) {
     }
 
     if (block.type === 'pageBreak') {
-      nextPage()
+      const requestedPageIndex = Number(block.pageIndex)
+      if (Number.isFinite(requestedPageIndex) && requestedPageIndex >= 1) {
+        const targetPageIndex = Math.round(requestedPageIndex)
+        while (pages.length < targetPageIndex) nextPage()
+        if (pages.length > targetPageIndex) nextPage()
+      } else nextPage()
       return
     }
 
@@ -533,11 +538,12 @@ export function buildCustomPdf(document) {
       freeCommands.push(drawShape(block.shape, shapeX, top, renderedWidth, height, block.color, opacityName(block), block.strokeColor, block.strokeWidth, block.rotation, block.flipX, block.flipY))
     } else if (block.type === 'image') {
       const background = block.importedPdfPage
+      const footerReserve = background && document.includeWatermark !== false ? (hasCustomFooter ? 42 : 28) : 0
       const imageX = background ? 0 : x
       const imageTop = background ? PAGE_HEIGHT : top
       const imageWidth = background ? PAGE_WIDTH : width
-      const height = background ? PAGE_HEIGHT : clamp(block.blockHeight || block.height, 54, 420)
-      freeCommands.push(drawImage(imageByData.get(block.imageData), imageX, imageTop, imageWidth, height, background ? 'cover' : block.fit, opacityName(block)))
+      const height = background ? PAGE_HEIGHT - footerReserve : clamp(block.blockHeight || block.height, 54, 420)
+      freeCommands.push(drawImage(imageByData.get(block.imageData), imageX, imageTop, imageWidth, height, background ? (footerReserve ? 'contain' : 'cover') : block.fit, opacityName(block)))
       addLink(linkTarget, block, imageX, imageTop - height, imageWidth, height)
     } else if (block.type === 'divider') {
       if (block.orientation === 'vertical') {

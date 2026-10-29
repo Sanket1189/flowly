@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowRight, ArrowUpRight, BookOpenCheck, Braces, BriefcaseBusiness, CalendarHeart,
-  Check, ChevronRight, Dumbbell, FileJson2, FilePenLine, HeartHandshake, Home, IndianRupee, LifeBuoy, ListChecks, Menu, Plane, Search, ShieldCheck, Sparkles,
+  ArrowRight, ArrowUpRight, AudioLines, BookOpenCheck, Braces, BriefcaseBusiness, CalendarHeart, CarFront,
+  Check, ChevronRight, Dumbbell, FileJson2, FilePenLine, HeartHandshake, Home, ImageDown, ImagePlus, IndianRupee, LifeBuoy, ListChecks, Menu, Palette, Plane, Scaling, Search, ShieldCheck, Sparkles,
   WalletCards, X,
 } from 'lucide-react'
 import MedicalSite from './MedicalSite.jsx'
@@ -11,6 +11,12 @@ import { RoutineBuilder, StudyPlanner } from './PlannerTools.jsx'
 import PdfMaker from './PdfMaker.jsx'
 import JsonDiffChecker from './JsonDiffChecker.jsx'
 import JsonFormatter from './JsonFormatter.jsx'
+import ImageCompressor from './ImageCompressor.jsx'
+import ImageResizer from './ImageResizer.jsx'
+import PngMaker from './PngMaker.jsx'
+import ColorPalette from './ColorPalette.jsx'
+import MusicVisualizer from './MusicVisualizer.jsx'
+import VehicleRentalSite from './VehicleRentalSite.jsx'
 import { cleanUrlHash, currentRoutePath, handleSectionLink, navigateTo, routeUrl, scrollToSection } from './navigation.js'
 import { applySeoPage } from './seo.js'
 import './ui-polish.css'
@@ -24,18 +30,24 @@ const workflows = [
   { id: 'home', category: 'Home', title: 'Home services', description: 'Preview a marketplace experience for finding and booking trusted home professionals.', icon: Home, tone: 'sand', tag: 'Provider demo', availability: 'demo' },
   { id: 'fitness', category: 'Health', title: 'Fitness coaching', description: 'Preview a guided flow for choosing a goal and finding the right fitness coach.', icon: Dumbbell, tone: 'lilac', tag: 'Provider demo', availability: 'demo' },
   { id: 'career', category: 'Work', title: 'Career mentor', description: 'Preview a focused experience for finding support with roles, interviews, and career decisions.', icon: BriefcaseBusiness, tone: 'peach', tag: 'Provider demo', availability: 'demo' },
+  { id: 'vehicle-rental', category: 'Travel', title: 'Vehicle rental', description: 'Compare vehicles, customise protection and extras, then review a complete rental price before the road.', icon: CarFront, tone: 'blue', tag: 'Service demo', availability: 'demo' },
 ]
 
 const utilities = [
   { id: 'pdf-maker', category: 'Utilities', title: 'PDF maker', description: 'Build polished PDFs with text, tables, colours, alignment and shapes—entirely in your browser.', icon: FilePenLine, tone: 'lime', tag: 'Browser utility', availability: 'utility' },
   { id: 'json-diff', category: 'Utilities', title: 'JSON diff checker', description: 'Validate and compare two JSON documents, then inspect every nested change by its exact path.', icon: FileJson2, tone: 'blue', tag: 'Browser utility', availability: 'utility' },
   { id: 'json-formatter', category: 'Utilities', title: 'JSON formatter', description: 'Validate, beautify, sort or minify JSON, then copy or download the clean result.', icon: Braces, tone: 'peach', tag: 'Browser utility', availability: 'utility' },
+  { id: 'image-compressor', category: 'Utilities', title: 'Image compressor', description: 'Compress and resize JPEG, PNG or WebP images privately, then compare and download the smaller result.', icon: ImageDown, tone: 'lime', tag: 'Browser utility', availability: 'utility' },
+  { id: 'image-resizer', category: 'Utilities', title: 'Image resizer', description: 'Resize JPEG, PNG or WebP images to exact dimensions with presets, fitting and private browser processing.', icon: Scaling, tone: 'blue', tag: 'Browser utility', availability: 'utility' },
+  { id: 'png-maker', category: 'Utilities', title: 'PNG maker', description: 'Convert JPEG, WebP or PNG images into crisp PNG files privately, with transparent or coloured canvas options.', icon: ImagePlus, tone: 'peach', tag: 'Browser utility', availability: 'utility' },
+  { id: 'color-palette', category: 'Utilities', title: 'Color palette', description: 'Generate harmonious colour combinations, preview them in a UI and copy developer-ready HEX, RGB, HSL and CSS.', icon: Palette, tone: 'lilac', tag: 'Developer utility', availability: 'utility' },
+  { id: 'music-visualizer', category: 'Utilities', title: 'Music visualizer', description: 'Loop a short video with a song, add beat-reactive rings, bars, particles and title text, then export the composition as MP4.', icon: AudioLines, tone: 'blue', tag: 'Video utility', availability: 'utility' },
 ]
 
 const catalog = [...workflows, ...utilities]
 
 const filters = ['All workflows', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
-const workflowPaths = { utilities: '/utilities', medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter' }
+const workflowPaths = { utilities: '/utilities', medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', 'vehicle-rental': '/vehicle-rental', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter', 'image-compressor': '/utilities/image-compressor', 'image-resizer': '/utilities/image-resizer', 'png-maker': '/utilities/png-maker', 'color-palette': '/utilities/color-palette', 'music-visualizer': '/utilities/music-visualizer' }
 const donationUpiId = import.meta.env.VITE_DONATION_UPI_ID || ''
 const donationUrl = import.meta.env.VITE_DONATION_URL || ''
 
@@ -73,13 +85,14 @@ function DonationDialog({ amount, setAmount, customAmount, setCustomAmount, onCl
 function App() {
   const [filter, setFilter] = useState('All workflows')
   const [query, setQuery] = useState('')
+  const [utilityQuery, setUtilityQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
   const [infoDialog, setInfoDialog] = useState(null)
   const [donationOpen, setDonationOpen] = useState(false)
   const [donationAmount, setDonationAmount] = useState(199)
   const [customDonation, setCustomDonation] = useState('')
-  const resolvePath = () => ({ '/utilities': 'utilities', '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter' }[currentRoutePath()] || null)
+  const resolvePath = () => ({ '/utilities': 'utilities', '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/vehicle-rental': 'vehicle-rental', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter', '/utilities/image-compressor': 'image-compressor', '/utilities/image-resizer': 'image-resizer', '/utilities/png-maker': 'png-maker', '/utilities/color-palette': 'color-palette', '/utilities/music-visualizer': 'music-visualizer' }[currentRoutePath()] || null)
   const [activeWorkflow, setActiveWorkflow] = useState(resolvePath)
 
   useEffect(() => {
@@ -106,6 +119,10 @@ function App() {
     return matchesFilter && matchesQuery
   }), [filter, query])
   const searchMatches = useMemo(() => query.trim() ? catalog.filter(item => `${item.title} ${item.description} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 5) : [], [query])
+  const visibleUtilities = useMemo(() => {
+    const search = utilityQuery.trim().toLowerCase()
+    return search ? utilities.filter(item => `${item.title} ${item.description} ${item.tag}`.toLowerCase().includes(search)) : utilities
+  }, [utilityQuery])
 
   const launch = (item) => {
     if (item.id === 'medical') {
@@ -179,8 +196,9 @@ function App() {
         <div className="utilities-hero-note"><span className="group-note-icon"><ShieldCheck size={20}/></span><span><strong>Made in your browser</strong><small>Work with files and data without uploading your content.</small></span></div>
       </section>
       <section className="utilities-catalog shell" aria-labelledby="utility-catalog-title">
-        <div className="utilities-catalog-heading"><div><span className="group-dot utility"/><span>AVAILABLE NOW</span></div><h2 id="utility-catalog-title">Choose a utility</h2><p>Open a focused workspace for documents or JSON. Every tool works without an account.</p></div>
-        <div className="workflow-grid utility-grid">{utilities.map(renderWorkflowCard)}</div>
+        <div className="utilities-catalog-heading"><div><span className="group-dot utility"/><span>AVAILABLE NOW</span></div><h2 id="utility-catalog-title">Choose a utility</h2><p>Open a focused workspace for documents, images or JSON. Every tool works without an account.</p></div>
+        <label className="utility-search"><Search size={19}/><input type="search" value={utilityQuery} onChange={event => setUtilityQuery(event.target.value)} placeholder="Search PDF, image, JSON or developer tools…" aria-label="Search utilities"/>{utilityQuery && <button type="button" aria-label="Clear utility search" onClick={() => setUtilityQuery('')}><X size={16}/></button>}<span>{visibleUtilities.length} tool{visibleUtilities.length === 1 ? '' : 's'}</span></label>
+        {visibleUtilities.length ? <div className="workflow-grid utility-grid">{visibleUtilities.map(renderWorkflowCard)}</div> : <div className="utility-search-empty"><Search size={24}/><strong>No utilities found</strong><p>Try searching for image, PDF, JSON, colour or developer.</p><button type="button" onClick={() => setUtilityQuery('')}>Show every utility</button></div>}
       </section>
       <section className="utilities-promise shell"><div><ShieldCheck size={23}/><span><strong>Private by default</strong><small>Your files and JSON stay in this browser while you work.</small></span></div><button onClick={() => goHome('workflows')}>Explore planning tools <ArrowRight size={17}/></button></section>
       <footer className="footer shell"><Logo onHome={() => goHome()}/><p>Make the next step feel simple.</p><div><a href={routeUrl('/')} onClick={(event) => { event.preventDefault(); goHome('workflows') }}>Workflows</a><a href={routeUrl('/utilities')}>Utilities</a><button onClick={() => setInfoDialog('privacy')}>Privacy</button><button onClick={() => setInfoDialog('support')}>Support</button></div><span>© 2026 Flowly</span></footer>
@@ -202,11 +220,17 @@ function App() {
   if (activeWorkflow === 'fitness') return <FitnessSite onExit={leaveSite} />
   if (activeWorkflow === 'finance') return <MoneySite onExit={leaveSite} />
   if (activeWorkflow === 'career') return <CareerSite onExit={leaveSite} />
+  if (activeWorkflow === 'vehicle-rental') return <VehicleRentalSite onExit={leaveSite} />
   if (activeWorkflow === 'study') return <StudyPlanner onExit={leaveSite} />
   if (activeWorkflow === 'routine') return <RoutineBuilder onExit={leaveSite} />
   if (activeWorkflow === 'pdf-maker') return <PdfMaker onExit={openUtilities} />
   if (activeWorkflow === 'json-diff') return <JsonDiffChecker onExit={openUtilities} />
   if (activeWorkflow === 'json-formatter') return <JsonFormatter onExit={openUtilities} />
+  if (activeWorkflow === 'image-compressor') return <ImageCompressor onExit={openUtilities} />
+  if (activeWorkflow === 'image-resizer') return <ImageResizer onExit={openUtilities} />
+  if (activeWorkflow === 'png-maker') return <PngMaker onExit={openUtilities} />
+  if (activeWorkflow === 'color-palette') return <ColorPalette onExit={openUtilities} />
+  if (activeWorkflow === 'music-visualizer') return <MusicVisualizer onExit={openUtilities} />
 
   return (
     <main id="top">
@@ -246,7 +270,7 @@ function App() {
         </div>
       </section>
 
-      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>planning tools</small><strong>3</strong><small>browser utilities</small><strong>4</strong><small>service UI demos</small></section>
+      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>planning tools</small><strong>8</strong><small>browser utilities</small><strong>5</strong><small>service UI demos</small></section>
 
       <section className="workflow-section shell" id="workflows">
         <div className="section-heading">

@@ -371,15 +371,46 @@ async function renderPdfPages(file, onProgress) {
         }
       }).filter(Boolean)
       rawText.forEach(item => {
-        const left = Math.max(0, Math.floor(item.left - 2))
-        const top = Math.max(0, Math.floor(item.top - 2))
-        const right = Math.min(canvas.width, Math.ceil(item.left + item.width + 2))
-        const bottom = Math.min(canvas.height, Math.ceil(item.top + item.height + 3))
-        const samplePoints = [[left - 2, (top + bottom) / 2], [right + 2, (top + bottom) / 2], [(left + right) / 2, top - 2], [(left + right) / 2, bottom + 2]]
+        const horizontalPadding = Math.max(2, item.height * .12)
+        const topPadding = Math.max(2, item.height * .16)
+        const bottomPadding = Math.max(3, item.height * .34)
+        const left = Math.max(0, Math.floor(item.left - horizontalPadding))
+        const top = Math.max(0, Math.floor(item.top - topPadding))
+        const right = Math.min(canvas.width, Math.ceil(item.left + item.width + horizontalPadding))
+        const bottom = Math.min(canvas.height, Math.ceil(item.top + item.height + bottomPadding))
+        const middleX = (left + right) / 2
+        const middleY = (top + bottom) / 2
+        const quarterX = left + (right - left) / 4
+        const threeQuarterX = left + (right - left) * .75
+        const quarterY = top + (bottom - top) / 4
+        const threeQuarterY = top + (bottom - top) * .75
+        const samplePoints = [
+          [left - 3, quarterY], [left - 3, middleY], [left - 3, threeQuarterY],
+          [right + 3, quarterY], [right + 3, middleY], [right + 3, threeQuarterY],
+          [quarterX, top - 3], [middleX, top - 3], [threeQuarterX, top - 3],
+          [quarterX, bottom + 3], [middleX, bottom + 3], [threeQuarterX, bottom + 3],
+        ]
           .map(([x, y]) => [Math.max(0, Math.min(canvas.width - 1, Math.round(x))), Math.max(0, Math.min(canvas.height - 1, Math.round(y)))])
         const colors = samplePoints.map(([x, y]) => [...context.getImageData(x, y, 1, 1).data])
-        const average = channel => Math.round(colors.reduce((total, color) => total + color[channel], 0) / Math.max(1, colors.length))
-        item.backgroundColor = `#${[average(0), average(1), average(2)].map(channel => channel.toString(16).padStart(2, '0')).join('')}`
+        const median = values => {
+          const sorted = [...values].sort((a, b) => a - b)
+          return sorted[Math.floor(sorted.length / 2)] || 0
+        }
+        const backgroundRgb = [0, 1, 2].map(channel => median(colors.map(color => color[channel])))
+        const toHex = rgb => `#${rgb.map(channel => Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, '0')).join('')}`
+        item.backgroundColor = toHex(backgroundRgb)
+        const width = Math.max(1, right - left)
+        const height = Math.max(1, bottom - top)
+        const pixels = context.getImageData(left, top, width, height).data
+        const foreground = []
+        for (let offset = 0; offset < pixels.length; offset += 4) {
+          const rgb = [pixels[offset], pixels[offset + 1], pixels[offset + 2]]
+          const distance = Math.abs(rgb[0] - backgroundRgb[0]) + Math.abs(rgb[1] - backgroundRgb[1]) + Math.abs(rgb[2] - backgroundRgb[2])
+          if (distance >= 54) foreground.push({ rgb, distance })
+        }
+        foreground.sort((a, b) => b.distance - a.distance)
+        const strongest = foreground.slice(0, Math.min(240, Math.max(12, Math.ceil(foreground.length * .3))))
+        if (strongest.length) item.color = toHex([0, 1, 2].map(channel => median(strongest.map(sample => sample.rgb[channel]))))
         context.fillStyle = item.backgroundColor
         context.fillRect(left, top, Math.max(1, right - left), Math.max(1, bottom - top))
       })
@@ -755,6 +786,13 @@ function paginate(blocks) {
   blocks.forEach((block, blockIndex) => {
     if (block.freePosition) return
     if (block.type === 'pageBreak') {
+      const requestedPageIndex = Number(block.pageIndex)
+      if (Number.isFinite(requestedPageIndex) && requestedPageIndex >= 1) {
+        while (pages.length <= Math.round(requestedPageIndex)) nextPage()
+        pages[Math.round(requestedPageIndex)].push({ ...block, sourceId: block.id })
+        remaining -= 30
+        return
+      }
       const currentPageIndex = pages.length - 1
       const hasEarlierFreeBlock = blocks.slice(0, blockIndex).some(item => item.freePosition && Math.max(0, Math.round(Number(item.freePosition.pageIndex) || 0)) === currentPageIndex)
       if (pages.at(-1).length || hasEarlierFreeBlock) nextPage()
@@ -1173,10 +1211,11 @@ function LayersPanel({ pages, selectedId, selectedIds, select, update, remove, r
       <summary><ChevronDown size={14}/><span>Page {pageIndex + 1}</span><small>{pageBlocks.length}</small></summary>
       <div>{[...pageBlocks].reverse().map(block => {
         const id = block.sourceId || block.id
+        const deletionLocked = block.locked && !block.importedPdfPage
         return <div className={`pdf-studio-layer-row ${selectedIds.includes(id) ? 'selected' : ''}`} key={`${pageIndex}-${id}`}>
           <button type="button" className="pdf-studio-layer-select" aria-current={selectedIds.includes(id) ? 'true' : undefined} onClick={event => select(id, null, event.shiftKey)}><i>{block.type === 'text' ? 'T' : block.type === 'list' ? '≡' : block.type === 'table' ? '▦' : block.type === 'image' ? '▧' : block.type === 'divider' ? '—' : block.type === 'shape' ? '□' : block.type === 'spacer' ? '↕' : '↳'}</i><span title={layerName(block)}>{layerName(block)}</span></button>
           {block.type !== 'pageBreak' && <><button type="button" className="pdf-studio-layer-action" aria-label={`Send ${layerName(block)} backward`} title="Send backward one layer" onClick={() => reorderLayer(id, 'backward')}>↓</button><button type="button" className="pdf-studio-layer-action" aria-label={`Bring ${layerName(block)} forward`} title="Bring forward one layer" onClick={() => reorderLayer(id, 'forward')}>↑</button><button type="button" className={block.locked ? 'pdf-studio-layer-action active' : 'pdf-studio-layer-action'} aria-label={block.locked ? `Unlock ${layerName(block)}` : `Lock ${layerName(block)}`} title={block.locked ? 'Unlock layer' : 'Lock layer'} onClick={() => update(id, { locked: !block.locked })}>{block.locked ? <Lock size={14}/> : <Unlock size={14}/>}</button></>}
-          <button type="button" className="pdf-studio-layer-action delete" disabled={block.locked} aria-label={block.locked ? `Unlock ${layerName(block)} before deleting` : `Delete ${layerName(block)}`} title={block.locked ? 'Unlock layer before deleting' : 'Delete layer'} onClick={() => remove(id)}><Trash2 size={14}/></button>
+          <button type="button" className="pdf-studio-layer-action delete" disabled={deletionLocked} aria-label={deletionLocked ? `Unlock ${layerName(block)} before deleting` : `Delete ${layerName(block)}`} title={deletionLocked ? 'Unlock layer before deleting' : block.importedPdfPage ? 'Delete imported page graphics' : 'Delete layer'} onClick={() => remove(id)}><Trash2 size={14}/></button>
         </div>
       })}</div>
     </details>)}
@@ -1254,7 +1293,7 @@ function Inspector({ block, update, remove, title, setTitle, pageColor, setPageC
     {block.type === 'divider' && <><span className="pdf-studio-field-label">Orientation</span><div className="pdf-studio-image-fit" role="group" aria-label="Line orientation"><button type="button" className={(block.orientation || 'horizontal') === 'horizontal' ? 'active' : ''} onClick={() => set({ orientation: 'horizontal', blockWidth: 60, blockHeight: 0, ...(block.freePosition ? { freePosition: { ...block.freePosition, x: Math.min(40, Number(block.freePosition.x) || 0) } } : {}) })}>Horizontal</button><button type="button" className={block.orientation === 'vertical' ? 'active' : ''} onClick={() => set({ orientation: 'vertical', blockWidth: 15, blockHeight: 0, height: Math.max(32, Number(block.height) || 120), align: block.align || 'center' })}>Vertical</button></div><span className="pdf-studio-field-label">Line style</span><div className="pdf-studio-divider-styles" role="group" aria-label="Divider style">{dividerStyles.map(style => <button type="button" className={(block.lineStyle || 'solid') === style.id ? 'active' : ''} aria-pressed={(block.lineStyle || 'solid') === style.id} onClick={() => set({ lineStyle: style.id })} key={style.id}><i className={style.id}/><span>{style.label}</span></button>)}</div><ColorField label="Line colour" value={block.color} onChange={color => set({ color })}/><label>Thickness<input type="number" min="1" max="8" value={block.thickness} onChange={event => set({ thickness: Number(event.target.value) })}/></label>{block.orientation === 'vertical' && <><label>Line length <output>{Math.max(32, Number(block.height) || 120)} px</output><input type="range" min="32" max="400" step="4" value={Math.max(32, Number(block.height) || 120)} onChange={event => set({ height: Number(event.target.value) })}/></label><span className="pdf-studio-field-label">Line placement</span><Alignment value={block.align || 'center'} onChange={align => set({ align })}/></>}</>}
     {block.type === 'spacer' && <><label>Empty space height <output>{Math.max(12, Number(block.height) || 48)} px</output><input type="range" min="12" max="220" step="4" value={Math.max(12, Number(block.height) || 48)} onChange={event => set({ height: Number(event.target.value) })}/></label><p className="pdf-studio-note">This creates blank vertical space in both the canvas and downloaded PDF.</p></>}
     {block.type === 'pageBreak' && <p className="pdf-studio-note">Everything after this marker starts on a fresh PDF page.</p>}
-    <button type="button" className="pdf-studio-delete" disabled={block.locked} title={block.locked ? 'Unlock this element before deleting it' : 'Delete element'} onClick={() => remove(block.id)}><Trash2 size={15}/> {block.locked ? 'Unlock to delete' : 'Delete element'}</button>
+    <button type="button" className="pdf-studio-delete" disabled={block.locked && !block.importedPdfPage} title={block.locked && !block.importedPdfPage ? 'Unlock this element before deleting it' : block.importedPdfPage ? 'Delete imported page graphics' : 'Delete element'} onClick={() => remove(block.id)}><Trash2 size={15}/> {block.locked && !block.importedPdfPage ? 'Unlock to delete' : block.importedPdfPage ? 'Delete page graphics' : 'Delete element'}</button>
   </aside>
 }
 
@@ -1709,6 +1748,7 @@ export default function PdfMaker({ onExit }) {
   }
   const selected = selectedIds.length === 1 ? blocks.find(block => block.id === selectedId) || null : null
   const documentData = useMemo(() => ({ title, pageColor, blocks, footerFields, customFonts }), [title, pageColor, blocks, footerFields, customFonts])
+  const hasImportedPages = blocks.some(block => block.importedPdfPage)
   const applyDocument = snapshot => {
     setTitle(snapshot.title || 'Untitled document')
     setPageColor(snapshot.pageColor || '#f7f7f2')
@@ -1988,7 +2028,11 @@ export default function PdfMaker({ onExit }) {
       const nextBreak = layerPages[1]?.find(block => block.type === 'pageBreak')
       if (nextBreak) ids.add(nextBreak.sourceId || nextBreak.id)
     }
-    setBlocks(current => current.filter(block => !ids.has(block.id)).map(block => block.freePosition && Number(block.freePosition.pageIndex) > pageIndex ? { ...block, freePosition: { ...block.freePosition, pageIndex: Number(block.freePosition.pageIndex) - 1 } } : block))
+    setBlocks(current => current.filter(block => !ids.has(block.id)).map(block => {
+      if (block.freePosition && Number(block.freePosition.pageIndex) > pageIndex) return { ...block, freePosition: { ...block.freePosition, pageIndex: Number(block.freePosition.pageIndex) - 1 } }
+      if (block.type === 'pageBreak' && Number.isFinite(Number(block.pageIndex)) && Number(block.pageIndex) > pageIndex) return { ...block, pageIndex: Number(block.pageIndex) - 1 }
+      return block
+    }))
     setSelectedId(null)
     setActivePage(Math.max(0, Math.min(pageIndex, layerPages.length - 2)))
   }
@@ -2136,7 +2180,7 @@ export default function PdfMaker({ onExit }) {
     const shouldLock = !selectedIds.every(id => blocks.find(block => block.id === id)?.locked)
     setBlocks(current => current.map(block => selectedIds.includes(block.id) ? { ...block, locked: shouldLock } : block))
   }
-  const deleteSelection = () => { setBlocks(current => current.filter(block => !selectedIds.includes(block.id) || block.locked)); setSelectedId(null) }
+  const deleteSelection = () => { setBlocks(current => current.filter(block => !selectedIds.includes(block.id) || (block.locked && !block.importedPdfPage))); setSelectedId(null) }
   const remove = id => { setBlocks(current => current.filter(block => block.id !== id)); setSelectedId(null) }
   const beginInlineEdit = id => {
     const block = blocks.find(item => item.id === id)
@@ -2207,7 +2251,11 @@ export default function PdfMaker({ onExit }) {
   const pasteCopied = () => insertDuplicates(clipboardBlock.current)
   const addAt = (type, index) => {
     const createdBlock = makeBlock(type)
-    const block = type !== 'pageBreak' && index == null ? placeAtVisualBottom(createdBlock) : createdBlock
+    const block = type === 'pageBreak' && index == null
+      ? { ...createdBlock, pageIndex: layerPages.length }
+      : type !== 'pageBreak' && index == null
+        ? placeAtVisualBottom(createdBlock)
+        : createdBlock
     setBlocks(current => {
       const next = [...current]
       next.splice(index ?? next.length, 0, block)
@@ -2292,7 +2340,11 @@ export default function PdfMaker({ onExit }) {
         const offsetY = (pageHeight - renderedHeight) / 2
         const background = {
           ...makeBlock('image'),
-          imageData: page.originalImageData || page.imageData,
+          // Use the text-cleaned page artwork behind the reconstructed text.
+          // Keeping the original full-page raster here made imported text look
+          // duplicated when editing and caused deleted text to remain visible.
+          imageData: page.imageData,
+          importedPdfOriginalImageData: page.originalImageData || page.imageData,
           imageWidth: page.imageWidth,
           imageHeight: page.imageHeight,
           imageName: `${file.name} · page ${index + 1} graphics`,
@@ -2323,6 +2375,7 @@ export default function PdfMaker({ onExit }) {
             content: item.value,
             fontSize: Math.max(8, Math.min(32, sourceFontSize)),
             fontFamily: item.fontFamily || 'Arial, Helvetica, sans-serif',
+            color: item.color || '#173b32',
             bold: item.bold,
             lineHeight: 1.08,
             blockWidth,
@@ -2330,7 +2383,10 @@ export default function PdfMaker({ onExit }) {
             margin: { ...emptyBoxSides },
             border: { ...emptyBoxSides },
             importedPdfText: true,
-            importedPdfOverlayActive: false,
+            // The cleaned background no longer contains this text, so the
+            // editable overlay must be visible immediately—not only after the
+            // first move or double-click.
+            importedPdfOverlayActive: true,
             importedPdfBackgroundColor: item.backgroundColor || '#ffffff',
             position: 'custom',
             freePosition: { pageIndex, x, y },
@@ -2770,7 +2826,7 @@ export default function PdfMaker({ onExit }) {
         <h2 id="pdf-download-title">Download your PDF</h2>
         <p>Choose the file name and whether Flowly’s small footer should appear on every page.</p>
         <label>PDF name<div className="pdf-download-name"><input autoFocus value={title} placeholder="Untitled document" onChange={event => setTitle(event.target.value)}/><span>.pdf</span></div></label>
-        <label className="pdf-download-watermark"><input type="checkbox" checked={includeWatermark} onChange={event => setIncludeWatermark(event.target.checked)}/><span><strong>Include Flowly watermark</strong><small>Shows “Created with Flowly PDF Maker” and the page number in the footer.</small></span></label>
+        <label className="pdf-download-watermark"><input type="checkbox" checked={includeWatermark} onChange={event => setIncludeWatermark(event.target.checked)}/><span><strong>Include Flowly watermark</strong><small>{hasImportedPages ? 'Imported pages are scaled slightly to reserve a clean footer band without covering their existing content.' : 'Shows “Created with Flowly PDF Maker” and the page number in the footer.'}</small></span></label>
         <div className={`pdf-download-preview ${includeWatermark ? '' : 'removed'}`}>{includeWatermark ? <><span>Created with Flowly PDF Maker</span><em>Page 1</em></> : <span>Watermark will not be included</span>}</div>
         <div className="pdf-download-actions"><button type="button" disabled={exporting} onClick={() => setDownloadOpen(false)}>Cancel</button><button type="submit" disabled={exporting}><Download size={16}/> {exporting ? 'Preparing…' : 'Download PDF'}</button></div>
       </form>
