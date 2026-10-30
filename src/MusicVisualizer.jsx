@@ -36,6 +36,24 @@ const durationOptions = [
   { value: '60', label: '60 seconds', description: 'Extended visualizer' },
 ]
 
+const lyricColourPresets = [
+  '#ffffff', '#fff0c2', '#dfff66', '#72f4d1', '#79d8ff', '#b8a7ff', '#ff9ed8', '#ffb36b',
+]
+
+const defaultLyricFont = { label: 'Inter', family: 'Inter, Arial, sans-serif', custom: false }
+
+async function loadVisualizerFontFile(file) {
+  const extension = file?.name?.split('.').pop()?.toLowerCase()
+  if (!['ttf', 'otf', 'woff', 'woff2'].includes(extension)) throw new Error('Choose a TTF, OTF, WOFF, or WOFF2 font file.')
+  if (file.size > 10 * 1024 * 1024) throw new Error('Choose a font smaller than 10 MB.')
+  const label = file.name.replace(/\.[^.]+$/, '').trim() || 'Custom font'
+  const family = `FlowlyLyrics-${label.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}-${Date.now().toString(36)}`
+  const face = new FontFace(family, await file.arrayBuffer())
+  await face.load()
+  document.fonts.add(face)
+  return { face, font: { label, family: `"${family}", sans-serif`, custom: true } }
+}
+
 const themeOptions = [
   { value: 'pulse', label: 'Pulse studio', description: 'Bars, waves, rings and sparks' },
   { value: 'universe', label: 'Universe', description: 'Stars, galaxies and orbiting planets' },
@@ -1896,7 +1914,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
       ctx.save()
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.font = `800 ${lyricSize}px Inter, Arial, sans-serif`
+      ctx.font = `800 ${lyricSize}px ${options.lyricsFontFamily || defaultLyricFont.family}`
       const lyricRows = wrapCanvasText(ctx, activeLyric.text, maxTextWidth)
       const widestRow = Math.max(...lyricRows.map(row => ctx.measureText(row).width))
       const panelWidth = Math.min(width * .88, widestRow + lyricSize * 1.55)
@@ -1910,7 +1928,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
       ctx.lineJoin = 'round'
       ctx.lineWidth = Math.max(2, lyricSize * .07)
       ctx.strokeStyle = 'rgba(0, 0, 0, .72)'
-      ctx.fillStyle = '#ffffff'
+      ctx.fillStyle = options.lyricsColor || '#ffffff'
       ctx.shadowColor = glow
       ctx.shadowBlur = lyricSize * .2
       lyricRows.forEach((row, index) => {
@@ -1923,7 +1941,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
       if (nextLyric && options.lyricsBackdrop < 85) {
         ctx.globalAlpha = .48
         ctx.shadowBlur = 0
-        ctx.font = `650 ${lyricSize * .55}px Inter, Arial, sans-serif`
+        ctx.font = `650 ${lyricSize * .55}px ${options.lyricsFontFamily || defaultLyricFont.family}`
         ctx.fillText(nextLyric, centerX, lyricY + panelHeight / 2 + lyricSize * .62)
       }
       ctx.restore()
@@ -1934,6 +1952,8 @@ function drawComposition(ctx, video, options, frequencyData, time) {
 export default function MusicVisualizer({ onExit }) {
   const canvasRef = useRef(null)
   const layerPreviewCanvasRef = useRef(null)
+  const lyricFontInputRef = useRef(null)
+  const lyricFontFaceRef = useRef(null)
   const videoRef = useRef(null)
   const audioRef = useRef(null)
   const frameRef = useRef(0)
@@ -1958,6 +1978,9 @@ export default function MusicVisualizer({ onExit }) {
   const [lyricsSize, setLyricsSize] = useState(4.2)
   const [lyricsPosition, setLyricsPosition] = useState(78)
   const [lyricsBackdrop, setLyricsBackdrop] = useState(58)
+  const [lyricsColor, setLyricsColor] = useState('#ffffff')
+  const [lyricsFont, setLyricsFont] = useState(defaultLyricFont)
+  const [lyricsFontError, setLyricsFontError] = useState('')
   const [color, setColor] = useState('#ff4ca8')
   const [glowColor, setGlowColor] = useState('#55d8ff')
   const [preserveColors, setPreserveColors] = useState(false)
@@ -2028,9 +2051,9 @@ export default function MusicVisualizer({ onExit }) {
 
   const options = useMemo(() => ({
     fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
-    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop,
+    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFontFamily: lyricsFont.family,
   }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
-    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop])
+    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFont.family])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -2076,6 +2099,31 @@ export default function MusicVisualizer({ onExit }) {
   useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl) }, [audioUrl])
   useEffect(() => () => { if (result?.url) URL.revokeObjectURL(result.url) }, [result])
   useEffect(() => () => { audioGraphRef.current?.context?.close().catch(() => {}) }, [])
+  useEffect(() => () => {
+    if (lyricFontFaceRef.current) document.fonts.delete(lyricFontFaceRef.current)
+  }, [])
+
+  const importLyricFont = async event => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setLyricsFontError('')
+    try {
+      const loaded = await loadVisualizerFontFile(file)
+      if (lyricFontFaceRef.current) document.fonts.delete(lyricFontFaceRef.current)
+      lyricFontFaceRef.current = loaded.face
+      setLyricsFont(loaded.font)
+    } catch (fontError) {
+      setLyricsFontError(fontError.message || 'This font could not be loaded.')
+    }
+  }
+
+  const resetLyricFont = () => {
+    if (lyricFontFaceRef.current) document.fonts.delete(lyricFontFaceRef.current)
+    lyricFontFaceRef.current = null
+    setLyricsFont(defaultLyricFont)
+    setLyricsFontError('')
+  }
 
   const loadVideo = file => {
     if (!file?.type.startsWith('video/')) { setError('Choose a video file such as MP4, WebM or MOV.'); return }
@@ -2335,6 +2383,11 @@ export default function MusicVisualizer({ onExit }) {
             <label>Lyrics<textarea value={lyricsText} disabled={!lyricsEnabled} onChange={event => setLyricsText(event.target.value)} placeholder={'First lyric line\nNext lyric line\n[02:00]\nLyrics return after 2 seconds'}/></label>
             <div className="music-lyrics-actions"><button type="button" disabled={!lyricsEnabled || !audioFile} onClick={insertLyricPause}><Pause size={14}/> Add pause at {formatTime(audioRef.current?.currentTime || 0)}</button><small>Play or seek to the instrumental start first. The next timestamped lyric resumes the overlay.</small></div>
             <div className="music-lyrics-count"><span>{lyricsLines.length ? `${lyricsLines.filter(line => !line.pause).length} lyric line${lyricsLines.filter(line => !line.pause).length === 1 ? '' : 's'} · ${lyricsLines.filter(line => line.pause).length} pause${lyricsLines.filter(line => line.pause).length === 1 ? '' : 's'}${fixedPauseDuration ? ` · ${fixedPauseDuration.toFixed(2).replace(/\.00$/, '')}s fixed` : ''}` : 'No lyrics added'}</span><small>{lyricsLines.some(line => Number.isFinite(line.time)) ? 'Timestamped timing' : 'Automatic timing'}</small></div>
+            <div className={`music-lyrics-appearance ${lyricsEnabled ? '' : 'disabled'}`}>
+              <div className="music-lyrics-font"><span><small>Lyric font</small><strong style={{ fontFamily: lyricsFont.family }}>{lyricsFont.label}</strong></span><div><button type="button" disabled={!lyricsEnabled} onClick={() => lyricFontInputRef.current?.click()}><Upload size={13}/>{lyricsFont.custom ? 'Replace' : 'Import font'}</button>{lyricsFont.custom && <button type="button" disabled={!lyricsEnabled} className="remove" aria-label="Remove imported lyric font" onClick={resetLyricFont}><X size={13}/></button>}</div><input ref={lyricFontInputRef} type="file" hidden accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" onChange={importLyricFont}/></div>
+              {lyricsFontError && <small className="music-lyrics-font-error" role="alert">{lyricsFontError}</small>}
+              <div className="music-lyrics-colour"><header><span>Text colour</span><code>{lyricsColor}</code></header><div className="music-lyrics-swatches">{lyricColourPresets.map(colour => <button type="button" key={colour} disabled={!lyricsEnabled} aria-label={`Use lyric colour ${colour}`} aria-pressed={lyricsColor === colour} className={lyricsColor === colour ? 'active' : ''} style={{ background: colour }} onClick={() => setLyricsColor(colour)}>{lyricsColor === colour && <Check size={12}/>}</button>)}<label className="music-lyrics-custom-colour"><input type="color" aria-label="Choose custom lyric colour" disabled={!lyricsEnabled} value={lyricsColor} onChange={event => setLyricsColor(event.target.value)}/><span>Custom</span></label></div></div>
+            </div>
             <label className="music-range-field"><span>Text size <output>{lyricsSize}%</output></span><input disabled={!lyricsEnabled} type="range" min="2.5" max="8" step=".1" value={lyricsSize} onChange={event => setLyricsSize(Number(event.target.value))}/></label>
             <label className="music-range-field"><span>Vertical position <output>{lyricsPosition}%</output></span><input disabled={!lyricsEnabled} type="range" min="55" max="90" value={lyricsPosition} onChange={event => setLyricsPosition(Number(event.target.value))}/></label>
             <label className="music-range-field"><span>Backdrop <output>{lyricsBackdrop}%</output></span><input disabled={!lyricsEnabled} type="range" min="0" max="90" value={lyricsBackdrop} onChange={event => setLyricsBackdrop(Number(event.target.value))}/></label>

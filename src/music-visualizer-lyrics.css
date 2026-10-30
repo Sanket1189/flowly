@@ -31,6 +31,72 @@
   text-align: center;
 }
 
+.music-lyrics-appearance {
+  margin-top: 10px;
+  padding: 9px;
+  display: grid;
+  gap: 9px;
+  border: 1px solid #d2ded7;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .78);
+}
+
+.music-lyrics-appearance.disabled { opacity: .55; }
+
+.music-lyrics-font {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+
+.music-lyrics-font > span { min-width: 0; display: grid; gap: 2px; }
+.music-lyrics-font > span small { color: var(--mv-muted); font-size: .5rem; font-weight: 800; }
+.music-lyrics-font > span strong { overflow: hidden; font-size: .67rem; text-overflow: ellipsis; white-space: nowrap; }
+.music-lyrics-font > div { display: flex; gap: 5px; }
+.music-lyrics-font button {
+  min-height: 31px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid #bdd0c6;
+  border-radius: 8px;
+  background: #f6faf5;
+  color: var(--mv-ink);
+  font-size: .53rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.music-lyrics-font button.remove { width: 31px; padding: 0; color: #b95747; background: #fff7f4; border-color: #efcfc7; }
+.music-lyrics-font button:disabled { cursor: not-allowed; }
+.music-lyrics-font-error { color: #b44f3f; font-size: .51rem; line-height: 1.4; }
+
+.music-lyrics-colour { display: grid; gap: 7px; }
+.music-lyrics-colour > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.music-lyrics-colour > header span { font-size: .58rem; font-weight: 900; }
+.music-lyrics-colour > header code { color: var(--mv-muted); font-size: .51rem; }
+.music-lyrics-swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.music-lyrics-swatches > button,
+.music-lyrics-custom-colour {
+  position: relative;
+  min-width: 0;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(20, 63, 56, .2);
+  border-radius: 8px;
+  color: #173f32;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+}
+.music-lyrics-swatches > button.active { outline: 2px solid var(--mv-ink); outline-offset: 1px; }
+.music-lyrics-swatches > button:disabled { cursor: not-allowed; }
+.music-lyrics-custom-colour { overflow: hidden; background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bff95, #4dabff, #b86bff); }
+.music-lyrics-custom-colour input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.music-lyrics-custom-colour span { position: relative; padding: 2px 5px; border-radius: 5px; background: rgba(255,255,255,.86); font-size: .46rem; font-weight: 900; pointer-events: none; }
+
 .music-colour-lock {
   margin-top: 12px;
   padding: 9px 10px;
