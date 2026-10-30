@@ -8,15 +8,23 @@ import './music-visualizer.css'
 import './music-visualizer-themes.css'
 
 const MP4_TYPES = [
+  'video/mp4;codecs="avc1.640033,mp4a.40.2"',
+  'video/mp4;codecs="avc1.4D4033,mp4a.40.2"',
   'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
   'video/mp4;codecs="avc1,mp4a.40.2"',
   'video/mp4',
 ]
 
 const aspectOptions = [
-  { value: 'square', label: 'Square · 1:1', description: '1080 × 1080' },
-  { value: 'landscape', label: 'Landscape · 16:9', description: '1920 × 1080' },
-  { value: 'portrait', label: 'Portrait · 9:16', description: '1080 × 1920' },
+  { value: 'square', label: 'Square · 1:1', description: 'Up to 2160 × 2160' },
+  { value: 'landscape', label: 'Landscape · 16:9', description: 'Up to 4K UHD' },
+  { value: 'portrait', label: 'Portrait · 9:16', description: 'Up to 2160 × 3840' },
+]
+
+const exportQualityOptions = [
+  { value: 'high', label: 'High · 1080p', description: 'Recommended quality and file size' },
+  { value: 'maximum', label: 'Maximum · 4K', description: 'Largest file · slower export' },
+  { value: 'standard', label: 'Standard · 720p', description: 'Smaller and faster' },
 ]
 
 const durationOptions = [
@@ -37,6 +45,8 @@ const themeOptions = [
   { value: 'minimal', label: 'Minimal mono', description: 'Clean lines and restrained motion' },
   { value: 'retro', label: 'Retro wave', description: 'Sunsets, VHS lines and synth grids' },
   { value: 'gold', label: 'Gold luxe', description: 'Art-deco rays and champagne light' },
+  { value: 'crystal', label: 'Crystal 3D', description: 'Faceted glass, refraction and depth' },
+  { value: 'chrome', label: 'Kinetic Chrome 3D', description: 'Realistic metal, turbines and studio depth' },
 ]
 
 const themePresets = {
@@ -50,6 +60,8 @@ const themePresets = {
   minimal: { color: '#f5f5f0', glow: '#a7b0b7', tint: 28 },
   retro: { color: '#ff5ca8', glow: '#57e6ff', tint: 22 },
   gold: { color: '#d8b56a', glow: '#fff0c2', tint: 24 },
+  crystal: { color: '#8fdcff', glow: '#e7c6ff', tint: 22 },
+  chrome: { color: '#9fd8ff', glow: '#f3f7ff', tint: 30 },
 }
 
 const themeLibraries = {
@@ -133,11 +145,14 @@ const themeLibraries = {
       { id: 'bubble-orbit', label: 'Bubble orbit', preview: 'bubble-orbit' },
       { id: 'bubble-spectrum', label: 'Bubble spectrum', preview: 'bubble-spectrum' },
       { id: 'rising-bubbles', label: 'Rising bubbles', preview: 'rising' },
+      { id: 'prism-orb', label: 'Prism orb', preview: 'prism-orb' },
     ] },
     { name: 'Foam', items: [
       { id: 'foam-ring', label: 'Foam ring', preview: 'foam' },
       { id: 'bubble-glow', label: 'Bubble glow', preview: 'bubble-glow' },
       { id: 'bubble-wave', label: 'Bubble wave', preview: 'bubble-wave' },
+      { id: 'caustic-shimmer', label: 'Caustic shimmer', preview: 'caustic-shimmer' },
+      { id: 'pearl-chain', label: 'Pearl chain', preview: 'pearl-chain' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Bubble title', preview: 'title' }] },
   ],
@@ -147,10 +162,13 @@ const themeLibraries = {
       { id: 'flame-ring', label: 'Flame ring', preview: 'flame' },
       { id: 'fire-bars', label: 'Fire spectrum', preview: 'fire-bars' },
       { id: 'heat-wave', label: 'Heat wave', preview: 'heat' },
+      { id: 'molten-core', label: 'Molten core', preview: 'molten-core' },
     ] },
     { name: 'Atmosphere', items: [
       { id: 'spark-burst', label: 'Spark burst', preview: 'spark-burst' },
       { id: 'flare-glow', label: 'Fire glow', preview: 'fire-glow' },
+      { id: 'ember-vortex', label: 'Ember vortex', preview: 'ember-vortex' },
+      { id: 'flame-crown', label: 'Flame crown', preview: 'flame-crown' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Inferno title', preview: 'title' }] },
   ],
@@ -160,11 +178,14 @@ const themeLibraries = {
       { id: 'sonar-rings', label: 'Sonar rings', preview: 'sonar' },
       { id: 'current-wave', label: 'Ocean current', preview: 'current' },
       { id: 'tide-bars', label: 'Tide spectrum', preview: 'tide-bars' },
+      { id: 'deep-portal', label: 'Deep portal', preview: 'deep-portal' },
     ] },
     { name: 'Depth', items: [
       { id: 'plankton', label: 'Plankton drift', preview: 'plankton' },
       { id: 'bubble-trail', label: 'Bubble trail', preview: 'bubble-trail' },
       { id: 'deep-glow', label: 'Deep glow', preview: 'deep-glow' },
+      { id: 'light-shafts', label: 'Light shafts', preview: 'light-shafts' },
+      { id: 'kelp-ribbons', label: 'Kelp ribbons', preview: 'kelp-ribbons' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Ocean title', preview: 'title' }] },
   ],
@@ -174,10 +195,13 @@ const themeLibraries = {
       { id: 'fine-ring', label: 'Fine ring', preview: 'fine-ring' },
       { id: 'clean-wave', label: 'Clean wave', preview: 'clean-wave' },
       { id: 'dot-grid', label: 'Dot grid', preview: 'dot-grid' },
+      { id: 'precision-axis', label: 'Precision axis', preview: 'precision-axis' },
     ] },
     { name: 'Frame', items: [
       { id: 'corner-marks', label: 'Corner marks', preview: 'corner-marks' },
       { id: 'soft-vignette', label: 'Soft vignette', preview: 'soft-vignette' },
+      { id: 'editorial-frame', label: 'Editorial frame', preview: 'editorial-frame' },
+      { id: 'type-rule', label: 'Type rule', preview: 'type-rule' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Minimal title', preview: 'title' }] },
   ],
@@ -187,10 +211,13 @@ const themeLibraries = {
       { id: 'retro-grid', label: 'Horizon grid', preview: 'retro-grid' },
       { id: 'vhs-lines', label: 'VHS lines', preview: 'vhs-lines' },
       { id: 'block-equalizer', label: 'Block equalizer', preview: 'block-eq' },
+      { id: 'horizon-mountains', label: 'Horizon mountains', preview: 'mountains' },
     ] },
     { name: 'Night sky', items: [
       { id: 'retro-stars', label: 'Pixel stars', preview: 'retro-stars' },
       { id: 'tape-glow', label: 'Tape glow', preview: 'tape-glow' },
+      { id: 'tape-noise', label: 'Analog noise', preview: 'tape-noise' },
+      { id: 'laser-moon', label: 'Laser moon', preview: 'laser-moon' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Retro title', preview: 'title' }] },
   ],
@@ -200,12 +227,47 @@ const themeLibraries = {
       { id: 'deco-rays', label: 'Art-deco rays', preview: 'deco-rays' },
       { id: 'champagne', label: 'Champagne drift', preview: 'champagne' },
       { id: 'orbit-arcs', label: 'Orbit arcs', preview: 'orbit-arcs' },
+      { id: 'deco-arch', label: 'Deco arch', preview: 'deco-arch' },
     ] },
     { name: 'Finish', items: [
       { id: 'gold-shimmer', label: 'Gold shimmer', preview: 'gold-shimmer' },
       { id: 'velvet-vignette', label: 'Velvet vignette', preview: 'velvet' },
+      { id: 'luxe-spotlight', label: 'Luxe spotlight', preview: 'luxe-spotlight' },
+      { id: 'pearl-dust', label: 'Pearl dust', preview: 'pearl-dust' },
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Luxe title', preview: 'title' }] },
+  ],
+  crystal: [
+    { name: 'Crystal form', items: [
+      { id: 'crystal-core', label: '3D crystal core', preview: 'crystal-core' },
+      { id: 'crystal-halo', label: 'Depth halo', preview: 'crystal-halo' },
+      { id: 'floating-shards', label: 'Floating shards', preview: 'crystal-shards' },
+      { id: 'prism-spectrum', label: 'Prism spectrum', preview: 'prism-spectrum' },
+      { id: 'depth-grid', label: 'Crystal grid', preview: 'crystal-grid' },
+    ] },
+    { name: 'Refraction', items: [
+      { id: 'crystal-glow', label: 'Crystal aura', preview: 'crystal-glow' },
+      { id: 'facet-rays', label: 'Facet rays', preview: 'facet-rays' },
+      { id: 'light-sweep', label: 'Glass sweep', preview: 'light-sweep' },
+      { id: 'crystal-dust', label: 'Crystal dust', preview: 'crystal-dust' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Crystal title', preview: 'title' }] },
+  ],
+  chrome: [
+    { name: 'Kinetic form', items: [
+      { id: 'chrome-orb', label: 'Chrome orb', preview: 'chrome-orb' },
+      { id: 'turbine-blades', label: 'Turbine blades', preview: 'turbine-blades' },
+      { id: 'gyro-rings', label: 'Gyro rings', preview: 'gyro-rings' },
+      { id: 'metal-spectrum', label: 'Metal spectrum', preview: 'metal-spectrum' },
+      { id: 'depth-floor', label: 'Perspective floor', preview: 'metal-floor' },
+    ] },
+    { name: 'Studio finish', items: [
+      { id: 'studio-lights', label: 'Studio lights', preview: 'studio-lights' },
+      { id: 'chrome-sweep', label: 'Chrome sweep', preview: 'chrome-sweep' },
+      { id: 'metal-sparks', label: 'Metal sparks', preview: 'metal-sparks' },
+      { id: 'floor-reflection', label: 'Floor reflection', preview: 'floor-reflection' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Chrome title', preview: 'title' }] },
   ],
 }
 
@@ -214,12 +276,14 @@ const defaultThemeLayers = {
   universe: ['star-field', 'galaxy-spiral', 'planet-orbits', 'event-horizon', 'aurora-band', 'title'],
   neon: ['neon-grid', 'city-silhouette', 'chrome-ring', 'neon-frame', 'light-trails', 'title'],
   slime: ['ooze-glow', 'liquid-lens', 'slime-ring', 'cellular-flow', 'surface-ripples', 'title'],
-  bubbles: ['bubble-field', 'bubble-orbit', 'foam-ring', 'rising-bubbles', 'title'],
-  inferno: ['ember-field', 'flame-ring', 'flare-glow', 'title'],
-  ocean: ['caustic-light', 'sonar-rings', 'plankton', 'deep-glow', 'title'],
-  minimal: ['fine-ring', 'clean-wave', 'dot-grid', 'title'],
-  retro: ['retro-sun', 'retro-grid', 'vhs-lines', 'title'],
-  gold: ['gold-halo', 'deco-rays', 'champagne', 'velvet-vignette', 'title'],
+  bubbles: ['bubble-glow', 'prism-orb', 'bubble-field', 'bubble-orbit', 'caustic-shimmer', 'pearl-chain', 'title'],
+  inferno: ['flare-glow', 'molten-core', 'flame-ring', 'ember-field', 'ember-vortex', 'flame-crown', 'title'],
+  ocean: ['deep-glow', 'deep-portal', 'caustic-light', 'sonar-rings', 'plankton', 'light-shafts', 'title'],
+  minimal: ['soft-vignette', 'fine-ring', 'clean-wave', 'precision-axis', 'editorial-frame', 'type-rule', 'title'],
+  retro: ['tape-glow', 'retro-sun', 'horizon-mountains', 'retro-grid', 'laser-moon', 'title'],
+  gold: ['velvet-vignette', 'luxe-spotlight', 'gold-halo', 'deco-rays', 'champagne', 'deco-arch', 'pearl-dust', 'title'],
+  crystal: ['crystal-glow', 'crystal-core', 'crystal-halo', 'facet-rays', 'floating-shards', 'crystal-dust', 'title'],
+  chrome: ['studio-lights', 'depth-floor', 'floor-reflection', 'turbine-blades', 'gyro-rings', 'chrome-orb', 'metal-sparks', 'title'],
 }
 
 const formatTime = value => {
@@ -240,6 +304,33 @@ const canvasSize = aspect => aspect === 'portrait'
   : aspect === 'landscape'
     ? { width: 1280, height: 720 }
     : { width: 900, height: 900 }
+
+const exportCanvasSize = (aspect, quality) => {
+  const dimensions = {
+    standard: {
+      portrait: { width: 720, height: 1280 },
+      landscape: { width: 1280, height: 720 },
+      square: { width: 720, height: 720 },
+    },
+    high: {
+      portrait: { width: 1080, height: 1920 },
+      landscape: { width: 1920, height: 1080 },
+      square: { width: 1080, height: 1080 },
+    },
+    maximum: {
+      portrait: { width: 2160, height: 3840 },
+      landscape: { width: 3840, height: 2160 },
+      square: { width: 2160, height: 2160 },
+    },
+  }
+  return dimensions[quality]?.[aspect] || dimensions.high[aspect]
+}
+
+const exportVideoBitrate = (quality, aspect) => {
+  if (quality === 'maximum') return aspect === 'square' ? 32_000_000 : 48_000_000
+  if (quality === 'standard') return aspect === 'square' ? 6_000_000 : 8_000_000
+  return aspect === 'square' ? 12_000_000 : 16_000_000
+}
 
 function drawCover(ctx, video, width, height, fit) {
   if (!video || video.readyState < 2 || !video.videoWidth) {
@@ -282,6 +373,22 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = liquid
     ctx.fillRect(0, 0, width, height)
   }
+  if (options.theme === 'crystal') {
+    const crystalAtmosphere = ctx.createRadialGradient(width * .5, height * .45, 0, width * .5, height * .45, Math.max(width, height) * .72)
+    crystalAtmosphere.addColorStop(0, 'rgba(80, 145, 190, .08)')
+    crystalAtmosphere.addColorStop(.5, 'rgba(42, 38, 92, .16)')
+    crystalAtmosphere.addColorStop(1, 'rgba(6, 10, 28, .5)')
+    ctx.fillStyle = crystalAtmosphere
+    ctx.fillRect(0, 0, width, height)
+  }
+  if (options.theme === 'chrome') {
+    const studio = ctx.createRadialGradient(width * .5, height * .42, 0, width * .5, height * .42, Math.max(width, height) * .78)
+    studio.addColorStop(0, 'rgba(94, 126, 160, .1)')
+    studio.addColorStop(.42, 'rgba(18, 26, 42, .2)')
+    studio.addColorStop(1, 'rgba(2, 5, 12, .68)')
+    ctx.fillStyle = studio
+    ctx.fillRect(0, 0, width, height)
+  }
 
   const values = frequencyData?.length ? frequencyData : new Uint8Array(64).fill(42)
   const sampleCount = Math.min(72, values.length)
@@ -295,6 +402,23 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   const accent = options.color
   const glow = options.glowColor
   const hasLayer = id => options.layers.includes(id)
+  const smoothFrequencyBin = (index, kernel = 2, wrap = false) => {
+    let weighted = 0
+    let weightTotal = 0
+    for (let offset = -kernel; offset <= kernel; offset += 1) {
+      const weight = kernel + 1 - Math.abs(offset)
+      let sampleIndex = Math.round(index) + offset
+      if (wrap) sampleIndex = (sampleIndex % sampleCount + sampleCount) % sampleCount
+      else sampleIndex = Math.max(0, Math.min(sampleCount - 1, sampleIndex))
+      weighted += values[sampleIndex] * weight
+      weightTotal += weight
+    }
+    return weighted / weightTotal / 255
+  }
+  const spectrumValue = (index, count, kernel = 2, wrap = false) => {
+    const denominator = wrap ? count : Math.max(1, count - 1)
+    return smoothFrequencyBin(index / denominator * (sampleCount - 1), kernel, wrap)
+  }
 
   if (hasLayer('bass-glow')) {
     const gradient = ctx.createRadialGradient(centerX, centerY, radius * .2, centerX, centerY, minSide * .62)
@@ -328,7 +452,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.shadowBlur = minSide * .018
     for (let i = 0; i < 18; i += 1) {
       const angle = (Math.PI * 2 * i) / 18 + time * .00035
-      const value = values[(i * 3) % sampleCount] / 255
+      const value = spectrumValue(i, 18, 2, true)
       const orbitRadius = radius * (1.34 + value * .16)
       ctx.globalAlpha = .48 + value * .5
       ctx.fillStyle = i % 3 ? accent : glow
@@ -344,15 +468,16 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.translate(centerX, centerY)
     ctx.lineCap = 'round'
     ctx.shadowColor = accent
-    ctx.shadowBlur = minSide * .018
-    for (let i = 0; i < 64; i += 1) {
-      const angle = (Math.PI * 2 * i) / 64 - Math.PI / 2
-      const value = values[Math.floor((i / 64) * sampleCount)] / 255
-      const bar = minSide * (.02 + value * .09 * (options.intensity / 50))
+    ctx.shadowBlur = minSide * .012
+    const barCount = 72
+    for (let i = 0; i < barCount; i += 1) {
+      const angle = (Math.PI * 2 * i) / barCount - Math.PI / 2
+      const value = spectrumValue(i, barCount, 3, true)
+      const bar = minSide * (.025 + Math.pow(value, .78) * .058 * (options.intensity / 70))
       const inner = radius * 1.15
-      ctx.strokeStyle = i % 5 === 0 ? '#ffffff' : accent
-      ctx.globalAlpha = .65 + value * .35
-      ctx.lineWidth = Math.max(2, minSide * .005)
+      ctx.strokeStyle = i % 9 === 0 ? glow : accent
+      ctx.globalAlpha = .58 + value * .35
+      ctx.lineWidth = Math.max(2, minSide * .0042)
       ctx.beginPath()
       ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner)
       ctx.lineTo(Math.cos(angle) * (inner + bar), Math.sin(angle) * (inner + bar))
@@ -368,7 +493,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.lineCap = 'round'
     for (let i = 0; i < 42; i += 1) {
       const angle = (Math.PI * 2 * i) / 42
-      const value = values[(i * 2) % sampleCount] / 255
+      const value = spectrumValue(i, 42, 3, true)
       const inner = radius * 1.26
       const length = minSide * (.012 + value * .035)
       ctx.strokeStyle = i % 2 ? accent : glow
@@ -390,7 +515,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const startX = width * .11
     const baseY = height * .9
     for (let i = 0; i < count; i += 1) {
-      const value = values[Math.floor((i / count) * sampleCount)] / 255
+      const value = spectrumValue(i, count, 3)
       const barHeight = minSide * (.012 + value * .15 * options.intensity / 70)
       ctx.fillStyle = i % 5 ? accent : glow
       ctx.globalAlpha = .45 + value * .55
@@ -403,7 +528,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.save()
     const count = 22
     for (let i = 0; i < count; i += 1) {
-      const value = values[Math.floor((i / count) * sampleCount)] / 255
+      const value = spectrumValue(i, count, 3)
       const barWidth = width * (.012 + value * .07)
       const y = height * .2 + (height * .6 * i) / count
       ctx.fillStyle = i % 4 ? accent : glow
@@ -423,7 +548,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     for (const direction of [-1, 1]) {
       ctx.beginPath()
       for (let i = 0; i < 72; i += 1) {
-        const value = values[Math.floor((i / 72) * sampleCount)] / 255
+        const value = spectrumValue(i, 72, 3)
         const x = width * .1 + (width * .8 * i) / 71
         const y = height * .78 + direction * Math.sin(i * .62 + time * .004) * value * minSide * .055
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
@@ -628,7 +753,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.rotate(time * .00006)
     for (let i = 0; i < 18; i += 1) {
       const angle = i * Math.PI * 2 / 18
-      const value = values[(i * 4) % sampleCount] / 255
+      const value = spectrumValue(i, 18, 3, true)
       const length = minSide * (.28 + value * .34)
       const gradient = ctx.createLinearGradient(0, 0, Math.cos(angle) * length, Math.sin(angle) * length)
       gradient.addColorStop(0, 'rgba(255,255,255,0)')
@@ -649,7 +774,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const gap = width * .006
     const barWidth = (width * .64 - gap * count) / count
     for (let i = 0; i < count; i += 1) {
-      const value = values[Math.floor(i / count * sampleCount)] / 255
+      const value = spectrumValue(i, count, 3)
       const barHeight = minSide * (.03 + value * .22)
       ctx.shadowColor = i % 2 ? accent : glow
       ctx.shadowBlur = minSide * .01
@@ -812,7 +937,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.save()
     for (let i = 0; i < 13; i += 1) {
       const x = width * (.08 + i / 15)
-      const value = values[(i * 5) % sampleCount] / 255
+      const value = spectrumValue(i, 13, 3)
       const length = height * (.06 + value * .18 + reaction * .05)
       ctx.strokeStyle = i % 2 ? accent : glow
       ctx.lineWidth = minSide * (.007 + value * .009)
@@ -861,7 +986,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.lineCap = 'round'
     ctx.beginPath()
     for (let i = 0; i <= 64; i += 1) {
-      const value = values[Math.floor(i / 64 * sampleCount)] / 255
+      const value = spectrumValue(i, 65, 3)
       const x = width * .08 + width * .84 * i / 64
       const y = height * .84 + Math.sin(i * .42 + time * .003) * minSide * (.018 + value * .05)
       if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
@@ -873,7 +998,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.save(); ctx.translate(centerX, centerY)
     for (let i = 0; i < 16; i += 1) {
       const angle = i / 16 * Math.PI * 2 + time * .00025
-      const value = values[(i * 4) % sampleCount] / 255
+      const value = spectrumValue(i, 16, 2, true)
       const r = radius * (1.22 + value * .18)
       const size = minSide * (.007 + value * .012)
       ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .5 + value * .45; ctx.lineWidth = minSide * .0025
@@ -885,7 +1010,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   if (hasLayer('bubble-spectrum')) {
     ctx.save()
     for (let i = 0; i < 30; i += 1) {
-      const value = values[Math.floor(i / 30 * sampleCount)] / 255
+      const value = spectrumValue(i, 30, 3)
       const x = width * .12 + width * .76 * i / 29
       const y = height * .88 - value * minSide * .16
       ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .45 + value * .5; ctx.lineWidth = minSide * .002
@@ -898,7 +1023,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.save(); ctx.translate(centerX, centerY)
     for (let i = 0; i < 40; i += 1) {
       const angle = i / 40 * Math.PI * 2
-      const value = values[(i * 2) % sampleCount] / 255
+      const value = spectrumValue(i, 40, 3, true)
       const r = radius * (1.08 + value * .12)
       ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .55 + value * .4; ctx.lineWidth = minSide * .002
       ctx.beginPath(); ctx.arc(Math.cos(angle) * r, Math.sin(angle) * r, minSide * (.006 + value * .009), 0, Math.PI * 2); ctx.stroke()
@@ -909,7 +1034,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   if (hasLayer('bubble-wave')) {
     ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .003
     for (let i = 0; i < 38; i += 1) {
-      const value = values[Math.floor(i / 38 * sampleCount)] / 255
+      const value = spectrumValue(i, 38, 3)
       const x = width * .1 + width * .8 * i / 37
       const y = height * .76 + Math.sin(i * .55 + time * .003) * minSide * .04
       ctx.globalAlpha = .35 + value * .6
@@ -949,9 +1074,10 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .02
     for (let ring = 0; ring < 2; ring += 1) {
       ctx.beginPath()
-      for (let i = 0; i <= 80; i += 1) {
-        const angle = i / 80 * Math.PI * 2
-        const flame = Math.max(0, Math.sin(angle * 11 - time * .004 + ring)) * reaction * .14
+      for (let i = 0; i <= 180; i += 1) {
+        const angle = i / 180 * Math.PI * 2
+        const wave = Math.sin(angle * 7 - time * .0028 + ring) * .55 + Math.sin(angle * 3 + time * .0017) * .3 + Math.sin(angle * 11 - time * .0012) * .15
+        const flame = wave * (.018 + reaction * .032)
         const r = radius * (1 + ring * .12 + flame)
         if (!i) ctx.moveTo(Math.cos(angle) * r, Math.sin(angle) * r); else ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r)
       }
@@ -965,7 +1091,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const count = hasLayer('mono-bars') ? 40 : 64
     for (let i = 0; i < count; i += 1) {
       const angle = i / count * Math.PI * 2 - Math.PI / 2
-      const value = values[Math.floor(i / count * sampleCount)] / 255
+      const value = spectrumValue(i, count, 3, true)
       const inner = radius * 1.12
       const length = minSide * (.012 + value * (hasLayer('mono-bars') ? .045 : .085))
       ctx.strokeStyle = i % 5 ? accent : glow; ctx.globalAlpha = .52 + value * .46
@@ -981,7 +1107,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     for (let line = 0; line < (isClean ? 1 : 3); line += 1) {
       ctx.beginPath()
       for (let i = 0; i <= 80; i += 1) {
-        const value = values[Math.floor(i / 80 * sampleCount)] / 255
+        const value = spectrumValue(i, 81, 3)
         const x = width * .08 + width * .84 * i / 80
         const y = height * (.78 + line * .035) + Math.sin(i * .34 + time * .003 + line) * minSide * (.008 + value * (isClean ? .02 : .038))
         if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
@@ -996,7 +1122,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const count = hasLayer('deco-rays') ? 24 : 36
     for (let i = 0; i < count; i += 1) {
       const angle = i / count * Math.PI * 2
-      const value = values[(i * 3) % sampleCount] / 255
+      const value = spectrumValue(i, count, 3, true)
       const start = radius * 1.2
       const end = start + minSide * (.025 + value * (hasLayer('deco-rays') ? .07 : .12))
       ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .25 + value * .65; ctx.lineWidth = minSide * (hasLayer('deco-rays') ? .0018 : .0035)
@@ -1006,16 +1132,18 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('caustic-light')) {
-    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.strokeStyle = `${glow}55`; ctx.lineWidth = minSide * .008; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .018
-    for (let row = 0; row < 5; row += 1) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.strokeStyle = `${glow}4d`; ctx.lineWidth = Math.max(1.5, minSide * .0035); ctx.shadowColor = glow; ctx.shadowBlur = minSide * .01
+    const causticRows = [.12, .28, .72, .88]
+    causticRows.forEach((rowPosition, row) => {
       ctx.beginPath()
       for (let i = 0; i <= 32; i += 1) {
         const x = width * i / 32
-        const y = height * (.16 + row * .17) + Math.sin(i * .7 + time * .0018 + row) * minSide * .025
+        const y = height * rowPosition + Math.sin(i * .64 + time * .0015 + row) * minSide * .016
         if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
       }
+      ctx.globalAlpha = .34 + row * .035
       ctx.stroke()
-    }
+    })
     ctx.restore()
   }
 
@@ -1037,7 +1165,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   if (hasLayer('tide-bars') || hasLayer('block-equalizer')) {
     ctx.save(); const count = hasLayer('block-equalizer') ? 24 : 42; const baseY = height * .89; const startX = width * .1; const available = width * .8; const gap = width * .004; const barWidth = available / count - gap
     for (let i = 0; i < count; i += 1) {
-      const value = values[Math.floor(i / count * sampleCount)] / 255
+      const value = spectrumValue(i, count, 3)
       const barHeight = minSide * (.012 + value * .16)
       ctx.fillStyle = i % 3 ? accent : glow; ctx.globalAlpha = .5 + value * .48
       ctx.fillRect(startX + i * available / count, baseY - barHeight, Math.max(2, barWidth), barHeight)
@@ -1072,8 +1200,9 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('retro-sun')) {
-    ctx.save(); const sunRadius = radius * 1.05; const gradient = ctx.createLinearGradient(0, centerY - sunRadius, 0, centerY + sunRadius); gradient.addColorStop(0, glow); gradient.addColorStop(1, accent); ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(centerX, centerY, sunRadius, 0, Math.PI * 2); ctx.fill(); ctx.globalCompositeOperation = 'destination-out'
-    for (let i = 0; i < 9; i += 1) { const y = centerY + sunRadius * (.12 + i * .1); ctx.fillRect(centerX - sunRadius, y, sunRadius * 2, minSide * (.006 + i * .0015)) }
+    ctx.save(); const sunRadius = radius * .92; const gradient = ctx.createLinearGradient(0, centerY - sunRadius, 0, centerY + sunRadius); gradient.addColorStop(0, glow); gradient.addColorStop(1, accent); ctx.fillStyle = gradient; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .018; ctx.beginPath(); ctx.arc(centerX, centerY, sunRadius, 0, Math.PI * 2); ctx.fill()
+    ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(8,8,28,.66)'
+    for (let i = 0; i < 7; i += 1) { const y = centerY + sunRadius * (.2 + i * .095); ctx.fillRect(centerX - sunRadius, y, sunRadius * 2, minSide * (.0035 + i * .0007)) }
     ctx.restore()
   }
 
@@ -1117,7 +1246,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
       ctx.beginPath()
       for (let i = 0; i <= 96; i += 1) {
         const angle = i / 96 * Math.PI * 2
-        const value = values[Math.floor(i / 96 * sampleCount)] / 255
+        const value = spectrumValue(i, 97, 3, true)
         const wobble = Math.sin(angle * 5 + time * .003 + band) * minSide * (.006 + value * .015)
         const r = radius * (1.32 + band * .08) + wobble
         if (!i) ctx.moveTo(Math.cos(angle) * r, Math.sin(angle) * r); else ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r)
@@ -1131,7 +1260,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-time * .0001)
     for (let i = 0; i < 12; i += 1) {
       const angle = i / 12 * Math.PI * 2
-      const value = values[(i * 5) % sampleCount] / 255
+      const value = spectrumValue(i, 12, 2, true)
       const r = radius * 1.55
       ctx.fillStyle = i % 3 ? accent : glow; ctx.globalAlpha = .3 + value * .7
       const size = minSide * (.004 + value * .007)
@@ -1184,11 +1313,11 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('city-silhouette')) {
-    ctx.save(); const ground = height * .72; ctx.fillStyle = 'rgba(3,7,18,.82)'
+    ctx.save(); const ground = height * .79; ctx.fillStyle = 'rgba(3,7,18,.82)'
     const buildings = [9,15,11,23,17,12,27,14,19,10,25,16,21,13,18,24,12,20]
     const unit = width / buildings.length
     buildings.forEach((storeys, i) => {
-      const buildingWidth = unit * .82; const buildingHeight = minSide * (.08 + storeys * .006)
+      const buildingWidth = unit * .82; const buildingHeight = minSide * (.06 + storeys * .005)
       const x = i * unit + unit * .09; const y = ground - buildingHeight
       ctx.fillRect(x, y, buildingWidth, buildingHeight)
       ctx.fillStyle = i % 2 ? `${accent}70` : `${glow}70`
@@ -1215,6 +1344,414 @@ function drawComposition(ctx, video, options, frequencyData, time) {
         if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
       }
       ctx.strokeStyle = track % 2 ? glow : accent; ctx.globalAlpha = .34 + track * .1; ctx.lineWidth = minSide * (.002 + track * .001); ctx.shadowColor = track % 2 ? glow : accent; ctx.shadowBlur = minSide * .01; ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('prism-orb')) {
+    ctx.save()
+    const orbRadius = radius * (1.02 + reaction * .05)
+    const prism = ctx.createRadialGradient(centerX - orbRadius * .34, centerY - orbRadius * .38, orbRadius * .04, centerX, centerY, orbRadius)
+    prism.addColorStop(0, 'rgba(255,255,255,.7)')
+    prism.addColorStop(.16, `${glow}66`)
+    prism.addColorStop(.42, `${accent}3d`)
+    prism.addColorStop(.7, 'rgba(120,100,255,.22)')
+    prism.addColorStop(1, 'rgba(8,20,38,.25)')
+    ctx.fillStyle = prism; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .026
+    ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.fill()
+    ctx.globalAlpha = .56; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .003
+    ctx.beginPath(); ctx.arc(centerX - orbRadius * .16, centerY - orbRadius * .2, orbRadius * .62, Math.PI * 1.08, Math.PI * 1.55); ctx.stroke()
+    ctx.restore()
+  }
+
+  if (hasLayer('caustic-shimmer')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.strokeStyle = `${glow}62`; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .014; ctx.lineWidth = minSide * .004
+    for (let band = 0; band < 5; band += 1) {
+      ctx.beginPath()
+      for (let i = 0; i <= 34; i += 1) {
+        const x = width * i / 34
+        const y = height * (.15 + band * .18) + Math.sin(i * .53 + time * .0015 + band * 1.4) * minSide * .018
+        if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+      }
+      ctx.globalAlpha = .12 + band * .035; ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('pearl-chain')) {
+    ctx.save(); ctx.translate(centerX, centerY)
+    for (let i = 0; i < 18; i += 1) {
+      const angle = Math.PI * (.12 + i / 21 * .76) + time * .00008
+      const value = spectrumValue(i, 18, 2)
+      const r = radius * (1.42 + value * .08)
+      const size = minSide * (.005 + value * .008)
+      const pearl = ctx.createRadialGradient(Math.cos(angle) * r - size * .3, Math.sin(angle) * r - size * .3, 0, Math.cos(angle) * r, Math.sin(angle) * r, size)
+      pearl.addColorStop(0, '#fff'); pearl.addColorStop(.4, glow); pearl.addColorStop(1, `${accent}66`)
+      ctx.fillStyle = pearl; ctx.globalAlpha = .48 + value * .46; ctx.beginPath(); ctx.arc(Math.cos(angle) * r, Math.sin(angle) * r, size, 0, Math.PI * 2); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('molten-core')) {
+    ctx.save(); ctx.translate(centerX, centerY)
+    const coreRadius = radius * (.82 + reaction * .07)
+    const lava = ctx.createRadialGradient(-coreRadius * .24, -coreRadius * .3, coreRadius * .02, 0, 0, coreRadius)
+    lava.addColorStop(0, '#ffe2a0'); lava.addColorStop(.16, glow); lava.addColorStop(.48, accent); lava.addColorStop(.78, '#8b1f0c'); lava.addColorStop(1, 'rgba(30,3,2,.82)')
+    ctx.fillStyle = lava; ctx.shadowColor = accent; ctx.shadowBlur = minSide * (.018 + reaction * .02)
+    ctx.beginPath()
+    for (let i = 0; i <= 64; i += 1) {
+      const angle = i / 64 * Math.PI * 2
+      const r = coreRadius * (1 + Math.sin(angle * 4 + time * .0018) * .035 + Math.sin(angle * 9 - time * .0023) * .018)
+      if (!i) ctx.moveTo(Math.cos(angle) * r, Math.sin(angle) * r); else ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r)
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore()
+  }
+
+  if (hasLayer('ember-vortex')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00012)
+    for (let i = 0; i < 54; i += 1) {
+      const progress = ((i * 17) % 54) / 54
+      const angle = i * .72 + progress * Math.PI * 2
+      const value = values[(i * 3) % sampleCount] / 255
+      const r = radius * (.42 + progress * 1.25)
+      ctx.fillStyle = i % 4 ? accent : glow; ctx.globalAlpha = .18 + value * .65
+      ctx.beginPath(); ctx.arc(Math.cos(angle) * r, Math.sin(angle) * r * .62, minSide * (.002 + value * .0035), 0, Math.PI * 2); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('flame-crown')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.lineCap = 'round'; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .012
+    for (let i = 0; i < 17; i += 1) {
+      const angle = Math.PI * (1.08 + i / 20 * .84)
+      const value = spectrumValue(i, 17, 3)
+      const start = radius * 1.1; const flame = minSide * (.03 + value * .075)
+      ctx.strokeStyle = i % 3 ? accent : glow; ctx.globalAlpha = .42 + value * .52; ctx.lineWidth = minSide * .004
+      ctx.beginPath(); ctx.moveTo(Math.cos(angle) * start, Math.sin(angle) * start); ctx.quadraticCurveTo(Math.cos(angle) * (start + flame * .55) + Math.sin(time * .003 + i) * flame * .15, Math.sin(angle) * (start + flame * .55), Math.cos(angle) * (start + flame), Math.sin(angle) * (start + flame)); ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('deep-portal')) {
+    ctx.save()
+    const portal = ctx.createRadialGradient(centerX, centerY, radius * .15, centerX, centerY, radius * 1.15)
+    portal.addColorStop(0, 'rgba(0,8,22,.92)'); portal.addColorStop(.48, 'rgba(0,30,58,.72)'); portal.addColorStop(.7, `${accent}42`); portal.addColorStop(.84, `${glow}68`); portal.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = portal; ctx.beginPath(); ctx.arc(centerX, centerY, radius * 1.22, 0, Math.PI * 2); ctx.fill()
+    ctx.strokeStyle = glow; ctx.globalAlpha = .62; ctx.lineWidth = minSide * .003; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .018
+    ctx.beginPath(); ctx.ellipse(centerX, centerY, radius * 1.08, radius * .42, -.08, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
+  }
+
+  if (hasLayer('light-shafts')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 5; i += 1) {
+      const x = width * (.12 + i * .2) + Math.sin(time * .0005 + i) * width * .03
+      const beam = ctx.createLinearGradient(x, 0, x + width * .08, height)
+      beam.addColorStop(0, `${glow}36`); beam.addColorStop(.62, `${accent}12`); beam.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = beam; ctx.globalAlpha = .25 + i * .035
+      ctx.beginPath(); ctx.moveTo(x - width * .035, 0); ctx.lineTo(x + width * .04, 0); ctx.lineTo(x + width * .18, height); ctx.lineTo(x - width * .04, height); ctx.closePath(); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('kelp-ribbons')) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = minSide * .007
+    for (let ribbon = 0; ribbon < 8; ribbon += 1) {
+      const startX = width * (.05 + ribbon * .13); ctx.beginPath(); ctx.moveTo(startX, height)
+      for (let i = 1; i <= 12; i += 1) { const y = height - minSide * .035 * i; const x = startX + Math.sin(i * .52 + time * .0014 + ribbon) * minSide * .025; ctx.lineTo(x, y) }
+      ctx.strokeStyle = ribbon % 2 ? `${accent}70` : `${glow}58`; ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('precision-axis')) {
+    ctx.save(); ctx.strokeStyle = `${glow}70`; ctx.lineWidth = Math.max(1, minSide * .0012); ctx.setLineDash([minSide * .008, minSide * .012])
+    ctx.beginPath(); ctx.moveTo(width * .08, centerY); ctx.lineTo(width * .92, centerY); ctx.moveTo(centerX, height * .08); ctx.lineTo(centerX, height * .92); ctx.stroke(); ctx.setLineDash([])
+    ctx.fillStyle = accent; ctx.globalAlpha = .75; ctx.beginPath(); ctx.arc(centerX, centerY, minSide * .004, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+
+  if (hasLayer('editorial-frame')) {
+    ctx.save(); const inset = minSide * .06; const short = minSide * .1; ctx.strokeStyle = accent; ctx.globalAlpha = .62; ctx.lineWidth = minSide * .002
+    ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2)
+    ctx.lineWidth = minSide * .005
+    ;[[inset,inset,1,1],[width-inset,inset,-1,1],[inset,height-inset,1,-1],[width-inset,height-inset,-1,-1]].forEach(([x,y,sx,sy]) => { ctx.beginPath(); ctx.moveTo(x, y + sy * short); ctx.lineTo(x, y); ctx.lineTo(x + sx * short, y); ctx.stroke() })
+    ctx.restore()
+  }
+
+  if (hasLayer('type-rule')) {
+    ctx.save(); ctx.strokeStyle = glow; ctx.globalAlpha = .55; ctx.lineWidth = minSide * .002
+    const gap = radius * 1.18
+    ctx.beginPath(); ctx.moveTo(width * .1, centerY); ctx.lineTo(centerX - gap, centerY); ctx.moveTo(centerX + gap, centerY); ctx.lineTo(width * .9, centerY); ctx.stroke()
+    for (const x of [width * .1, width * .9]) { ctx.fillStyle = accent; ctx.fillRect(x - minSide * .003, centerY - minSide * .003, minSide * .006, minSide * .006) }
+    ctx.restore()
+  }
+
+  if (hasLayer('horizon-mountains')) {
+    ctx.save(); const base = height * .66; const peaks = [0,.12,.06,.2,.1,.24,.08,.18,.05,.14,0]; ctx.fillStyle = 'rgba(6,4,24,.7)'; ctx.strokeStyle = accent; ctx.lineWidth = minSide * .0018; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .005
+    ctx.beginPath(); ctx.moveTo(0, base); peaks.forEach((peak, i) => ctx.lineTo(width * i / (peaks.length - 1), base - minSide * peak)); ctx.lineTo(width, base); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore()
+  }
+
+  if (hasLayer('tape-noise')) {
+    ctx.save(); ctx.globalAlpha = .09
+    for (let i = 0; i < 44; i += 1) {
+      const y = ((i * 37 + Math.floor(time * .04)) % 100) / 100 * height
+      const x = ((i * 61 + Math.floor(time * .02)) % 100) / 100 * width
+      const length = width * (.008 + (i % 7) * .006)
+      ctx.fillStyle = i % 5 ? '#fff' : accent; ctx.fillRect(x, y, length, Math.max(1, minSide * .001))
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('laser-moon')) {
+    ctx.save(); ctx.fillStyle = `${glow}66`; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .018; ctx.beginPath(); ctx.arc(width * .78, height * .2, minSide * .058, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(8,10,34,.9)'; ctx.beginPath(); ctx.arc(width * .802, height * .18, minSide * .055, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+
+  if (hasLayer('deco-arch')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = accent; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .01; ctx.lineWidth = minSide * .0025
+    for (let i = 0; i < 4; i += 1) {
+      const r = radius * (.78 + i * .22); ctx.globalAlpha = .24 + i * .12; ctx.beginPath(); ctx.arc(0, radius * .2, r, Math.PI, Math.PI * 2); ctx.lineTo(r, radius * 1.18); ctx.moveTo(-r, radius * .2); ctx.lineTo(-r, radius * 1.18); ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('luxe-spotlight')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    for (const [start, end] of [[width * .15,width * .48],[width * .85,width * .52]]) {
+      const beam = ctx.createLinearGradient(start, 0, end, height)
+      beam.addColorStop(0, `${glow}48`); beam.addColorStop(.5, `${accent}18`); beam.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = beam; ctx.globalAlpha = .4; ctx.beginPath(); ctx.moveTo(start - width * .04, 0); ctx.lineTo(start + width * .04, 0); ctx.lineTo(end + width * .18, height); ctx.lineTo(end - width * .18, height); ctx.closePath(); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('pearl-dust')) {
+    ctx.save()
+    for (let i = 0; i < 48; i += 1) {
+      const x = ((i * 73.7) % 100) / 100 * width; const y = ((i * 43.1 + time * .002) % 100) / 100 * height; const twinkle = .35 + Math.abs(Math.sin(time * .0015 + i)) * .65
+      ctx.fillStyle = i % 5 ? glow : '#fff'; ctx.globalAlpha = .18 + twinkle * .48; ctx.beginPath(); ctx.arc(x, y, minSide * (.0015 + i % 4 * .0007), 0, Math.PI * 2); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('crystal-glow')) {
+    const aura = ctx.createRadialGradient(centerX, centerY, radius * .08, centerX, centerY, minSide * .56)
+    aura.addColorStop(0, `${glow}4d`)
+    aura.addColorStop(.28, `${accent}2e`)
+    aura.addColorStop(.68, 'rgba(96,80,190,.1)')
+    aura.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = aura
+    ctx.fillRect(0, 0, width, height)
+  }
+
+  if (hasLayer('facet-rays')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.translate(centerX, centerY); ctx.rotate(time * .000025)
+    const rayCount = 10
+    for (let i = 0; i < rayCount; i += 1) {
+      const angle = i / rayCount * Math.PI * 2
+      const value = spectrumValue(i, rayCount, 2, true)
+      const inner = radius * .76
+      const outer = minSide * (.44 + value * .08)
+      const halfWidth = .035 + value * .016
+      const ray = ctx.createLinearGradient(Math.cos(angle) * inner, Math.sin(angle) * inner, Math.cos(angle) * outer, Math.sin(angle) * outer)
+      ray.addColorStop(0, i % 2 ? `${glow}42` : `${accent}42`)
+      ray.addColorStop(.55, i % 2 ? `${accent}1f` : `${glow}1f`)
+      ray.addColorStop(1, 'rgba(255,255,255,0)')
+      ctx.fillStyle = ray; ctx.globalAlpha = .34 + value * .24
+      ctx.beginPath(); ctx.moveTo(Math.cos(angle - halfWidth) * inner, Math.sin(angle - halfWidth) * inner); ctx.lineTo(Math.cos(angle - halfWidth * .34) * outer, Math.sin(angle - halfWidth * .34) * outer); ctx.lineTo(Math.cos(angle + halfWidth * .34) * outer, Math.sin(angle + halfWidth * .34) * outer); ctx.lineTo(Math.cos(angle + halfWidth) * inner, Math.sin(angle + halfWidth) * inner); ctx.closePath(); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('depth-grid')) {
+    ctx.save(); ctx.strokeStyle = `${glow}3d`; ctx.lineWidth = Math.max(1, minSide * .0012)
+    const horizon = height * .67
+    for (let i = -8; i <= 8; i += 1) { ctx.globalAlpha = .24 + Math.abs(i) * .012; ctx.beginPath(); ctx.moveTo(centerX, horizon); ctx.lineTo(centerX + i * width * .11, height); ctx.stroke() }
+    for (let i = 0; i < 8; i += 1) { const phase = (i / 8 + time * .00008) % 1; const y = horizon + (height - horizon) * phase * phase; ctx.globalAlpha = .12 + phase * .36; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke() }
+    ctx.restore()
+  }
+
+  if (hasLayer('crystal-halo')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-.18 + Math.sin(time * .0004) * .04); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 3; i += 1) {
+      const orbitX = radius * (1.05 + i * .31)
+      const orbitY = orbitX * (.3 + i * .035)
+      ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .26 + i * .13; ctx.lineWidth = minSide * (.0018 + i * .0005); ctx.shadowColor = i % 2 ? accent : glow; ctx.shadowBlur = minSide * .008
+      ctx.beginPath(); ctx.ellipse(0, 0, orbitX, orbitY, 0, 0, Math.PI * 2); ctx.stroke()
+      const beadAngle = time * (.00022 + i * .00005) + i * 2.2
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = .72; ctx.beginPath(); ctx.arc(Math.cos(beadAngle) * orbitX, Math.sin(beadAngle) * orbitY, minSide * (.0035 + i * .001), 0, Math.PI * 2); ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('crystal-core')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    const rotationY = time * .00022
+    const rotationX = -.2 + Math.sin(time * .00032) * .07
+    const scale = radius * (1.02 + reaction * .06)
+    const vertices = [[0,-1.32,0],[0,1.32,0],[-.76,0,0],[0,0,.66],[.76,0,0],[0,0,-.66]]
+    const rotatePoint = ([x,y,z]) => {
+      const cy = Math.cos(rotationY); const sy = Math.sin(rotationY); const cx = Math.cos(rotationX); const sx = Math.sin(rotationX)
+      const x1 = x * cy + z * sy; const z1 = -x * sy + z * cy
+      const y1 = y * cx - z1 * sx; const z2 = y * sx + z1 * cx
+      const perspective = 1 / (1.9 - z2 * .2)
+      return { x: centerX + x1 * scale * perspective * 1.65, y: centerY + y1 * scale * perspective * 1.65, z: z2 }
+    }
+    const projected = vertices.map(rotatePoint)
+    const faces = [[0,2,3],[0,3,4],[0,4,5],[0,5,2],[1,3,2],[1,4,3],[1,5,4],[1,2,5]]
+      .map((indices, faceIndex) => ({ indices, faceIndex, depth: indices.reduce((sum, index) => sum + projected[index].z, 0) / indices.length }))
+      .sort((a,b) => a.depth - b.depth)
+    faces.forEach(({ indices, faceIndex, depth }) => {
+      const points = indices.map(index => projected[index])
+      const faceGradient = ctx.createLinearGradient(points[0].x, points[0].y, points[2].x, points[2].y)
+      const front = Math.max(0, Math.min(1, (depth + .8) / 1.6))
+      faceGradient.addColorStop(0, faceIndex % 2 ? `${glow}${front > .5 ? '70' : '38'}` : `${accent}${front > .5 ? '78' : '3d'}`)
+      faceGradient.addColorStop(.5, 'rgba(255,255,255,.24)')
+      faceGradient.addColorStop(1, faceIndex % 2 ? `${accent}2e` : `${glow}33`)
+      ctx.fillStyle = faceGradient; ctx.strokeStyle = front > .5 ? 'rgba(255,255,255,.72)' : `${glow}7a`; ctx.lineWidth = minSide * .0022; ctx.shadowColor = faceIndex % 2 ? glow : accent; ctx.shadowBlur = minSide * (.008 + front * .01)
+      ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y); ctx.lineTo(points[1].x, points[1].y); ctx.lineTo(points[2].x, points[2].y); ctx.closePath(); ctx.fill(); ctx.stroke()
+    })
+    ctx.globalAlpha = .72; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .0015
+    ctx.beginPath(); ctx.moveTo(projected[0].x, projected[0].y); ctx.lineTo(projected[1].x, projected[1].y); ctx.stroke()
+    ctx.restore()
+  }
+
+  if (hasLayer('floating-shards')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 14; i += 1) {
+      const angle = i * 2.399 + time * (.00005 + i % 3 * .000012)
+      const distance = radius * (1.38 + ((i * 29) % 70) / 100)
+      const value = values[(i * 5) % sampleCount] / 255
+      const x = centerX + Math.cos(angle) * distance; const y = centerY + Math.sin(angle) * distance * .72
+      const shardHeight = minSide * (.022 + (i % 4) * .009 + value * .012); const shardWidth = shardHeight * (.26 + i % 3 * .06)
+      ctx.save(); ctx.translate(x, y); ctx.rotate(angle + time * .0002 * (i % 2 ? 1 : -1)); ctx.fillStyle = i % 2 ? `${accent}70` : `${glow}70`; ctx.strokeStyle = 'rgba(255,255,255,.62)'; ctx.lineWidth = Math.max(1, minSide * .0012); ctx.globalAlpha = .35 + value * .5
+      ctx.beginPath(); ctx.moveTo(0, -shardHeight); ctx.lineTo(shardWidth, 0); ctx.lineTo(0, shardHeight * .75); ctx.lineTo(-shardWidth, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('prism-spectrum')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    const count = 25; const startX = width * .1; const available = width * .8; const baseY = height * .89
+    for (let i = 0; i < count; i += 1) {
+      const value = spectrumValue(i, count, 3)
+      const crystalHeight = minSide * (.018 + value * .14); const x = startX + available * i / (count - 1); const half = available / count * .3
+      ctx.fillStyle = i % 3 === 0 ? `${glow}80` : `${accent}72`; ctx.strokeStyle = 'rgba(255,255,255,.42)'; ctx.lineWidth = Math.max(1, minSide * .0009); ctx.globalAlpha = .4 + value * .5
+      ctx.beginPath(); ctx.moveTo(x, baseY - crystalHeight); ctx.lineTo(x + half, baseY); ctx.lineTo(x - half, baseY); ctx.closePath(); ctx.fill(); ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('light-sweep')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    const sweepX = ((time * .00013) % 1.4 - .2) * width
+    const sweep = ctx.createLinearGradient(sweepX - width * .14, 0, sweepX + width * .14, 0)
+    sweep.addColorStop(0, 'rgba(255,255,255,0)'); sweep.addColorStop(.42, `${accent}18`); sweep.addColorStop(.5, 'rgba(255,255,255,.38)'); sweep.addColorStop(.58, `${glow}18`); sweep.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = sweep; ctx.transform(1, 0, -.22, 1, 0, 0); ctx.fillRect(sweepX - width * .18, 0, width * .36, height); ctx.restore()
+  }
+
+  if (hasLayer('crystal-dust')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 42; i += 1) {
+      const x = ((i * 67.9) % 100) / 100 * width; const y = ((i * 41.7 + time * .0012) % 100) / 100 * height; const twinkle = .25 + Math.abs(Math.sin(time * .0018 + i * 1.9)) * .75
+      const size = minSide * (.0013 + i % 4 * .00065) * (1 + reaction * .8)
+      ctx.fillStyle = i % 5 ? glow : '#fff'; ctx.globalAlpha = .18 + twinkle * .55; ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-size, -size, size * 2, size * 2); ctx.restore()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('studio-lights')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    const lightSources = [[width * .12, glow, width * .42], [width * .88, accent, width * .58]]
+    lightSources.forEach(([sourceX, colour, targetX], index) => {
+      const beam = ctx.createLinearGradient(sourceX, 0, targetX, height)
+      beam.addColorStop(0, `${colour}52`); beam.addColorStop(.42, `${colour}18`); beam.addColorStop(1, 'rgba(255,255,255,0)')
+      ctx.fillStyle = beam; ctx.globalAlpha = .26 + index * .05
+      ctx.beginPath(); ctx.moveTo(sourceX - width * .035, 0); ctx.lineTo(sourceX + width * .035, 0); ctx.lineTo(targetX + width * .2, height); ctx.lineTo(targetX - width * .2, height); ctx.closePath(); ctx.fill()
+    })
+    ctx.restore()
+  }
+
+  if (hasLayer('depth-floor')) {
+    ctx.save(); const horizon = height * .68; ctx.strokeStyle = `${accent}38`; ctx.lineWidth = Math.max(1, minSide * .001)
+    for (let i = -10; i <= 10; i += 1) { ctx.globalAlpha = .14 + Math.abs(i) * .008; ctx.beginPath(); ctx.moveTo(centerX, horizon); ctx.lineTo(centerX + i * width * .09, height); ctx.stroke() }
+    for (let i = 0; i < 9; i += 1) { const phase = (i / 9 + time * .00006) % 1; const y = horizon + (height - horizon) * phase * phase; ctx.globalAlpha = .08 + phase * .28; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke() }
+    ctx.restore()
+  }
+
+  if (hasLayer('floor-reflection')) {
+    ctx.save(); ctx.translate(centerX, height * .72); ctx.scale(1, .22)
+    const reflection = ctx.createRadialGradient(0, 0, radius * .05, 0, 0, radius * 1.8)
+    reflection.addColorStop(0, 'rgba(255,255,255,.34)'); reflection.addColorStop(.18, `${glow}32`); reflection.addColorStop(.54, `${accent}1c`); reflection.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = reflection; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .08; ctx.beginPath(); ctx.arc(0, 0, radius * 1.75, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+
+  if (hasLayer('turbine-blades')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00016); ctx.globalCompositeOperation = 'screen'
+    const bladeCount = 14
+    for (let i = 0; i < bladeCount; i += 1) {
+      const angle = i / bladeCount * Math.PI * 2
+      const value = spectrumValue(i, bladeCount, 3, true)
+      const inner = radius * .72; const outer = radius * (1.35 + value * .22); const sweep = .22
+      const blade = ctx.createLinearGradient(Math.cos(angle) * inner, Math.sin(angle) * inner, Math.cos(angle + sweep) * outer, Math.sin(angle + sweep) * outer)
+      blade.addColorStop(0, 'rgba(255,255,255,.52)'); blade.addColorStop(.24, `${glow}70`); blade.addColorStop(.62, `${accent}44`); blade.addColorStop(1, 'rgba(18,28,42,.18)')
+      ctx.fillStyle = blade; ctx.strokeStyle = i % 2 ? `${glow}8c` : `${accent}8c`; ctx.lineWidth = minSide * .0015; ctx.globalAlpha = .48 + value * .34
+      ctx.beginPath(); ctx.moveTo(Math.cos(angle - .05) * inner, Math.sin(angle - .05) * inner); ctx.quadraticCurveTo(Math.cos(angle + sweep * .45) * outer * .86, Math.sin(angle + sweep * .45) * outer * .86, Math.cos(angle + sweep) * outer, Math.sin(angle + sweep) * outer); ctx.lineTo(Math.cos(angle + .14) * inner, Math.sin(angle + .14) * inner); ctx.closePath(); ctx.fill(); ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('gyro-rings')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.globalCompositeOperation = 'screen'; ctx.lineCap = 'round'
+    const gyroAngles = [-.42, .18, .76]
+    gyroAngles.forEach((tilt, index) => {
+      ctx.save(); ctx.rotate(tilt + Math.sin(time * .00025 + index) * .05); ctx.strokeStyle = index === 1 ? glow : accent; ctx.globalAlpha = .32 + index * .14; ctx.lineWidth = minSide * (.0018 + index * .0008); ctx.shadowColor = index === 1 ? glow : accent; ctx.shadowBlur = minSide * .009
+      ctx.beginPath(); ctx.ellipse(0, 0, radius * (1.08 + index * .17), radius * (.34 + index * .045), 0, 0, Math.PI * 2); ctx.stroke()
+      const marker = time * (.0002 + index * .00005) + index * 2
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = .76; ctx.beginPath(); ctx.arc(Math.cos(marker) * radius * (1.08 + index * .17), Math.sin(marker) * radius * (.34 + index * .045), minSide * (.003 + index * .0008), 0, Math.PI * 2); ctx.fill(); ctx.restore()
+    })
+    ctx.restore()
+  }
+
+  if (hasLayer('metal-spectrum')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.lineCap = 'round'; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .006
+    const barCount = 64
+    for (let i = 0; i < barCount; i += 1) {
+      const angle = i / barCount * Math.PI * 2 - Math.PI / 2
+      const value = spectrumValue(i, barCount, 3, true)
+      const inner = radius * 1.48; const length = minSide * (.012 + value * .045)
+      ctx.strokeStyle = i % 8 === 0 ? '#fff' : i % 2 ? accent : glow; ctx.globalAlpha = .38 + value * .52; ctx.lineWidth = minSide * .0025
+      ctx.beginPath(); ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner); ctx.lineTo(Math.cos(angle) * (inner + length), Math.sin(angle) * (inner + length)); ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  if (hasLayer('chrome-orb')) {
+    ctx.save()
+    const orbRadius = radius * (.88 + reaction * .035)
+    const chrome = ctx.createRadialGradient(centerX - orbRadius * .34, centerY - orbRadius * .38, orbRadius * .025, centerX, centerY, orbRadius)
+    chrome.addColorStop(0, '#ffffff'); chrome.addColorStop(.07, '#dff3ff'); chrome.addColorStop(.17, '#8395a8'); chrome.addColorStop(.31, '#283545'); chrome.addColorStop(.47, '#080d15'); chrome.addColorStop(.61, `${accent}b8`); chrome.addColorStop(.72, '#121b27'); chrome.addColorStop(.84, '#536577'); chrome.addColorStop(.93, '#d5e4ef'); chrome.addColorStop(1, '#1b2532')
+    ctx.fillStyle = chrome; ctx.shadowColor = accent; ctx.shadowBlur = minSide * (.02 + reaction * .016); ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.fill()
+    ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius * .98, 0, Math.PI * 2); ctx.clip()
+    const band = ctx.createLinearGradient(0, centerY - orbRadius, 0, centerY + orbRadius)
+    band.addColorStop(0, 'rgba(255,255,255,.55)'); band.addColorStop(.2, 'rgba(255,255,255,0)'); band.addColorStop(.48, `${accent}2e`); band.addColorStop(.62, 'rgba(255,255,255,.28)'); band.addColorStop(.78, 'rgba(0,0,0,.34)'); band.addColorStop(1, 'rgba(255,255,255,.18)')
+    ctx.fillStyle = band; ctx.fillRect(centerX - orbRadius, centerY - orbRadius, orbRadius * 2, orbRadius * 2)
+    ctx.globalAlpha = .78; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .0035; ctx.beginPath(); ctx.arc(centerX - orbRadius * .15, centerY - orbRadius * .18, orbRadius * .63, Math.PI * 1.08, Math.PI * 1.58); ctx.stroke(); ctx.restore()
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = minSide * .0018; ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
+  }
+
+  if (hasLayer('chrome-sweep')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    const sweepX = ((time * .00016) % 1.45 - .22) * width
+    const sweep = ctx.createLinearGradient(sweepX - width * .1, 0, sweepX + width * .1, 0)
+    sweep.addColorStop(0, 'rgba(255,255,255,0)'); sweep.addColorStop(.45, `${accent}22`); sweep.addColorStop(.5, 'rgba(255,255,255,.66)'); sweep.addColorStop(.55, `${glow}22`); sweep.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = sweep; ctx.transform(1, 0, -.18, 1, 0, 0); ctx.fillRect(sweepX - width * .12, 0, width * .24, height); ctx.restore()
+  }
+
+  if (hasLayer('metal-sparks')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 36; i += 1) {
+      const angle = i * 2.399 + time * .00009; const distance = radius * (1.2 + ((i * 23) % 90) / 65); const twinkle = .28 + Math.abs(Math.sin(time * .0017 + i * 1.4)) * .72
+      const x = centerX + Math.cos(angle) * distance; const y = centerY + Math.sin(angle) * distance * .74; const size = minSide * (.0012 + i % 4 * .0007)
+      ctx.fillStyle = i % 6 ? glow : '#fff'; ctx.globalAlpha = .18 + twinkle * .56; ctx.fillRect(x - size * 1.8, y - size * .45, size * 3.6, size * .9)
     }
     ctx.restore()
   }
@@ -1253,6 +1790,7 @@ export default function MusicVisualizer({ onExit }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [aspect, setAspect] = useState('square')
+  const [exportQuality, setExportQuality] = useState('high')
   const [durationMode, setDurationMode] = useState('full')
   const [fit, setFit] = useState('cover')
   const [title, setTitle] = useState('YOUR TITLE')
@@ -1419,16 +1957,40 @@ export default function MusicVisualizer({ onExit }) {
       : Math.min(Number(durationMode), audioRef.current.duration || Number(durationMode))
     if (!duration) { setError('The song is still loading. Wait a moment, then try again.'); return }
     const graph = await ensureAudioGraph()
-    const canvasStream = canvasRef.current.captureStream(30)
+    const canvas = canvasRef.current
+    const previewSize = canvasSize(aspect)
+    const outputSize = exportCanvasSize(aspect, exportQuality)
+    canvas.width = outputSize.width
+    canvas.height = outputSize.height
+    const restorePreviewResolution = () => {
+      canvas.width = previewSize.width
+      canvas.height = previewSize.height
+    }
+    const canvasStream = canvas.captureStream(30)
     graph.recordingDestination.stream.getAudioTracks().forEach(track => canvasStream.addTrack(track))
-    const recorder = new MediaRecorder(canvasStream, {
-      mimeType: mp4Type,
-      videoBitsPerSecond: aspect === 'square' ? 6_000_000 : 8_000_000,
-      audioBitsPerSecond: 192_000,
-    })
+    let recorder
+    try {
+      recorder = new MediaRecorder(canvasStream, {
+        mimeType: mp4Type,
+        videoBitsPerSecond: exportVideoBitrate(exportQuality, aspect),
+        audioBitsPerSecond: exportQuality === 'maximum' ? 320_000 : 256_000,
+      })
+    } catch (exportError) {
+      canvasStream.getTracks().forEach(track => track.stop())
+      restorePreviewResolution()
+      setError(exportQuality === 'maximum'
+        ? 'This device cannot encode 4K MP4. Choose High 1080p and export again.'
+        : exportError.message || 'MP4 export could not start.')
+      return
+    }
     const chunks = []
     recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data) }
-    recorder.onerror = event => { setError(event.error?.message || 'MP4 export failed.'); setExporting(false) }
+    recorder.onerror = event => {
+      setError(event.error?.message || 'MP4 export failed.')
+      setExporting(false)
+      canvasStream.getTracks().forEach(track => track.stop())
+      restorePreviewResolution()
+    }
     recorder.onstop = () => {
       if (exportCancelledRef.current) {
         setExporting(false)
@@ -1437,17 +1999,19 @@ export default function MusicVisualizer({ onExit }) {
         videoRef.current?.pause()
         audioRef.current?.pause()
         canvasStream.getTracks().forEach(track => track.stop())
+        restorePreviewResolution()
         return
       }
       const blob = new Blob(chunks, { type: recorder.mimeType || 'video/mp4' })
       if (result?.url) URL.revokeObjectURL(result.url)
-      setResult({ blob, url: URL.createObjectURL(blob), duration })
+      setResult({ blob, url: URL.createObjectURL(blob), duration, width: outputSize.width, height: outputSize.height, quality: exportQuality })
       setExporting(false)
       setExportProgress(100)
       setPlaying(false)
       videoRef.current?.pause()
       audioRef.current?.pause()
       canvasStream.getTracks().forEach(track => track.stop())
+      restorePreviewResolution()
     }
     recorderRef.current = recorder
     exportCancelledRef.current = false
@@ -1530,6 +2094,7 @@ export default function MusicVisualizer({ onExit }) {
           <label className="music-range-field"><span>Horizontal <output>{centerX}%</output></span><input type="range" min="18" max="82" value={centerX} onChange={event => setCenterX(Number(event.target.value))}/></label>
           <label className="music-range-field"><span>Vertical <output>{centerY}%</output></span><input type="range" min="18" max="82" value={centerY} onChange={event => setCenterY(Number(event.target.value))}/></label>
           <FlowSelect label="Canvas size" value={aspect} options={aspectOptions} onChange={setAspect}/>
+          <FlowSelect label="Export quality" value={exportQuality} options={exportQualityOptions} onChange={setExportQuality}/>
           <FlowSelect label="Export length" value={durationMode} options={durationOptions} onChange={setDurationMode}/>
           <div className="music-fit"><span>Video fit</span><div><button type="button" className={fit === 'cover' ? 'active' : ''} onClick={() => setFit('cover')}>Fill canvas</button><button type="button" className={fit === 'contain' ? 'active' : ''} onClick={() => setFit('contain')}>Show all</button></div></div>
         </details>
@@ -1542,8 +2107,8 @@ export default function MusicVisualizer({ onExit }) {
         <div className="music-preview-note"><AudioLines size={17}/><span><strong>Beat-reactive preview</strong><small>Click or drag the timeline to jump through the song. Use the 5-second buttons for precise skipping.</small></span></div>
         {error && <div className="music-error" role="alert"><CircleAlert size={17}/><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="Dismiss"><X size={15}/></button></div>}
         {exporting && <div className="music-exporting"><div><span>Recording MP4 in real time</span><strong>{Math.round(exportProgress)}%</strong></div><div><i style={{ width: `${exportProgress}%` }}/></div><small>Keep this tab open. A {formatTime(selectedDuration)} export takes about the same amount of time.</small><button type="button" onClick={stopExport}>Cancel export</button></div>}
-        {result && <div className="music-result"><span><Check size={18}/></span><div><strong>MP4 is ready</strong><small>{formatTime(result.duration)} · {formatBytes(result.blob.size)}</small></div><button type="button" onClick={downloadResult}><Download size={16}/> Download MP4</button></div>}
-        <div className="music-export-bar"><div><span className={mp4Type ? 'supported' : 'unsupported'}>{mp4Type ? <Check size={15}/> : <CircleAlert size={15}/>}</span><span><strong>{mp4Type ? 'Genuine MP4 export supported' : 'MP4 export is not supported here'}</strong><small>{mp4Type ? 'Video, music and beat layers are recorded together.' : 'Use the latest Chrome or Edge desktop browser.'}</small></span></div><button type="button" disabled={exporting || !mp4Type} onClick={exportMp4}><Download size={17}/> {exporting ? 'Exporting…' : 'Export MP4'}</button></div>
+        {result && <div className="music-result"><span><Check size={18}/></span><div><strong>High-quality MP4 is ready</strong><small>{result.width} × {result.height} · {formatTime(result.duration)} · {formatBytes(result.blob.size)}</small></div><button type="button" onClick={downloadResult}><Download size={16}/> Download MP4</button></div>}
+        <div className="music-export-bar"><div><span className={mp4Type ? 'supported' : 'unsupported'}>{mp4Type ? <Check size={15}/> : <CircleAlert size={15}/>}</span><span><strong>{mp4Type ? exportQuality === 'maximum' ? 'Maximum-quality 4K MP4' : 'Full-resolution MP4 export' : 'MP4 export is not supported here'}</strong><small>{mp4Type ? exportQuality === 'maximum' ? 'Up to 48 Mbps video with 320 kbps audio. Export takes more memory.' : exportQuality === 'standard' ? '720p video with 256 kbps audio.' : '1080p high-bitrate video with 256 kbps audio.' : 'Use the latest Chrome or Edge desktop browser.'}</small></span></div><button type="button" disabled={exporting || !mp4Type} onClick={exportMp4}><Download size={17}/> {exporting ? 'Exporting…' : 'Export MP4'}</button></div>
       </section>
     </section>
 
