@@ -76,6 +76,13 @@ export const seoPages = {
     heading: 'Music Visualizer and MP4 Maker',
     type: 'utility',
   },
+  'audio-lyrics': {
+    path: '/utilities/audio-lyrics',
+    title: 'Audio to Phonetic Lyrics Converter | Flowly',
+    description: 'Transcribe mixed-language vocals into editable phonetic lyrics written with English letters. Copy or download TXT and LRC files privately in your browser.',
+    heading: 'Audio to Phonetic Lyrics Converter',
+    type: 'utility',
+  },
 }
 
 const setMeta = (selector, attribute, value) => {

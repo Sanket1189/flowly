@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, AudioLines, Check, CircleAlert, Download, FileMusic, Film,
-  FastForward, Layers3, Pause, Play, Rewind, RotateCcw, Sparkles, Upload, X,
+  ArrowLeft, AudioLines, Captions, Check, CircleAlert, Download, FileMusic, Film,
+  FastForward, Layers3, LockKeyhole, Pause, Play, Plus, Rewind, RotateCcw, Search, Sparkles, Upload, X,
 } from 'lucide-react'
 import FlowSelect from './FlowSelect.jsx'
 import './music-visualizer.css'
 import './music-visualizer-themes.css'
+import './music-visualizer-lyrics.css'
+import './music-visualizer-layer-browser.css'
 
 const MP4_TYPES = [
   'video/mp4;codecs="avc1.640033,mp4a.40.2"',
@@ -282,8 +284,8 @@ const defaultThemeLayers = {
   minimal: ['soft-vignette', 'fine-ring', 'clean-wave', 'precision-axis', 'editorial-frame', 'type-rule', 'title'],
   retro: ['tape-glow', 'retro-sun', 'horizon-mountains', 'retro-grid', 'laser-moon', 'title'],
   gold: ['velvet-vignette', 'luxe-spotlight', 'gold-halo', 'deco-rays', 'champagne', 'deco-arch', 'pearl-dust', 'title'],
-  crystal: ['crystal-glow', 'crystal-core', 'crystal-halo', 'facet-rays', 'floating-shards', 'crystal-dust', 'title'],
-  chrome: ['studio-lights', 'depth-floor', 'floor-reflection', 'turbine-blades', 'gyro-rings', 'chrome-orb', 'metal-sparks', 'title'],
+  crystal: ['crystal-glow', 'crystal-core', 'crystal-halo', 'facet-rays', 'floating-shards', 'light-sweep', 'crystal-dust', 'title'],
+  chrome: ['studio-lights', 'depth-floor', 'floor-reflection', 'turbine-blades', 'gyro-rings', 'chrome-orb', 'chrome-sweep', 'metal-sparks', 'title'],
 }
 
 const formatTime = value => {
@@ -297,6 +299,51 @@ const formatBytes = bytes => {
   const units = ['B', 'KB', 'MB', 'GB']
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
   return `${(bytes / (1024 ** index)).toFixed(index ? 1 : 0)} ${units[index]}`
+}
+
+const formatLyricTime = value => {
+  const seconds = Math.max(0, Number(value) || 0)
+  const minutes = Math.floor(seconds / 60)
+  return `${String(minutes).padStart(2, '0')}:${(seconds - minutes * 60).toFixed(2).padStart(5, '0')}`
+}
+
+const parseLyrics = value => value
+  .split(/\r?\n/)
+  .map((line, index) => {
+    const match = line.match(/^\s*\[(\d{1,3}):(\d{2}(?:\.\d{1,3})?)\]\s*(.*?)\s*$/)
+    if (match) {
+      const text = match[3].trim()
+      if (!text) {
+        return {
+          id: index,
+          time: null,
+          text: '',
+          pause: true,
+          duration: Number(match[1]) + Number(match[2]) / 100,
+        }
+      }
+      const pause = !text || /^\[(?:pause|instrumental|music)\]$/i.test(text)
+      return { id: index, time: Number(match[1]) * 60 + Number(match[2]), text: pause ? '' : text, pause, duration: 0 }
+    }
+    const text = line.trim()
+    if (!text || /^\[[a-z]+:/i.test(text)) return null
+    return { id: index, time: null, text, pause: false, duration: 0 }
+  })
+  .filter(Boolean)
+
+const wrapCanvasText = (ctx, value, maxWidth) => {
+  const words = value.split(/\s+/)
+  const lines = []
+  let line = ''
+  words.forEach(word => {
+    const candidate = line ? `${line} ${word}` : word
+    if (line && ctx.measureText(candidate).width > maxWidth) {
+      lines.push(line)
+      line = word
+    } else line = candidate
+  })
+  if (line) lines.push(line)
+  return lines.slice(0, 3)
 }
 
 const canvasSize = aspect => aspect === 'portrait'
@@ -374,19 +421,34 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillRect(0, 0, width, height)
   }
   if (options.theme === 'crystal') {
-    const crystalAtmosphere = ctx.createRadialGradient(width * .5, height * .45, 0, width * .5, height * .45, Math.max(width, height) * .72)
-    crystalAtmosphere.addColorStop(0, 'rgba(80, 145, 190, .08)')
-    crystalAtmosphere.addColorStop(.5, 'rgba(42, 38, 92, .16)')
-    crystalAtmosphere.addColorStop(1, 'rgba(6, 10, 28, .5)')
+    const crystalAtmosphere = ctx.createRadialGradient(width * .5, height * .42, 0, width * .5, height * .46, Math.max(width, height) * .76)
+    crystalAtmosphere.addColorStop(0, 'rgba(142, 224, 255, .13)')
+    crystalAtmosphere.addColorStop(.32, 'rgba(92, 96, 190, .12)')
+    crystalAtmosphere.addColorStop(.7, 'rgba(30, 29, 76, .28)')
+    crystalAtmosphere.addColorStop(1, 'rgba(4, 7, 22, .64)')
     ctx.fillStyle = crystalAtmosphere
+    ctx.fillRect(0, 0, width, height)
+    const crystalLight = ctx.createLinearGradient(0, 0, width, height)
+    crystalLight.addColorStop(0, 'rgba(255,255,255,.12)')
+    crystalLight.addColorStop(.24, 'rgba(126,225,255,.025)')
+    crystalLight.addColorStop(.62, 'rgba(225,188,255,.04)')
+    crystalLight.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = crystalLight
     ctx.fillRect(0, 0, width, height)
   }
   if (options.theme === 'chrome') {
-    const studio = ctx.createRadialGradient(width * .5, height * .42, 0, width * .5, height * .42, Math.max(width, height) * .78)
-    studio.addColorStop(0, 'rgba(94, 126, 160, .1)')
-    studio.addColorStop(.42, 'rgba(18, 26, 42, .2)')
-    studio.addColorStop(1, 'rgba(2, 5, 12, .68)')
+    const studio = ctx.createRadialGradient(width * .5, height * .39, 0, width * .5, height * .44, Math.max(width, height) * .82)
+    studio.addColorStop(0, 'rgba(178, 215, 238, .14)')
+    studio.addColorStop(.28, 'rgba(54, 72, 94, .17)')
+    studio.addColorStop(.62, 'rgba(13, 20, 33, .38)')
+    studio.addColorStop(1, 'rgba(1, 3, 8, .78)')
     ctx.fillStyle = studio
+    ctx.fillRect(0, 0, width, height)
+    const steelFalloff = ctx.createLinearGradient(0, 0, 0, height)
+    steelFalloff.addColorStop(0, 'rgba(255,255,255,.07)')
+    steelFalloff.addColorStop(.45, 'rgba(255,255,255,0)')
+    steelFalloff.addColorStop(1, 'rgba(0,0,0,.32)')
+    ctx.fillStyle = steelFalloff
     ctx.fillRect(0, 0, width, height)
   }
 
@@ -1583,7 +1645,11 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('crystal-core')) {
-    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    ctx.save()
+    const crystalShadow = ctx.createRadialGradient(centerX, centerY + radius * 1.02, 0, centerX, centerY + radius * 1.02, radius * 1.28)
+    crystalShadow.addColorStop(0, 'rgba(4,8,24,.55)'); crystalShadow.addColorStop(.46, `${accent}1f`); crystalShadow.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = crystalShadow; ctx.save(); ctx.translate(centerX, centerY + radius * 1.02); ctx.scale(1, .22); ctx.beginPath(); ctx.arc(0, 0, radius * 1.25, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+    ctx.globalCompositeOperation = 'source-over'
     const rotationY = time * .00022
     const rotationX = -.2 + Math.sin(time * .00032) * .07
     const scale = radius * (1.02 + reaction * .06)
@@ -1606,24 +1672,35 @@ function drawComposition(ctx, video, options, frequencyData, time) {
       faceGradient.addColorStop(0, faceIndex % 2 ? `${glow}${front > .5 ? '70' : '38'}` : `${accent}${front > .5 ? '78' : '3d'}`)
       faceGradient.addColorStop(.5, 'rgba(255,255,255,.24)')
       faceGradient.addColorStop(1, faceIndex % 2 ? `${accent}2e` : `${glow}33`)
-      ctx.fillStyle = faceGradient; ctx.strokeStyle = front > .5 ? 'rgba(255,255,255,.72)' : `${glow}7a`; ctx.lineWidth = minSide * .0022; ctx.shadowColor = faceIndex % 2 ? glow : accent; ctx.shadowBlur = minSide * (.008 + front * .01)
+      ctx.fillStyle = faceGradient; ctx.globalAlpha = .5 + front * .38; ctx.strokeStyle = front > .5 ? 'rgba(255,255,255,.78)' : `${glow}72`; ctx.lineWidth = minSide * (.0015 + front * .0012); ctx.shadowColor = faceIndex % 2 ? glow : accent; ctx.shadowBlur = minSide * (.003 + front * .007)
       ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y); ctx.lineTo(points[1].x, points[1].y); ctx.lineTo(points[2].x, points[2].y); ctx.closePath(); ctx.fill(); ctx.stroke()
     })
-    ctx.globalAlpha = .72; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .0015
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = .72; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .0015
     ctx.beginPath(); ctx.moveTo(projected[0].x, projected[0].y); ctx.lineTo(projected[1].x, projected[1].y); ctx.stroke()
+    const innerRefraction = ctx.createRadialGradient(centerX - radius * .16, centerY - radius * .22, 0, centerX, centerY, radius * .72)
+    innerRefraction.addColorStop(0, 'rgba(255,255,255,.42)'); innerRefraction.addColorStop(.28, `${glow}26`); innerRefraction.addColorStop(.62, `${accent}12`); innerRefraction.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = innerRefraction; ctx.globalAlpha = .66; ctx.beginPath(); ctx.moveTo(projected[0].x, projected[0].y); ctx.lineTo(projected[4].x, projected[4].y); ctx.lineTo(projected[1].x, projected[1].y); ctx.lineTo(projected[2].x, projected[2].y); ctx.closePath(); ctx.fill()
+    const glint = .5 + Math.sin(time * .0011) * .5
+    const glintY = projected[0].y + (projected[1].y - projected[0].y) * (.22 + glint * .42)
+    ctx.globalAlpha = .42 + glint * .38; ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = minSide * .012
+    ctx.beginPath(); ctx.arc(centerX - radius * .08, glintY, minSide * (.003 + glint * .0025), 0, Math.PI * 2); ctx.fill()
     ctx.restore()
   }
 
   if (hasLayer('floating-shards')) {
-    ctx.save(); ctx.globalCompositeOperation = 'screen'
+    ctx.save(); ctx.globalCompositeOperation = 'source-over'
     for (let i = 0; i < 14; i += 1) {
       const angle = i * 2.399 + time * (.00005 + i % 3 * .000012)
       const distance = radius * (1.38 + ((i * 29) % 70) / 100)
       const value = values[(i * 5) % sampleCount] / 255
       const x = centerX + Math.cos(angle) * distance; const y = centerY + Math.sin(angle) * distance * .72
-      const shardHeight = minSide * (.022 + (i % 4) * .009 + value * .012); const shardWidth = shardHeight * (.26 + i % 3 * .06)
-      ctx.save(); ctx.translate(x, y); ctx.rotate(angle + time * .0002 * (i % 2 ? 1 : -1)); ctx.fillStyle = i % 2 ? `${accent}70` : `${glow}70`; ctx.strokeStyle = 'rgba(255,255,255,.62)'; ctx.lineWidth = Math.max(1, minSide * .0012); ctx.globalAlpha = .35 + value * .5
-      ctx.beginPath(); ctx.moveTo(0, -shardHeight); ctx.lineTo(shardWidth, 0); ctx.lineTo(0, shardHeight * .75); ctx.lineTo(-shardWidth, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore()
+      const depth = .5 + Math.sin(angle * 1.4 + time * .00018 + i) * .5
+      const shardHeight = minSide * (.024 + (i % 4) * .007 + value * .01) * (.72 + depth * .38); const shardWidth = shardHeight * (.25 + i % 3 * .055)
+      ctx.save(); ctx.translate(x, y); ctx.rotate(angle + time * .00016 * (i % 2 ? 1 : -1)); ctx.globalAlpha = .28 + depth * .38 + value * .18
+      const shardFace = ctx.createLinearGradient(-shardWidth, 0, shardWidth, 0); shardFace.addColorStop(0, `${accent}28`); shardFace.addColorStop(.46, i % 2 ? `${accent}94` : `${glow}94`); shardFace.addColorStop(1, 'rgba(255,255,255,.48)')
+      ctx.fillStyle = shardFace; ctx.strokeStyle = 'rgba(255,255,255,.66)'; ctx.lineWidth = Math.max(1, minSide * .0009)
+      ctx.beginPath(); ctx.moveTo(0, -shardHeight); ctx.lineTo(shardWidth, 0); ctx.lineTo(0, shardHeight * .75); ctx.lineTo(-shardWidth, 0); ctx.closePath(); ctx.fill(); ctx.stroke()
+      ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = .44 + depth * .35; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(0, -shardHeight); ctx.lineTo(0, shardHeight * .75); ctx.stroke(); ctx.restore()
     }
     ctx.restore()
   }
@@ -1671,9 +1748,10 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('depth-floor')) {
-    ctx.save(); const horizon = height * .68; ctx.strokeStyle = `${accent}38`; ctx.lineWidth = Math.max(1, minSide * .001)
-    for (let i = -10; i <= 10; i += 1) { ctx.globalAlpha = .14 + Math.abs(i) * .008; ctx.beginPath(); ctx.moveTo(centerX, horizon); ctx.lineTo(centerX + i * width * .09, height); ctx.stroke() }
-    for (let i = 0; i < 9; i += 1) { const phase = (i / 9 + time * .00006) % 1; const y = horizon + (height - horizon) * phase * phase; ctx.globalAlpha = .08 + phase * .28; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke() }
+    ctx.save(); const horizon = height * .68; ctx.strokeStyle = `${accent}44`; ctx.lineWidth = Math.max(1, minSide * .001)
+    const floorFade = ctx.createLinearGradient(0, horizon, 0, height); floorFade.addColorStop(0, 'rgba(0,0,0,0)'); floorFade.addColorStop(1, `${accent}12`); ctx.fillStyle = floorFade; ctx.fillRect(0, horizon, width, height - horizon)
+    for (let i = -10; i <= 10; i += 1) { ctx.globalAlpha = .09 + Math.abs(i) * .007; ctx.beginPath(); ctx.moveTo(centerX, horizon); ctx.lineTo(centerX + i * width * .09, height); ctx.stroke() }
+    for (let i = 0; i < 9; i += 1) { const phase = (i / 9 + time * .000045) % 1; const y = horizon + (height - horizon) * phase * phase; ctx.globalAlpha = .06 + phase * .24; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke() }
     ctx.restore()
   }
 
@@ -1685,15 +1763,16 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   }
 
   if (hasLayer('turbine-blades')) {
-    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00016); ctx.globalCompositeOperation = 'screen'
-    const bladeCount = 14
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00012); ctx.globalCompositeOperation = 'source-over'
+    const bladeCount = 16
     for (let i = 0; i < bladeCount; i += 1) {
       const angle = i / bladeCount * Math.PI * 2
-      const value = spectrumValue(i, bladeCount, 3, true)
-      const inner = radius * .72; const outer = radius * (1.35 + value * .22); const sweep = .22
+      const rawValue = spectrumValue(i, bladeCount, 5, true)
+      const value = .42 + rawValue * .58
+      const inner = radius * .75; const outer = radius * (1.38 + value * .12); const sweep = .19
       const blade = ctx.createLinearGradient(Math.cos(angle) * inner, Math.sin(angle) * inner, Math.cos(angle + sweep) * outer, Math.sin(angle + sweep) * outer)
-      blade.addColorStop(0, 'rgba(255,255,255,.52)'); blade.addColorStop(.24, `${glow}70`); blade.addColorStop(.62, `${accent}44`); blade.addColorStop(1, 'rgba(18,28,42,.18)')
-      ctx.fillStyle = blade; ctx.strokeStyle = i % 2 ? `${glow}8c` : `${accent}8c`; ctx.lineWidth = minSide * .0015; ctx.globalAlpha = .48 + value * .34
+      blade.addColorStop(0, 'rgba(238,247,255,.72)'); blade.addColorStop(.22, `${glow}82`); blade.addColorStop(.58, `${accent}58`); blade.addColorStop(1, 'rgba(6,11,18,.66)')
+      ctx.fillStyle = blade; ctx.strokeStyle = i % 2 ? `${glow}78` : `${accent}78`; ctx.lineWidth = minSide * .0013; ctx.globalAlpha = .38 + value * .34; ctx.shadowColor = 'rgba(0,0,0,.72)'; ctx.shadowBlur = minSide * .006
       ctx.beginPath(); ctx.moveTo(Math.cos(angle - .05) * inner, Math.sin(angle - .05) * inner); ctx.quadraticCurveTo(Math.cos(angle + sweep * .45) * outer * .86, Math.sin(angle + sweep * .45) * outer * .86, Math.cos(angle + sweep) * outer, Math.sin(angle + sweep) * outer); ctx.lineTo(Math.cos(angle + .14) * inner, Math.sin(angle + .14) * inner); ctx.closePath(); ctx.fill(); ctx.stroke()
     }
     ctx.restore()
@@ -1704,7 +1783,9 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const gyroAngles = [-.42, .18, .76]
     gyroAngles.forEach((tilt, index) => {
       ctx.save(); ctx.rotate(tilt + Math.sin(time * .00025 + index) * .05); ctx.strokeStyle = index === 1 ? glow : accent; ctx.globalAlpha = .32 + index * .14; ctx.lineWidth = minSide * (.0018 + index * .0008); ctx.shadowColor = index === 1 ? glow : accent; ctx.shadowBlur = minSide * .009
-      ctx.beginPath(); ctx.ellipse(0, 0, radius * (1.08 + index * .17), radius * (.34 + index * .045), 0, 0, Math.PI * 2); ctx.stroke()
+      const ringX = radius * (1.08 + index * .17); const ringY = radius * (.34 + index * .045)
+      ctx.beginPath(); ctx.ellipse(0, 0, ringX, ringY, 0, Math.PI, Math.PI * 2); ctx.globalAlpha *= .45; ctx.stroke()
+      ctx.beginPath(); ctx.ellipse(0, 0, ringX, ringY, 0, 0, Math.PI); ctx.globalAlpha = .46 + index * .12; ctx.lineWidth *= 1.35; ctx.stroke()
       const marker = time * (.0002 + index * .00005) + index * 2
       ctx.fillStyle = '#fff'; ctx.globalAlpha = .76; ctx.beginPath(); ctx.arc(Math.cos(marker) * radius * (1.08 + index * .17), Math.sin(marker) * radius * (.34 + index * .045), minSide * (.003 + index * .0008), 0, Math.PI * 2); ctx.fill(); ctx.restore()
     })
@@ -1716,8 +1797,8 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const barCount = 64
     for (let i = 0; i < barCount; i += 1) {
       const angle = i / barCount * Math.PI * 2 - Math.PI / 2
-      const value = spectrumValue(i, barCount, 3, true)
-      const inner = radius * 1.48; const length = minSide * (.012 + value * .045)
+      const value = .35 + spectrumValue(i, barCount, 5, true) * .65
+      const inner = radius * 1.5; const length = minSide * (.014 + value * .03)
       ctx.strokeStyle = i % 8 === 0 ? '#fff' : i % 2 ? accent : glow; ctx.globalAlpha = .38 + value * .52; ctx.lineWidth = minSide * .0025
       ctx.beginPath(); ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner); ctx.lineTo(Math.cos(angle) * (inner + length), Math.sin(angle) * (inner + length)); ctx.stroke()
     }
@@ -1726,16 +1807,28 @@ function drawComposition(ctx, video, options, frequencyData, time) {
 
   if (hasLayer('chrome-orb')) {
     ctx.save()
+    ctx.save(); ctx.translate(centerX, centerY + radius * 1.04); ctx.scale(1, .2)
+    const contactShadow = ctx.createRadialGradient(0, 0, radius * .04, 0, 0, radius * 1.35)
+    contactShadow.addColorStop(0, 'rgba(0,0,0,.72)'); contactShadow.addColorStop(.52, `${accent}24`); contactShadow.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = contactShadow; ctx.beginPath(); ctx.arc(0, 0, radius * 1.35, 0, Math.PI * 2); ctx.fill(); ctx.restore()
     const orbRadius = radius * (.88 + reaction * .035)
-    const chrome = ctx.createRadialGradient(centerX - orbRadius * .34, centerY - orbRadius * .38, orbRadius * .025, centerX, centerY, orbRadius)
-    chrome.addColorStop(0, '#ffffff'); chrome.addColorStop(.07, '#dff3ff'); chrome.addColorStop(.17, '#8395a8'); chrome.addColorStop(.31, '#283545'); chrome.addColorStop(.47, '#080d15'); chrome.addColorStop(.61, `${accent}b8`); chrome.addColorStop(.72, '#121b27'); chrome.addColorStop(.84, '#536577'); chrome.addColorStop(.93, '#d5e4ef'); chrome.addColorStop(1, '#1b2532')
+    const chrome = ctx.createRadialGradient(centerX - orbRadius * .34, centerY - orbRadius * .38, orbRadius * .018, centerX, centerY, orbRadius)
+    chrome.addColorStop(0, '#ffffff'); chrome.addColorStop(.055, '#eaf8ff'); chrome.addColorStop(.16, '#8fa6b8'); chrome.addColorStop(.31, '#344454'); chrome.addColorStop(.5, '#121b26'); chrome.addColorStop(.68, '#63798a'); chrome.addColorStop(.82, '#202d39'); chrome.addColorStop(.94, '#778b9b'); chrome.addColorStop(1, '#060a0f')
     ctx.fillStyle = chrome; ctx.shadowColor = accent; ctx.shadowBlur = minSide * (.02 + reaction * .016); ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.fill()
     ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius * .98, 0, Math.PI * 2); ctx.clip()
     const band = ctx.createLinearGradient(0, centerY - orbRadius, 0, centerY + orbRadius)
     band.addColorStop(0, 'rgba(255,255,255,.55)'); band.addColorStop(.2, 'rgba(255,255,255,0)'); band.addColorStop(.48, `${accent}2e`); band.addColorStop(.62, 'rgba(255,255,255,.28)'); band.addColorStop(.78, 'rgba(0,0,0,.34)'); band.addColorStop(1, 'rgba(255,255,255,.18)')
     ctx.fillStyle = band; ctx.fillRect(centerX - orbRadius, centerY - orbRadius, orbRadius * 2, orbRadius * 2)
+    const movingReflectionX = centerX + Math.sin(time * .00038) * orbRadius * .38
+    const movingReflection = ctx.createLinearGradient(movingReflectionX - orbRadius * .18, 0, movingReflectionX + orbRadius * .18, 0)
+    movingReflection.addColorStop(0, 'rgba(255,255,255,0)'); movingReflection.addColorStop(.46, 'rgba(255,255,255,.02)'); movingReflection.addColorStop(.5, 'rgba(255,255,255,.7)'); movingReflection.addColorStop(.54, `${glow}22`); movingReflection.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = movingReflection; ctx.globalAlpha = .62; ctx.fillRect(centerX - orbRadius, centerY - orbRadius, orbRadius * 2, orbRadius * 2)
+    ctx.globalAlpha = .48; ctx.strokeStyle = '#dff5ff'; ctx.lineWidth = minSide * .002; ctx.beginPath(); ctx.ellipse(centerX, centerY + orbRadius * .2, orbRadius * .84, orbRadius * .24, -.08, Math.PI * .08, Math.PI * .92); ctx.stroke()
     ctx.globalAlpha = .78; ctx.strokeStyle = '#fff'; ctx.lineWidth = minSide * .0035; ctx.beginPath(); ctx.arc(centerX - orbRadius * .15, centerY - orbRadius * .18, orbRadius * .63, Math.PI * 1.08, Math.PI * 1.58); ctx.stroke(); ctx.restore()
-    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = minSide * .0018; ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = minSide * .0018; ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2); ctx.stroke()
+    const rim = ctx.createLinearGradient(centerX - orbRadius, centerY, centerX + orbRadius, centerY)
+    rim.addColorStop(0, `${glow}b8`); rim.addColorStop(.18, 'rgba(255,255,255,0)'); rim.addColorStop(.82, 'rgba(255,255,255,0)'); rim.addColorStop(1, `${accent}c4`)
+    ctx.strokeStyle = rim; ctx.lineWidth = minSide * .005; ctx.globalAlpha = .72; ctx.beginPath(); ctx.arc(centerX, centerY, orbRadius * .965, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
   }
 
   if (hasLayer('chrome-sweep')) {
@@ -1772,10 +1865,75 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillText(options.title.toUpperCase(), centerX, centerY)
     ctx.restore()
   }
+
+  if (options.lyricsEnabled && options.lyricsLines.length) {
+    const timedLyrics = options.lyricsLines.some(line => Number.isFinite(line.time))
+    let lyricIndex = 0
+    if (timedLyrics) {
+      const nextIndex = options.lyricsLines.findLastIndex(line => Number.isFinite(line.time) && line.time <= options.playbackTime)
+      lyricIndex = nextIndex
+    } else if (options.playbackDuration > 0) {
+      const lyricCount = options.lyricsLines.filter(line => !line.pause).length
+      const pauseDuration = options.lyricsLines.reduce((total, line) => total + (line.duration || 0), 0)
+      const lyricDuration = lyricCount
+        ? Math.max(.1, (options.playbackDuration - pauseDuration) / lyricCount)
+        : options.playbackDuration
+      let cursor = 0
+      lyricIndex = options.lyricsLines.findIndex(line => {
+        const segmentDuration = line.pause ? line.duration || lyricDuration : lyricDuration
+        const active = options.playbackTime >= cursor && options.playbackTime < cursor + segmentDuration
+        cursor += segmentDuration
+        return active
+      })
+      if (lyricIndex < 0) lyricIndex = options.lyricsLines.length - 1
+    }
+    const activeLyric = lyricIndex >= 0 ? options.lyricsLines[lyricIndex] : null
+    if (activeLyric && !activeLyric.pause && activeLyric.text) {
+      const lyricSize = Math.max(18, minSide * (options.lyricsSize / 100))
+      const lyricY = height * (options.lyricsPosition / 100)
+      const maxTextWidth = width * .78
+      const lineHeight = lyricSize * 1.18
+      ctx.save()
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.font = `800 ${lyricSize}px Inter, Arial, sans-serif`
+      const lyricRows = wrapCanvasText(ctx, activeLyric.text, maxTextWidth)
+      const widestRow = Math.max(...lyricRows.map(row => ctx.measureText(row).width))
+      const panelWidth = Math.min(width * .88, widestRow + lyricSize * 1.55)
+      const panelHeight = lyricRows.length * lineHeight + lyricSize * .72
+      const panelX = centerX - panelWidth / 2
+      const panelY = lyricY - panelHeight / 2
+      ctx.fillStyle = `rgba(4, 9, 18, ${options.lyricsBackdrop / 100})`
+      ctx.beginPath()
+      ctx.roundRect(panelX, panelY, panelWidth, panelHeight, lyricSize * .42)
+      ctx.fill()
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = Math.max(2, lyricSize * .07)
+      ctx.strokeStyle = 'rgba(0, 0, 0, .72)'
+      ctx.fillStyle = '#ffffff'
+      ctx.shadowColor = glow
+      ctx.shadowBlur = lyricSize * .2
+      lyricRows.forEach((row, index) => {
+        const rowY = lyricY + (index - (lyricRows.length - 1) / 2) * lineHeight
+        ctx.strokeText(row, centerX, rowY)
+        ctx.fillText(row, centerX, rowY)
+      })
+      const nextLine = options.lyricsLines[lyricIndex + 1]
+      const nextLyric = nextLine && !nextLine.pause ? nextLine.text : ''
+      if (nextLyric && options.lyricsBackdrop < 85) {
+        ctx.globalAlpha = .48
+        ctx.shadowBlur = 0
+        ctx.font = `650 ${lyricSize * .55}px Inter, Arial, sans-serif`
+        ctx.fillText(nextLyric, centerX, lyricY + panelHeight / 2 + lyricSize * .62)
+      }
+      ctx.restore()
+    }
+  }
 }
 
 export default function MusicVisualizer({ onExit }) {
   const canvasRef = useRef(null)
+  const layerPreviewCanvasRef = useRef(null)
   const videoRef = useRef(null)
   const audioRef = useRef(null)
   const frameRef = useRef(0)
@@ -1795,20 +1953,38 @@ export default function MusicVisualizer({ onExit }) {
   const [fit, setFit] = useState('cover')
   const [title, setTitle] = useState('YOUR TITLE')
   const [titleSize, setTitleSize] = useState(7)
+  const [lyricsEnabled, setLyricsEnabled] = useState(false)
+  const [lyricsText, setLyricsText] = useState('')
+  const [lyricsSize, setLyricsSize] = useState(4.2)
+  const [lyricsPosition, setLyricsPosition] = useState(78)
+  const [lyricsBackdrop, setLyricsBackdrop] = useState(58)
   const [color, setColor] = useState('#ff4ca8')
   const [glowColor, setGlowColor] = useState('#55d8ff')
+  const [preserveColors, setPreserveColors] = useState(false)
   const [intensity, setIntensity] = useState(70)
   const [tint, setTint] = useState(18)
   const [centerX, setCenterX] = useState(50)
   const [centerY, setCenterY] = useState(50)
   const [theme, setTheme] = useState('pulse')
   const [themeLayerSelections, setThemeLayerSelections] = useState(defaultThemeLayers)
+  const [layerLibraryOpen, setLayerLibraryOpen] = useState(false)
+  const [layerSearch, setLayerSearch] = useState('')
   const [exporting, setExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState(0)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const layers = themeLayerSelections[theme]
   const layerGroups = themeLibraries[theme]
+  const allLayerGroups = useMemo(() => {
+    const query = layerSearch.trim().toLowerCase()
+    return themeOptions.map(option => {
+      const allItems = themeLibraries[option.value]
+        .flatMap(group => group.items.map(item => ({ ...item, section: group.name })))
+        .filter(item => item.id !== 'title')
+      const items = allItems.filter(item => !query || `${item.label} ${item.section} ${option.label}`.toLowerCase().includes(query))
+      return { ...option, allItems, items }
+    }).filter(group => group.items.length)
+  }, [layerSearch])
 
   const mp4Type = useMemo(() => typeof MediaRecorder !== 'undefined'
     ? MP4_TYPES.find(type => MediaRecorder.isTypeSupported(type)) || ''
@@ -1818,10 +1994,43 @@ export default function MusicVisualizer({ onExit }) {
     if (durationMode === 'full') return Math.min(audioDuration, 300)
     return audioDuration ? Math.min(Number(durationMode), audioDuration) : Number(durationMode)
   }, [durationMode, audioFile])
+  const lyricsLines = useMemo(() => parseLyrics(lyricsText), [lyricsText])
+  const fixedPauseDuration = useMemo(() => lyricsLines.reduce((total, line) => total + (line.duration || 0), 0), [lyricsLines])
+
+  useEffect(() => {
+    if (!layerLibraryOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') setLayerLibraryOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [layerLibraryOpen])
+
+  const insertLyricPause = () => {
+    const cueTime = audioRef.current?.currentTime || 0
+    const cue = `[${formatLyricTime(cueTime)}] [pause]`
+    setLyricsText(current => {
+      const lines = current.trimEnd() ? current.trimEnd().split(/\r?\n/) : []
+      const insertAt = lines.findIndex(line => {
+        const match = line.match(/^\s*\[(\d{1,3}):(\d{2}(?:\.\d{1,3})?)\]/)
+        return match && Number(match[1]) * 60 + Number(match[2]) > cueTime
+      })
+      if (insertAt < 0) lines.push(cue)
+      else lines.splice(insertAt, 0, cue)
+      return `${lines.join('\n')}\n`
+    })
+  }
 
   const options = useMemo(() => ({
     fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
-  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme])
+    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop,
+  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
+    lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -1842,12 +2051,26 @@ export default function MusicVisualizer({ onExit }) {
         frequencyData = graph.data
         graph.analyser.getByteFrequencyData(frequencyData)
       }
-      drawComposition(ctx, videoRef.current, options, frequencyData, time)
+      drawComposition(ctx, videoRef.current, {
+        ...options,
+        playbackTime: audioRef.current?.currentTime || 0,
+        playbackDuration: audioRef.current?.duration || 0,
+      }, frequencyData, time)
+      const layerPreviewCanvas = layerPreviewCanvasRef.current
+      if (layerLibraryOpen && layerPreviewCanvas) {
+        if (layerPreviewCanvas.width !== canvas.width || layerPreviewCanvas.height !== canvas.height) {
+          layerPreviewCanvas.width = canvas.width
+          layerPreviewCanvas.height = canvas.height
+        }
+        const layerPreviewContext = layerPreviewCanvas.getContext('2d')
+        layerPreviewContext?.clearRect(0, 0, layerPreviewCanvas.width, layerPreviewCanvas.height)
+        layerPreviewContext?.drawImage(canvas, 0, 0)
+      }
       frameRef.current = requestAnimationFrame(draw)
     }
     frameRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(frameRef.current)
-  }, [options, aspect, videoUrl])
+  }, [options, aspect, videoUrl, layerLibraryOpen])
 
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
   useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl) }, [audioUrl])
@@ -2048,11 +2271,32 @@ export default function MusicVisualizer({ onExit }) {
     [theme]: current[theme].includes(key) ? current[theme].filter(item => item !== key) : [...current[theme], key],
   }))
 
+  const setThemeGroupLayers = (items, selected) => {
+    const groupIds = items.map(item => item.id)
+    const groupIdSet = new Set(groupIds)
+    setThemeLayerSelections(current => ({
+      ...current,
+      [theme]: selected
+        ? [...new Set([...current[theme], ...groupIds])]
+        : current[theme].filter(item => !groupIdSet.has(item)),
+    }))
+  }
+
   const changeTheme = value => {
     setTheme(value)
-    setColor(themePresets[value].color)
-    setGlowColor(themePresets[value].glow)
+    if (!preserveColors) {
+      setColor(themePresets[value].color)
+      setGlowColor(themePresets[value].glow)
+    }
     setTint(themePresets[value].tint)
+  }
+
+  const togglePreserveColors = () => {
+    if (preserveColors) {
+      setColor(themePresets[theme].color)
+      setGlowColor(themePresets[theme].glow)
+    }
+    setPreserveColors(value => !value)
   }
 
   return <main className="music-visualizer-app" data-theme={theme} style={{ '--theme-a': color, '--theme-b': glowColor, '--ic-ink': '#143f38', '--ic-muted': '#667a73' }}>
@@ -2079,13 +2323,25 @@ export default function MusicVisualizer({ onExit }) {
           <FlowSelect label="Visualizer theme" value={theme} options={themeOptions} onChange={changeTheme}/>
           <div className="music-section-title"><span>Beat layer library</span><small>{layers.length} selected</small></div>
           <p className="music-layer-help">Mix different spectra, shapes and motion effects. Every selected layer reacts to the song.</p>
+          <button type="button" className="music-open-layer-browser" onClick={() => setLayerLibraryOpen(true)}><Layers3 size={16}/><span><strong>All theme layers</strong><small>Mix visual layers from every theme</small></span><Plus size={16}/></button>
           <div className="music-layer-library">
             {layerGroups.map(group => <section key={group.name}><header><span>{group.name}</span><small>{group.items.filter(item => layers.includes(item.id)).length}/{group.items.length}</small></header><div>{group.items.map(item => <button type="button" key={item.id} className={layers.includes(item.id) ? 'active' : ''} aria-pressed={layers.includes(item.id)} onClick={() => toggleLayer(item.id)}><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{layers.includes(item.id) ? 'Added to canvas' : 'Click to add'}</small></span><b style={layers.includes(item.id) ? undefined : { background: 'transparent' }}>{layers.includes(item.id) && <Check size={11}/>}</b></button>)}</div></section>)}
           </div>
           <label className="music-text-field">Title text<input value={title} maxLength={32} onChange={event => setTitle(event.target.value)} placeholder="Your title"/></label>
           <label className="music-range-field"><span>Title size <output>{titleSize}%</output></span><input type="range" min="4" max="13" value={titleSize} onChange={event => setTitleSize(Number(event.target.value))}/></label>
+          <section className={`music-lyrics-panel ${lyricsEnabled ? 'enabled' : ''}`}>
+            <header><span><Captions size={16}/><strong>Song lyrics</strong></span><button type="button" role="switch" aria-label="Show song lyrics" aria-checked={lyricsEnabled} onClick={() => setLyricsEnabled(value => !value)}><i/></button></header>
+            <p>Put <code>[02:00]</code> on its own line to pause automatic lyrics for 2 seconds. For exact timing, use <code>[00:42.00] [pause]</code>.</p>
+            <label>Lyrics<textarea value={lyricsText} disabled={!lyricsEnabled} onChange={event => setLyricsText(event.target.value)} placeholder={'First lyric line\nNext lyric line\n[02:00]\nLyrics return after 2 seconds'}/></label>
+            <div className="music-lyrics-actions"><button type="button" disabled={!lyricsEnabled || !audioFile} onClick={insertLyricPause}><Pause size={14}/> Add pause at {formatTime(audioRef.current?.currentTime || 0)}</button><small>Play or seek to the instrumental start first. The next timestamped lyric resumes the overlay.</small></div>
+            <div className="music-lyrics-count"><span>{lyricsLines.length ? `${lyricsLines.filter(line => !line.pause).length} lyric line${lyricsLines.filter(line => !line.pause).length === 1 ? '' : 's'} · ${lyricsLines.filter(line => line.pause).length} pause${lyricsLines.filter(line => line.pause).length === 1 ? '' : 's'}${fixedPauseDuration ? ` · ${fixedPauseDuration.toFixed(2).replace(/\.00$/, '')}s fixed` : ''}` : 'No lyrics added'}</span><small>{lyricsLines.some(line => Number.isFinite(line.time)) ? 'Timestamped timing' : 'Automatic timing'}</small></div>
+            <label className="music-range-field"><span>Text size <output>{lyricsSize}%</output></span><input disabled={!lyricsEnabled} type="range" min="2.5" max="8" step=".1" value={lyricsSize} onChange={event => setLyricsSize(Number(event.target.value))}/></label>
+            <label className="music-range-field"><span>Vertical position <output>{lyricsPosition}%</output></span><input disabled={!lyricsEnabled} type="range" min="55" max="90" value={lyricsPosition} onChange={event => setLyricsPosition(Number(event.target.value))}/></label>
+            <label className="music-range-field"><span>Backdrop <output>{lyricsBackdrop}%</output></span><input disabled={!lyricsEnabled} type="range" min="0" max="90" value={lyricsBackdrop} onChange={event => setLyricsBackdrop(Number(event.target.value))}/></label>
+          </section>
           <label className="music-range-field"><span>Beat movement <output>{intensity}%</output></span><input type="range" min="20" max="120" value={intensity} onChange={event => setIntensity(Number(event.target.value))}/></label>
           <label className="music-range-field"><span>Video tint <output>{tint}%</output></span><input type="range" min="0" max="55" value={tint} onChange={event => setTint(Number(event.target.value))}/></label>
+          <div className={`music-colour-lock ${preserveColors ? 'enabled' : ''}`}><span><LockKeyhole size={16}/><span><strong>Keep colours across themes</strong><small>{preserveColors ? 'Your Primary and Glow colours will stay selected.' : 'Each theme uses its recommended colour pair.'}</small></span></span><button type="button" role="switch" aria-label="Keep selected colours when changing themes" aria-checked={preserveColors} onClick={togglePreserveColors}><i/></button></div>
           <div className="music-colors"><label>Primary colour<span><input type="color" value={color} onChange={event => setColor(event.target.value)}/>{color}</span></label><label>Glow colour<span><input type="color" value={glowColor} onChange={event => setGlowColor(event.target.value)}/>{glowColor}</span></label></div>
         </div>
 
@@ -2111,6 +2367,23 @@ export default function MusicVisualizer({ onExit }) {
         <div className="music-export-bar"><div><span className={mp4Type ? 'supported' : 'unsupported'}>{mp4Type ? <Check size={15}/> : <CircleAlert size={15}/>}</span><span><strong>{mp4Type ? exportQuality === 'maximum' ? 'Maximum-quality 4K MP4' : 'Full-resolution MP4 export' : 'MP4 export is not supported here'}</strong><small>{mp4Type ? exportQuality === 'maximum' ? 'Up to 48 Mbps video with 320 kbps audio. Export takes more memory.' : exportQuality === 'standard' ? '720p video with 256 kbps audio.' : '1080p high-bitrate video with 256 kbps audio.' : 'Use the latest Chrome or Edge desktop browser.'}</small></span></div><button type="button" disabled={exporting || !mp4Type} onClick={exportMp4}><Download size={17}/> {exporting ? 'Exporting…' : 'Export MP4'}</button></div>
       </section>
     </section>
+
+    {layerLibraryOpen && <div className="music-layer-browser-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setLayerLibraryOpen(false) }}><section className="music-layer-browser" role="dialog" aria-modal="true" aria-labelledby="all-layer-title">
+      <header><div><span><Layers3 size={21}/></span><div><small>GLOBAL LAYER LIBRARY</small><h2 id="all-layer-title">Mix layers from every theme</h2><p>Layers are added to <strong>{themeOptions.find(option => option.value === theme)?.label}</strong> without changing its base theme.</p></div></div><button type="button" aria-label="Close all theme layers" onClick={() => setLayerLibraryOpen(false)}><X size={20}/></button></header>
+      <div className="music-layer-browser-body"><div className="music-layer-browser-list"><label className="music-layer-search"><Search size={17}/><input autoFocus value={layerSearch} onChange={event => setLayerSearch(event.target.value)} placeholder="Search waves, particles, rings, grids…"/><span>{allLayerGroups.reduce((count, group) => count + group.items.length, 0)} layers</span></label>
+        <div className="music-all-layer-groups">{allLayerGroups.map(group => {
+          const selectedCount = group.allItems.filter(item => layers.includes(item.id)).length
+          const allSelected = selectedCount === group.allItems.length
+          const noneSelected = selectedCount === 0
+          return <section key={group.value}><header><div><i style={{ '--group-a': themePresets[group.value].color, '--group-b': themePresets[group.value].glow }}/><span><strong>{group.label}</strong><small>{group.description}</small></span></div><div className="music-layer-group-actions"><small>{selectedCount}/{group.allItems.length} added</small><div><button type="button" disabled={allSelected} onClick={() => setThemeGroupLayers(group.allItems, true)} aria-label={`Select all ${group.label} layers`}>Select all</button><button type="button" disabled={noneSelected} onClick={() => setThemeGroupLayers(group.allItems, false)} aria-label={`Deselect all ${group.label} layers`}>Deselect all</button></div></div></header><div>{group.items.map(item => {
+            const selected = layers.includes(item.id)
+            return <button type="button" key={`${group.value}-${item.id}`} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => toggleLayer(item.id)}><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{group.label} · {item.section}</small></span><b>{selected ? <Check size={13}/> : <Plus size={13}/>}</b></button>
+          })}</div></section>
+        })}</div>
+        {!allLayerGroups.length && <div className="music-layer-empty"><Search size={24}/><strong>No matching layers</strong><p>Try another layer name or theme.</p></div>}
+      </div><aside className="music-layer-live-preview"><header><span><small>LIVE COMPOSITION</small><strong>{themeOptions.find(option => option.value === theme)?.label}</strong></span><b>{layers.filter(id => id !== 'title').length} layers</b></header><div className={`music-layer-preview-canvas ${aspect}`}><canvas ref={layerPreviewCanvasRef}/>{!videoFile && !audioFile && <span>Theme preview · add media anytime</span>}</div><p>Select or deselect any layer—the preview updates instantly.</p></aside></div>
+      <footer><span><strong>{layers.filter(id => id !== 'title').length}</strong> visual layers selected for this composition</span><button type="button" onClick={() => setLayerLibraryOpen(false)}>Done mixing</button></footer>
+    </section></div>}
 
     <video ref={videoRef} src={videoUrl || undefined} muted playsInline loop className="music-hidden-media"/>
     <audio ref={audioRef} src={audioUrl || undefined} className="music-hidden-media" onTimeUpdate={event => setProgress(event.currentTarget.duration ? (event.currentTarget.currentTime / event.currentTarget.duration) * 100 : 0)} onEnded={() => setPlaying(false)}/>
