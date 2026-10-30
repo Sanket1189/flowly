@@ -31,6 +31,7 @@ const exportQualityOptions = [
 
 const exportFrameRateOptions = [
   { value: '60', label: 'Smooth · 60 FPS', description: 'Recommended for fluid beat animation' },
+  { value: '90', label: 'Ultra smooth · 90 FPS', description: 'High-end CPU and GPU recommended' },
   { value: '30', label: 'Standard · 30 FPS', description: 'Faster export on slower devices' },
 ]
 
@@ -401,7 +402,9 @@ const exportVideoBitrate = (quality, aspect, fps = 30) => {
   if (quality === 'maximum') bitrate = aspect === 'square' ? 32_000_000 : 48_000_000
   else if (quality === 'standard') bitrate = aspect === 'square' ? 6_000_000 : 8_000_000
   else bitrate = aspect === 'square' ? 12_000_000 : 16_000_000
-  return Math.round(bitrate * (Number(fps) >= 60 ? 1.25 : 1))
+  const frameRate = Number(fps)
+  const frameRateMultiplier = frameRate >= 90 ? 1.5 : frameRate >= 60 ? 1.25 : 1
+  return Math.round(bitrate * frameRateMultiplier)
 }
 
 function drawCover(ctx, video, width, height, fit) {
@@ -2075,6 +2078,21 @@ export default function MusicVisualizer({ onExit }) {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!ctx) return undefined
+    const renderFps = exporting ? Number(exportFps) : 0
+    const useHighFrameTimer = renderFps > 60
+    const frameInterval = useHighFrameTimer ? 1000 / renderFps : 0
+    let renderTimer = 0
+    let nextFrameAt = performance.now()
+    const scheduleNextFrame = () => {
+      if (!useHighFrameTimer) {
+        frameRef.current = requestAnimationFrame(draw)
+        return
+      }
+      const now = performance.now()
+      if (nextFrameAt < now - frameInterval) nextFrameAt = now
+      nextFrameAt += frameInterval
+      renderTimer = window.setTimeout(() => draw(performance.now()), Math.max(0, nextFrameAt - performance.now()))
+    }
     const draw = time => {
       const graph = audioGraphRef.current
       let frequencyData
@@ -2097,11 +2115,14 @@ export default function MusicVisualizer({ onExit }) {
         layerPreviewContext?.clearRect(0, 0, layerPreviewCanvas.width, layerPreviewCanvas.height)
         layerPreviewContext?.drawImage(canvas, 0, 0)
       }
-      frameRef.current = requestAnimationFrame(draw)
+      scheduleNextFrame()
     }
-    frameRef.current = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(frameRef.current)
-  }, [options, aspect, videoUrl, layerLibraryOpen])
+    scheduleNextFrame()
+    return () => {
+      cancelAnimationFrame(frameRef.current)
+      window.clearTimeout(renderTimer)
+    }
+  }, [options, aspect, videoUrl, layerLibraryOpen, exporting, exportFps])
 
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
   useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl) }, [audioUrl])
@@ -2431,7 +2452,7 @@ export default function MusicVisualizer({ onExit }) {
         {error && <div className="music-error" role="alert"><CircleAlert size={17}/><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="Dismiss"><X size={15}/></button></div>}
         {exporting && <div className="music-exporting"><div><span>Recording MP4 in real time</span><strong>{Math.round(exportProgress)}%</strong></div><div><i style={{ width: `${exportProgress}%` }}/></div><small>Keep this tab open. A {formatTime(selectedDuration)} export takes about the same amount of time.</small><button type="button" onClick={stopExport}>Cancel export</button></div>}
         {result && <div className="music-result"><span><Check size={18}/></span><div><strong>High-quality MP4 is ready</strong><small>{result.width} × {result.height} · {result.fps || 30} FPS · {formatTime(result.duration)} · {formatBytes(result.blob.size)}</small></div><button type="button" onClick={downloadResult}><Download size={16}/> Download MP4</button></div>}
-        <div className="music-export-bar"><div><span className={mp4Type ? 'supported' : 'unsupported'}>{mp4Type ? <Check size={15}/> : <CircleAlert size={15}/>}</span><span><strong>{mp4Type ? exportQuality === 'maximum' ? `Maximum-quality 4K · ${exportFps} FPS` : `Full-resolution MP4 · ${exportFps} FPS` : 'MP4 export is not supported here'}</strong><small>{mp4Type ? exportQuality === 'maximum' ? `${exportFps === '60' ? 'Up to 60' : 'Up to 48'} Mbps video with 320 kbps audio. 1080p is smoother on slower devices.` : exportQuality === 'standard' ? `720p ${exportFps} FPS video with 256 kbps audio.` : `1080p high-bitrate ${exportFps} FPS video with 256 kbps audio.` : 'Use the latest Chrome or Edge desktop browser.'}</small></span></div><button type="button" disabled={exporting || !mp4Type} onClick={exportMp4}><Download size={17}/> {exporting ? 'Exporting…' : 'Export MP4'}</button></div>
+        <div className="music-export-bar"><div><span className={mp4Type ? 'supported' : 'unsupported'}>{mp4Type ? <Check size={15}/> : <CircleAlert size={15}/>}</span><span><strong>{mp4Type ? exportQuality === 'maximum' ? `Maximum-quality 4K · ${exportFps} FPS` : `Full-resolution MP4 · ${exportFps} FPS` : 'MP4 export is not supported here'}</strong><small>{mp4Type ? exportQuality === 'maximum' ? `${exportFps === '90' ? 'Up to 72' : exportFps === '60' ? 'Up to 60' : 'Up to 48'} Mbps video with 320 kbps audio. 1080p is smoother on slower devices.` : exportQuality === 'standard' ? `720p ${exportFps} FPS video with 256 kbps audio.` : `1080p high-bitrate ${exportFps} FPS video with 256 kbps audio.` : 'Use the latest Chrome or Edge desktop browser.'}</small></span></div><button type="button" disabled={exporting || !mp4Type} onClick={exportMp4}><Download size={17}/> {exporting ? 'Exporting…' : 'Export MP4'}</button></div>
       </section>
     </section>
 
