@@ -17,6 +17,12 @@ const MP4_TYPES = [
   'video/mp4',
 ]
 
+const MP4_4K_90_TYPES = [
+  'video/mp4;codecs="avc1.640034,mp4a.40.2"',
+  'video/mp4;codecs="avc1,mp4a.40.2"',
+  ...MP4_TYPES,
+]
+
 const aspectOptions = [
   { value: 'square', label: 'Square · 1:1', description: 'Up to 2160 × 2160' },
   { value: 'landscape', label: 'Landscape · 16:9', description: 'Up to 4K UHD' },
@@ -2020,9 +2026,11 @@ export default function MusicVisualizer({ onExit }) {
     }).filter(group => group.items.length)
   }, [layerSearch])
 
-  const mp4Type = useMemo(() => typeof MediaRecorder !== 'undefined'
-    ? MP4_TYPES.find(type => MediaRecorder.isTypeSupported(type)) || ''
-    : '', [])
+  const mp4Type = useMemo(() => {
+    if (typeof MediaRecorder === 'undefined') return ''
+    const candidates = exportQuality === 'maximum' && Number(exportFps) >= 90 ? MP4_4K_90_TYPES : MP4_TYPES
+    return [...new Set(candidates)].find(type => MediaRecorder.isTypeSupported(type)) || ''
+  }, [exportQuality, exportFps])
   const selectedDuration = useMemo(() => {
     const audioDuration = audioRef.current?.duration || 0
     if (durationMode === 'full') return Math.min(audioDuration, 300)
@@ -2182,11 +2190,14 @@ export default function MusicVisualizer({ onExit }) {
     const source = context.createMediaElementSource(audio)
     const analyser = context.createAnalyser()
     const recordingDestination = context.createMediaStreamDestination()
+    recordingDestination.channelCount = 2
     analyser.fftSize = 256
     analyser.smoothingTimeConstant = .78
     source.connect(analyser)
     analyser.connect(context.destination)
-    analyser.connect(recordingDestination)
+    // Keep recording audio on a dedicated branch. Routing it through the analyser
+    // can be starved when a 4K canvas is rendering at a very high frame rate.
+    source.connect(recordingDestination)
     const graph = { context, source, analyser, recordingDestination, data: new Uint8Array(analyser.frequencyBinCount) }
     audioGraphRef.current = graph
     await context.resume()
@@ -2268,7 +2279,18 @@ export default function MusicVisualizer({ onExit }) {
     }
     const frameRate = Number(exportFps)
     const canvasStream = canvas.captureStream(frameRate)
-    graph.recordingDestination.stream.getAudioTracks().forEach(track => canvasStream.addTrack(track))
+    const recordingAudioTracks = graph.recordingDestination.stream.getAudioTracks()
+    if (!recordingAudioTracks.length || recordingAudioTracks.every(track => track.readyState !== 'live')) {
+      canvasStream.getTracks().forEach(track => track.stop())
+      restorePreviewResolution()
+      setError('The audio track was not ready for export. Press Preview once, then export again.')
+      return
+    }
+    recordingAudioTracks.forEach(track => {
+      track.enabled = true
+      if ('contentHint' in track) track.contentHint = 'music'
+      canvasStream.addTrack(track)
+    })
     let recorder
     try {
       recorder = new MediaRecorder(canvasStream, {
@@ -2323,7 +2345,9 @@ export default function MusicVisualizer({ onExit }) {
     setResult(null)
     setExporting(true)
     setExportProgress(0)
-    recorder.start(1000)
+    // Smaller chunks keep the browser from buffering a huge 4K/90 FPS segment
+    // and dropping the much smaller audio stream under encoder pressure.
+    recorder.start(250)
     await videoRef.current.play()
     await audioRef.current.play()
     setPlaying(true)
