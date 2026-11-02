@@ -79,6 +79,16 @@ const themeOptions = [
   { value: 'gold', label: 'Gold luxe', description: 'Art-deco rays and champagne light' },
   { value: 'crystal', label: 'Crystal 3D', description: 'Faceted glass, refraction and depth' },
   { value: 'chrome', label: 'Kinetic Chrome 3D', description: 'Realistic metal, turbines and studio depth' },
+  { value: 'paper', label: 'Paper Cut', description: 'Layered cutouts, folded shadows and collage motion' },
+  { value: 'circuit', label: 'Bio Circuit', description: 'Neural signals, living traces and data pulses' },
+  { value: 'clockwork', label: 'Celestial Clockwork', description: 'Astrolabes, gears and precision time motion' },
+  { value: 'aurora', label: 'Silk Aurora', description: 'Luminous fabric, polar light and flowing ribbons' },
+  { value: 'ink', label: 'Ukiyo Ink', description: 'Brush waves, rain, moonlight and drifting pigment' },
+  { value: 'topographic', label: 'Topographic Pulse', description: 'Contour maps, elevation scans and terrain rhythm' },
+  { value: 'holo', label: 'Holographic Bloom', description: 'Iridescent petals, laser pollen and spectral glass' },
+  { value: 'mosaic', label: 'Mosaic Cathedral', description: 'Stained glass, rose windows and radiant architecture' },
+  { value: 'storm', label: 'Storm Chamber', description: 'Lightning, pressure waves and cinematic rain' },
+  { value: 'origami', label: 'Origami City', description: 'Folded skylines, paper streets and flying cranes' },
 ]
 
 const themePresets = {
@@ -94,6 +104,16 @@ const themePresets = {
   gold: { color: '#d8b56a', glow: '#fff0c2', tint: 24 },
   crystal: { color: '#8fdcff', glow: '#e7c6ff', tint: 22 },
   chrome: { color: '#9fd8ff', glow: '#f3f7ff', tint: 30 },
+  paper: { color: '#ff7a5c', glow: '#ffd66b', tint: 16 },
+  circuit: { color: '#55f5b5', glow: '#5ab7ff', tint: 30 },
+  clockwork: { color: '#d8a84e', glow: '#8bd8ff', tint: 28 },
+  aurora: { color: '#70f0cf', glow: '#b98cff', tint: 18 },
+  ink: { color: '#f05b72', glow: '#d8e4ff', tint: 26 },
+  topographic: { color: '#b8f36b', glow: '#58d6c7', tint: 24 },
+  holo: { color: '#ff7edb', glow: '#6ff4ff', tint: 20 },
+  mosaic: { color: '#ffb34d', glow: '#6d8dff', tint: 27 },
+  storm: { color: '#8ca8ff', glow: '#e9f2ff', tint: 36 },
+  origami: { color: '#ff7b65', glow: '#ffd56f', tint: 18 },
 }
 
 const themeLibraries = {
@@ -301,6 +321,166 @@ const themeLibraries = {
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'Chrome title', preview: 'title' }] },
   ],
+  paper: [
+    { name: 'Cut paper', items: [
+      { id: 'paper-sun', label: 'Cutout sun', preview: 'paper-sun' },
+      { id: 'paper-orbits', label: 'Paper orbits', preview: 'paper-orbits' },
+      { id: 'folded-spectrum', label: 'Folded spectrum', preview: 'folded-spectrum' },
+      { id: 'shadow-stack', label: 'Shadow stack', preview: 'shadow-stack' },
+    ] },
+    { name: 'Collage', items: [
+      { id: 'paper-ribbon', label: 'Paper ribbon', preview: 'paper-ribbon' },
+      { id: 'paper-confetti', label: 'Cut confetti', preview: 'paper-confetti' },
+      { id: 'paper-grain', label: 'Paper grain', preview: 'paper-grain' },
+      { id: 'torn-frame', label: 'Torn paper frame', preview: 'torn-frame' },
+      { id: 'paper-clouds', label: 'Layered clouds', preview: 'paper-clouds' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Collage title', preview: 'title' }] },
+  ],
+  circuit: [
+    { name: 'Neural system', items: [
+      { id: 'neural-core', label: 'Neural core', preview: 'neural-core' },
+      { id: 'circuit-traces', label: 'Circuit traces', preview: 'circuit-traces' },
+      { id: 'scan-nodes', label: 'Scanning nodes', preview: 'scan-nodes' },
+      { id: 'energy-veins', label: 'Energy veins', preview: 'energy-veins' },
+    ] },
+    { name: 'Data field', items: [
+      { id: 'hex-grid', label: 'Living hex grid', preview: 'hex-grid' },
+      { id: 'data-pulses', label: 'Data pulses', preview: 'data-pulses' },
+      { id: 'signal-bars', label: 'Signal spectrum', preview: 'signal-bars' },
+      { id: 'scan-line', label: 'Bio scan line', preview: 'scan-line' },
+      { id: 'bio-cells', label: 'Living cells', preview: 'bio-cells' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'System title', preview: 'title' }] },
+  ],
+  clockwork: [
+    { name: 'Mechanism', items: [
+      { id: 'astrolabe', label: 'Astrolabe', preview: 'astrolabe' },
+      { id: 'gear-train', label: 'Gear train', preview: 'gear-train' },
+      { id: 'orbital-hands', label: 'Orbital hands', preview: 'orbital-hands' },
+      { id: 'roman-dial', label: 'Roman dial', preview: 'roman-dial' },
+    ] },
+    { name: 'Time motion', items: [
+      { id: 'pendulum-arc', label: 'Pendulum arc', preview: 'pendulum-arc' },
+      { id: 'tick-spectrum', label: 'Tick spectrum', preview: 'tick-spectrum' },
+      { id: 'time-sparks', label: 'Time dust', preview: 'time-sparks' },
+      { id: 'brass-rings', label: 'Brass rings', preview: 'brass-rings' },
+      { id: 'escapement', label: 'Escapement pulse', preview: 'escapement' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Clockwork title', preview: 'title' }] },
+  ],
+  aurora: [
+    { name: 'Polar light', items: [
+      { id: 'aurora-curtain', label: 'Aurora curtain', preview: 'aurora-curtain' },
+      { id: 'silk-ribbons', label: 'Silk ribbons', preview: 'silk-ribbons' },
+      { id: 'horizon-glow', label: 'Polar horizon', preview: 'horizon-glow' },
+      { id: 'glass-horizon', label: 'Glass reflection', preview: 'glass-horizon' },
+    ] },
+    { name: 'Sky', items: [
+      { id: 'polar-stars', label: 'Polar stars', preview: 'polar-stars' },
+      { id: 'ribbon-spectrum', label: 'Ribbon spectrum', preview: 'ribbon-spectrum' },
+      { id: 'light-dust', label: 'Light dust', preview: 'light-dust' },
+      { id: 'ice-crystals', label: 'Ice crystals', preview: 'ice-crystals' },
+      { id: 'polar-mist', label: 'Polar mist', preview: 'polar-mist' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Aurora title', preview: 'title' }] },
+  ],
+  ink: [
+    { name: 'Ink painting', items: [
+      { id: 'ink-moon', label: 'Ink moon', preview: 'ink-moon' },
+      { id: 'brush-waves', label: 'Brush waves', preview: 'brush-waves' },
+      { id: 'ink-blooms', label: 'Pigment blooms', preview: 'ink-blooms' },
+      { id: 'koi-orbit', label: 'Koi orbit', preview: 'koi-orbit' },
+    ] },
+    { name: 'Atmosphere', items: [
+      { id: 'rain-strokes', label: 'Rain strokes', preview: 'rain-strokes' },
+      { id: 'paper-fibers', label: 'Paper fibres', preview: 'paper-fibers' },
+      { id: 'seal-frame', label: 'Seal frame', preview: 'seal-frame' },
+      { id: 'bamboo-silhouette', label: 'Bamboo silhouette', preview: 'bamboo-silhouette' },
+      { id: 'ink-splatter', label: 'Ink splatter', preview: 'ink-splatter' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Ink title', preview: 'title' }] },
+  ],
+  topographic: [
+    { name: 'Terrain', items: [
+      { id: 'contour-field', label: 'Contour field', preview: 'contour-field' },
+      { id: 'elevation-rings', label: 'Elevation rings', preview: 'elevation-rings' },
+      { id: 'terrain-scan', label: 'Terrain scanner', preview: 'terrain-scan' },
+      { id: 'ridge-spectrum', label: 'Ridge spectrum', preview: 'ridge-spectrum' },
+    ] },
+    { name: 'Navigation', items: [
+      { id: 'map-nodes', label: 'Map nodes', preview: 'map-nodes' },
+      { id: 'compass-sweep', label: 'Compass sweep', preview: 'compass-sweep' },
+      { id: 'topo-grain', label: 'Terrain grain', preview: 'topo-grain' },
+      { id: 'coordinate-grid', label: 'Coordinate grid', preview: 'coordinate-grid' },
+      { id: 'route-trails', label: 'Route trails', preview: 'route-trails' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Terrain title', preview: 'title' }] },
+  ],
+  holo: [
+    { name: 'Hologram', items: [
+      { id: 'holo-bloom', label: 'Holographic bloom', preview: 'holo-bloom' },
+      { id: 'iris-petals', label: 'Iris petals', preview: 'iris-petals' },
+      { id: 'spectral-cage', label: 'Spectral cage', preview: 'spectral-cage' },
+      { id: 'chroma-disc', label: 'Chroma disc', preview: 'chroma-disc' },
+    ] },
+    { name: 'Refraction', items: [
+      { id: 'laser-pollen', label: 'Laser pollen', preview: 'laser-pollen' },
+      { id: 'diffraction-bars', label: 'Diffraction spectrum', preview: 'diffraction-bars' },
+      { id: 'glass-flare', label: 'Glass flare', preview: 'glass-flare' },
+      { id: 'prism-beams', label: 'Prism beams', preview: 'prism-beams' },
+      { id: 'hologram-grid', label: 'Hologram grid', preview: 'hologram-grid' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Hologram title', preview: 'title' }] },
+  ],
+  mosaic: [
+    { name: 'Stained glass', items: [
+      { id: 'rose-window', label: 'Rose window', preview: 'rose-window' },
+      { id: 'glass-shards', label: 'Glass shards', preview: 'glass-shards' },
+      { id: 'lead-grid', label: 'Lead grid', preview: 'lead-grid' },
+      { id: 'mosaic-spectrum', label: 'Mosaic spectrum', preview: 'mosaic-spectrum' },
+    ] },
+    { name: 'Architecture', items: [
+      { id: 'cathedral-rays', label: 'Cathedral rays', preview: 'cathedral-rays' },
+      { id: 'arch-frame', label: 'Gothic arch', preview: 'arch-frame' },
+      { id: 'color-dust', label: 'Colour dust', preview: 'color-dust' },
+      { id: 'lancet-windows', label: 'Lancet windows', preview: 'lancet-windows' },
+      { id: 'glass-sparks', label: 'Glass sparks', preview: 'glass-sparks' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Mosaic title', preview: 'title' }] },
+  ],
+  storm: [
+    { name: 'Weather', items: [
+      { id: 'storm-clouds', label: 'Storm clouds', preview: 'storm-clouds' },
+      { id: 'lightning-branches', label: 'Lightning branches', preview: 'lightning-branches' },
+      { id: 'rain-wall', label: 'Rain wall', preview: 'rain-wall' },
+      { id: 'electric-mist', label: 'Electric mist', preview: 'electric-mist' },
+    ] },
+    { name: 'Pressure', items: [
+      { id: 'thunder-ring', label: 'Thunder ring', preview: 'thunder-ring' },
+      { id: 'pressure-wave', label: 'Pressure wave', preview: 'pressure-wave' },
+      { id: 'storm-spectrum', label: 'Storm spectrum', preview: 'storm-spectrum' },
+      { id: 'wind-streams', label: 'Wind streams', preview: 'wind-streams' },
+      { id: 'cloud-flashes', label: 'Cloud flashes', preview: 'cloud-flashes' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Storm title', preview: 'title' }] },
+  ],
+  origami: [
+    { name: 'Paper city', items: [
+      { id: 'paper-city', label: 'Folded city', preview: 'paper-city' },
+      { id: 'folded-towers', label: 'Folded towers', preview: 'folded-towers' },
+      { id: 'perspective-streets', label: 'Paper streets', preview: 'perspective-streets' },
+      { id: 'window-pulse', label: 'Window pulse', preview: 'window-pulse' },
+    ] },
+    { name: 'Skyline', items: [
+      { id: 'sunset-disc', label: 'Paper sunset', preview: 'sunset-disc' },
+      { id: 'flying-cranes', label: 'Flying cranes', preview: 'flying-cranes' },
+      { id: 'skyline-spectrum', label: 'Skyline spectrum', preview: 'skyline-spectrum' },
+      { id: 'paper-lanterns', label: 'Paper lanterns', preview: 'paper-lanterns' },
+      { id: 'fold-lines', label: 'Architectural folds', preview: 'fold-lines' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'City title', preview: 'title' }] },
+  ],
 }
 
 const defaultThemeLayers = {
@@ -316,6 +496,16 @@ const defaultThemeLayers = {
   gold: ['velvet-vignette', 'luxe-spotlight', 'gold-halo', 'deco-rays', 'champagne', 'deco-arch', 'pearl-dust', 'title'],
   crystal: ['crystal-glow', 'crystal-core', 'crystal-halo', 'facet-rays', 'floating-shards', 'light-sweep', 'crystal-dust', 'title'],
   chrome: ['studio-lights', 'depth-floor', 'floor-reflection', 'turbine-blades', 'gyro-rings', 'chrome-orb', 'chrome-sweep', 'metal-sparks', 'title'],
+  paper: ['shadow-stack', 'paper-sun', 'paper-orbits', 'folded-spectrum', 'paper-ribbon', 'paper-confetti', 'paper-grain', 'torn-frame', 'paper-clouds', 'title'],
+  circuit: ['hex-grid', 'circuit-traces', 'neural-core', 'energy-veins', 'data-pulses', 'scan-nodes', 'signal-bars', 'scan-line', 'bio-cells', 'title'],
+  clockwork: ['astrolabe', 'gear-train', 'orbital-hands', 'roman-dial', 'pendulum-arc', 'tick-spectrum', 'time-sparks', 'brass-rings', 'escapement', 'title'],
+  aurora: ['horizon-glow', 'aurora-curtain', 'silk-ribbons', 'polar-stars', 'glass-horizon', 'light-dust', 'ribbon-spectrum', 'ice-crystals', 'polar-mist', 'title'],
+  ink: ['paper-fibers', 'ink-moon', 'brush-waves', 'rain-strokes', 'ink-blooms', 'koi-orbit', 'seal-frame', 'bamboo-silhouette', 'ink-splatter', 'title'],
+  topographic: ['contour-field', 'elevation-rings', 'terrain-scan', 'ridge-spectrum', 'map-nodes', 'compass-sweep', 'topo-grain', 'coordinate-grid', 'route-trails', 'title'],
+  holo: ['holo-bloom', 'iris-petals', 'spectral-cage', 'chroma-disc', 'laser-pollen', 'diffraction-bars', 'glass-flare', 'prism-beams', 'hologram-grid', 'title'],
+  mosaic: ['rose-window', 'glass-shards', 'lead-grid', 'mosaic-spectrum', 'cathedral-rays', 'arch-frame', 'color-dust', 'lancet-windows', 'glass-sparks', 'title'],
+  storm: ['storm-clouds', 'lightning-branches', 'rain-wall', 'electric-mist', 'thunder-ring', 'pressure-wave', 'storm-spectrum', 'wind-streams', 'cloud-flashes', 'title'],
+  origami: ['sunset-disc', 'paper-city', 'folded-towers', 'perspective-streets', 'window-pulse', 'flying-cranes', 'skyline-spectrum', 'paper-lanterns', 'fold-lines', 'title'],
 }
 
 const formatTime = value => {
@@ -433,6 +623,350 @@ function drawCover(ctx, video, width, height, fit) {
   ctx.drawImage(video, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight)
 }
 
+function drawSignatureThemeAtmosphere(ctx, theme, width, height, accent, glow, time) {
+  if (!['paper', 'circuit', 'clockwork', 'aurora', 'ink', 'topographic', 'holo', 'mosaic', 'storm', 'origami'].includes(theme)) return
+  ctx.save()
+  if (theme === 'paper') {
+    const paper = ctx.createLinearGradient(0, 0, width, height)
+    paper.addColorStop(0, 'rgba(44,25,35,.28)')
+    paper.addColorStop(.48, 'rgba(18,31,48,.18)')
+    paper.addColorStop(1, 'rgba(56,26,30,.36)')
+    ctx.fillStyle = paper
+  } else if (theme === 'circuit') {
+    const circuit = ctx.createRadialGradient(width * .5, height * .46, 0, width * .5, height * .46, Math.max(width, height) * .74)
+    circuit.addColorStop(0, `${accent}18`)
+    circuit.addColorStop(.36, `${glow}0d`)
+    circuit.addColorStop(1, 'rgba(0,8,13,.72)')
+    ctx.fillStyle = circuit
+  } else if (theme === 'clockwork') {
+    const brass = ctx.createRadialGradient(width * .5, height * .45, 0, width * .5, height * .48, Math.max(width, height) * .78)
+    brass.addColorStop(0, 'rgba(96,67,30,.18)')
+    brass.addColorStop(.42, 'rgba(28,32,43,.18)')
+    brass.addColorStop(1, 'rgba(8,7,12,.68)')
+    ctx.fillStyle = brass
+  } else if (theme === 'aurora') {
+    const polar = ctx.createLinearGradient(0, 0, 0, height)
+    polar.addColorStop(0, 'rgba(4,15,34,.46)')
+    polar.addColorStop(.52, `${glow}0f`)
+    polar.addColorStop(1, 'rgba(3,20,31,.54)')
+    ctx.fillStyle = polar
+  } else if (theme === 'ink') {
+    const ink = ctx.createRadialGradient(width * .62, height * .25, 0, width * .5, height * .48, Math.max(width, height) * .8)
+    ink.addColorStop(0, 'rgba(220,229,244,.09)')
+    ink.addColorStop(.35, 'rgba(18,26,40,.2)')
+    ink.addColorStop(1, 'rgba(3,7,14,.72)')
+    ctx.fillStyle = ink
+  } else if (theme === 'topographic') {
+    const terrain = ctx.createLinearGradient(0, 0, width, height)
+    terrain.addColorStop(0, 'rgba(11,31,28,.64)'); terrain.addColorStop(.5, 'rgba(20,48,39,.3)'); terrain.addColorStop(1, 'rgba(4,18,22,.72)'); ctx.fillStyle = terrain
+  } else if (theme === 'holo') {
+    const holo = ctx.createRadialGradient(width * .48, height * .42, 0, width * .5, height * .48, Math.max(width, height) * .78)
+    holo.addColorStop(0, `${accent}1f`); holo.addColorStop(.34, `${glow}14`); holo.addColorStop(.7, 'rgba(28,20,55,.28)'); holo.addColorStop(1, 'rgba(2,6,18,.72)'); ctx.fillStyle = holo
+  } else if (theme === 'mosaic') {
+    const chapel = ctx.createLinearGradient(0, 0, 0, height)
+    chapel.addColorStop(0, 'rgba(15,18,44,.46)'); chapel.addColorStop(.46, `${glow}12`); chapel.addColorStop(1, 'rgba(24,8,28,.68)'); ctx.fillStyle = chapel
+  } else if (theme === 'storm') {
+    const weather = ctx.createLinearGradient(0, 0, width, height)
+    weather.addColorStop(0, 'rgba(15,24,46,.62)'); weather.addColorStop(.45, 'rgba(34,43,68,.32)'); weather.addColorStop(1, 'rgba(3,8,18,.78)'); ctx.fillStyle = weather
+  } else {
+    const city = ctx.createLinearGradient(0, 0, 0, height)
+    city.addColorStop(0, 'rgba(42,29,47,.34)'); city.addColorStop(.58, `${accent}14`); city.addColorStop(1, 'rgba(17,16,31,.68)'); ctx.fillStyle = city
+  }
+  ctx.fillRect(0, 0, width, height)
+  if (theme === 'paper' || theme === 'ink' || theme === 'origami') {
+    ctx.globalAlpha = theme === 'paper' ? .08 : .055
+    ctx.fillStyle = '#fff'
+    for (let i = 0; i < 70; i += 1) {
+      const x = ((i * 71.3) % 100) / 100 * width
+      const y = ((i * 47.7 + time * .00002) % 100) / 100 * height
+      ctx.fillRect(x, y, Math.max(1, width * .0007), Math.max(1, height * .0007))
+    }
+  }
+  ctx.restore()
+}
+
+function drawSignatureThemeLayers(ctx, state) {
+  const { width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue } = state
+  const drawGear = (x, y, gearRadius, teeth, rotation, colour) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.strokeStyle = colour; ctx.lineWidth = Math.max(1.5, minSide * .0025); ctx.shadowColor = colour; ctx.shadowBlur = minSide * .006
+    const metal = ctx.createRadialGradient(-gearRadius * .24, -gearRadius * .28, 0, 0, 0, gearRadius)
+    metal.addColorStop(0, 'rgba(255,255,255,.2)'); metal.addColorStop(.38, `${colour}24`); metal.addColorStop(1, 'rgba(0,0,0,.16)')
+    ctx.fillStyle = metal; ctx.beginPath(); ctx.arc(0, 0, gearRadius * .82, 0, Math.PI * 2); ctx.fill()
+    for (let i = 0; i < teeth; i += 1) { const angle = i / teeth * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(angle) * gearRadius * .84, Math.sin(angle) * gearRadius * .84); ctx.lineTo(Math.cos(angle) * gearRadius * 1.08, Math.sin(angle) * gearRadius * 1.08); ctx.stroke() }
+    ctx.beginPath(); ctx.arc(0, 0, gearRadius * .82, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, gearRadius * .22, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
+  }
+
+  if (hasLayer('shadow-stack')) {
+    ctx.save(); ctx.translate(centerX, centerY)
+    for (let i = 5; i >= 0; i -= 1) { const r = radius * (1.58 - i * .1); ctx.fillStyle = i % 2 ? `${accent}32` : `${glow}2a`; ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = minSide * .018; ctx.shadowOffsetX = minSide * .012; ctx.shadowOffsetY = minSide * .014; ctx.beginPath(); ctx.arc(-i * minSide * .006, i * minSide * .004, r, 0, Math.PI * 2); ctx.fill() }
+    ctx.restore()
+  }
+  if (hasLayer('paper-sun')) {
+    ctx.save(); ctx.fillStyle = accent; ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = minSide * .012; ctx.shadowOffsetX = minSide * .018; ctx.shadowOffsetY = minSide * .02; ctx.beginPath(); ctx.arc(centerX, centerY, radius * (.7 + reaction * .08), 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = glow; ctx.globalAlpha = .72; ctx.beginPath(); ctx.arc(centerX - radius * .18, centerY - radius * .2, radius * .3, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+  if (hasLayer('paper-orbits')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-.22 + Math.sin(time * .0002) * .05); ctx.lineWidth = minSide * .018; ctx.lineCap = 'round'
+    for (let i = 0; i < 3; i += 1) { ctx.strokeStyle = i % 2 ? glow : accent; ctx.globalAlpha = .52 + i * .14; ctx.beginPath(); ctx.ellipse(0, 0, radius * (1.08 + i * .23), radius * (.42 + i * .08), 0, .25 + i * .5, Math.PI * (1.25 + i * .22)); ctx.stroke() }
+    ctx.restore()
+  }
+  if (hasLayer('paper-ribbon')) {
+    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .025; ctx.lineCap = 'round'; ctx.shadowColor = 'rgba(0,0,0,.52)'; ctx.shadowBlur = minSide * .012; ctx.shadowOffsetY = minSide * .012; ctx.beginPath()
+    for (let i = 0; i <= 96; i += 1) { const x = width * (.08 + i / 96 * .84); const y = height * .74 + Math.sin(i * .175 + time * .0018) * minSide * (.025 + reaction * .035); if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke(); ctx.restore()
+  }
+  if (hasLayer('folded-spectrum')) {
+    ctx.save(); const count = 22; const baseY = height * .91; const startX = width * .1; const step = width * .8 / count
+    for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 3); const h = minSide * (.035 + value * .16); ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .58 + value * .38; ctx.beginPath(); ctx.moveTo(startX + i * step, baseY); ctx.lineTo(startX + (i + .5) * step, baseY - h); ctx.lineTo(startX + (i + 1) * step, baseY); ctx.closePath(); ctx.fill() } ctx.restore()
+  }
+  if (hasLayer('paper-confetti')) {
+    ctx.save(); for (let i = 0; i < 34; i += 1) { const phase = (time * .00006 + i * .073) % 1; const x = ((i * 37.7) % 100) / 100 * width; const y = (phase * 1.25 - .12) * height; const size = minSide * (.004 + i % 4 * .002); ctx.save(); ctx.translate(x, y); ctx.rotate(time * .001 + i); ctx.globalAlpha = .26 + reaction * .5; ctx.fillStyle = i % 3 ? accent : glow; ctx.fillRect(-size, -size * .45, size * 2, size * .9); ctx.restore() } ctx.restore()
+  }
+  if (hasLayer('paper-grain')) { ctx.save(); ctx.globalAlpha = .1; ctx.fillStyle = '#fff'; for (let i = 0; i < 90; i += 1) ctx.fillRect(((i * 53) % 97) / 97 * width, ((i * 31) % 89) / 89 * height, 1 + i % 2, 1 + i % 2); ctx.restore() }
+
+  if (hasLayer('hex-grid')) {
+    ctx.save(); ctx.strokeStyle = `${glow}38`; ctx.lineWidth = Math.max(1, minSide * .0012); const s = minSide * .045
+    for (let row = -1; row < Math.ceil(height / (s * 1.5)) + 1; row += 1) for (let col = -1; col < Math.ceil(width / (s * 1.72)) + 1; col += 1) { const x = col * s * 1.72 + (row % 2 ? s * .86 : 0); const y = row * s * 1.5; ctx.globalAlpha = .12 + .12 * Math.sin(time * .001 + row + col); ctx.beginPath(); for (let p = 0; p < 6; p += 1) { const a = p * Math.PI / 3; const px = x + Math.cos(a) * s; const py = y + Math.sin(a) * s; if (!p) ctx.moveTo(px, py); else ctx.lineTo(px, py) } ctx.closePath(); ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('circuit-traces')) {
+    ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = Math.max(1.5, minSide * .002); ctx.shadowColor = accent; ctx.shadowBlur = minSide * .008
+    for (let i = 0; i < 12; i += 1) { const y = height * (.13 + i * .065); const direction = i % 2 ? 1 : -1; ctx.globalAlpha = .24 + (i % 3) * .12; ctx.beginPath(); ctx.moveTo(direction > 0 ? 0 : width, y); ctx.lineTo(width * (.18 + (i % 4) * .08), y); ctx.lineTo(width * (.27 + (i % 4) * .08), y + direction * height * .05); ctx.lineTo(centerX - direction * radius * .76, centerY + (i - 5.5) * minSide * .028); ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('neural-core')) {
+    ctx.save(); const core = ctx.createRadialGradient(centerX - radius * .18, centerY - radius * .22, 0, centerX, centerY, radius); core.addColorStop(0, '#fff'); core.addColorStop(.12, glow); core.addColorStop(.5, accent); core.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = core; ctx.globalAlpha = .45 + reaction * .42; ctx.shadowColor = accent; ctx.shadowBlur = minSide * (.025 + bass * .04); ctx.beginPath(); ctx.arc(centerX, centerY, radius * (.62 + reaction * .09), 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+  if (hasLayer('scan-nodes') || hasLayer('data-pulses')) {
+    ctx.save(); for (let i = 0; i < 22; i += 1) { const a = i / 22 * Math.PI * 2 + time * .00018; const value = spectrumValue(i, 22, 2, true); const r = radius * (1.1 + (i % 4) * .18); const x = centerX + Math.cos(a) * r; const y = centerY + Math.sin(a) * r * .72; ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .38 + value * .55; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = minSide * .009; ctx.beginPath(); ctx.arc(x, y, minSide * (.003 + value * .005), 0, Math.PI * 2); ctx.fill() } ctx.restore()
+  }
+  if (hasLayer('energy-veins')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .002; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .01
+    for (let branch = 0; branch < 10; branch += 1) { const a = branch / 10 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .38, Math.sin(a) * radius * .38); for (let p = 1; p <= 5; p += 1) { const r = radius * (.4 + p * .22); const jitter = Math.sin(time * .004 + branch * 3 + p) * minSide * .012; ctx.lineTo(Math.cos(a) * r + Math.sin(a) * jitter, Math.sin(a) * r - Math.cos(a) * jitter) } ctx.globalAlpha = .28 + reaction * .45; ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('signal-bars')) {
+    ctx.save(); const count = 30; for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 3); const y = height * (.16 + i / count * .68); const w = width * (.015 + value * .12); ctx.fillStyle = i % 3 ? accent : glow; ctx.globalAlpha = .3 + value * .6; ctx.fillRect(width * .04, y, w, minSide * .005); ctx.fillRect(width * .96 - w, y, w, minSide * .005) } ctx.restore()
+  }
+
+  if (hasLayer('astrolabe')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .000045); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .003; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .008
+    for (let i = 0; i < 4; i += 1) { ctx.globalAlpha = .28 + i * .14; ctx.beginPath(); ctx.ellipse(0, 0, radius * (1.02 + i * .18), radius * (.45 + i * .13), i * .44, 0, Math.PI * 2); ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('gear-train')) { drawGear(centerX - radius * .95, centerY + radius * .62, radius * .4, 14, time * .00025, accent); drawGear(centerX + radius * .88, centerY - radius * .55, radius * .3, 12, -time * .00032, glow); drawGear(centerX + radius * 1.12, centerY + radius * .58, radius * .22, 10, time * .0004, accent) }
+  if (hasLayer('roman-dial')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = glow; ctx.lineCap = 'round'
+    for (let i = 0; i < 12; i += 1) { const a = i / 12 * Math.PI * 2 - Math.PI / 2; ctx.globalAlpha = .5 + (i % 3) * .16; ctx.lineWidth = i % 3 ? minSide * .003 : minSide * .006; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * 1.2, Math.sin(a) * radius * 1.2); ctx.lineTo(Math.cos(a) * radius * (i % 3 ? 1.32 : 1.38), Math.sin(a) * radius * (i % 3 ? 1.32 : 1.38)); ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('orbital-hands')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.lineCap = 'round'; [[time * .00018, .94, accent], [-time * .00031, .67, glow], [time * .00055, 1.2, '#fff']].forEach(([a, length, colour], i) => { ctx.rotate(a); ctx.strokeStyle = colour; ctx.lineWidth = minSide * (.006 - i * .0013); ctx.shadowColor = colour; ctx.shadowBlur = minSide * .007; ctx.beginPath(); ctx.moveTo(-radius * .14, 0); ctx.lineTo(radius * length, 0); ctx.stroke(); ctx.rotate(-a) }); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, minSide * .012, 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+  if (hasLayer('pendulum-arc')) {
+    const angle = Math.sin(time * .0014) * .54; ctx.save(); ctx.translate(centerX, centerY - radius * .1); ctx.rotate(angle); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .004; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, radius * 1.75); ctx.stroke(); ctx.fillStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .018; ctx.beginPath(); ctx.arc(0, radius * 1.75, radius * (.16 + bass * .05), 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+  if (hasLayer('tick-spectrum')) {
+    ctx.save(); ctx.translate(centerX, centerY); for (let i = 0; i < 60; i += 1) { const a = i / 60 * Math.PI * 2; const value = spectrumValue(i, 60, 4, true); const inner = radius * 1.52; ctx.strokeStyle = i % 5 ? accent : glow; ctx.globalAlpha = .3 + value * .58; ctx.lineWidth = minSide * .002; ctx.beginPath(); ctx.moveTo(Math.cos(a) * inner, Math.sin(a) * inner); ctx.lineTo(Math.cos(a) * (inner + minSide * (.01 + value * .025)), Math.sin(a) * (inner + minSide * (.01 + value * .025))); ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('time-sparks')) { ctx.save(); for (let i = 0; i < 35; i += 1) { const a = i * 2.399 + time * .00007; const r = radius * (1.4 + (i % 8) * .13); ctx.fillStyle = i % 4 ? accent : glow; ctx.globalAlpha = .18 + Math.abs(Math.sin(time * .001 + i)) * .42; ctx.fillRect(centerX + Math.cos(a) * r, centerY + Math.sin(a) * r, minSide * .003, minSide * .003) } ctx.restore() }
+
+  if (hasLayer('horizon-glow')) { const horizon = ctx.createLinearGradient(0, height * .52, 0, height); horizon.addColorStop(0, 'rgba(0,0,0,0)'); horizon.addColorStop(.52, `${accent}1f`); horizon.addColorStop(1, `${glow}0b`); ctx.fillStyle = horizon; ctx.fillRect(0, height * .42, width, height * .58) }
+  if (hasLayer('aurora-curtain')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let band = 0; band < 5; band += 1) { const gradient = ctx.createLinearGradient(0, height * .08, 0, height * .72); gradient.addColorStop(0, 'rgba(255,255,255,0)'); gradient.addColorStop(.25, band % 2 ? `${accent}54` : `${glow}48`); gradient.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = gradient; ctx.globalAlpha = .22 + band * .045 + reaction * .12; ctx.beginPath(); ctx.moveTo(-width * .05, height * .12); for (let i = 0; i <= 44; i += 1) { const x = width * i / 44; const y = height * (.18 + band * .035) + Math.sin(i * .172 + time * .0007 + band) * height * (.07 + band * .008); ctx.lineTo(x, y) } for (let i = 44; i >= 0; i -= 1) { const x = width * i / 44; const y = height * (.58 + band * .025) + Math.sin(i * .172 + time * .0007 + band) * height * .11; ctx.lineTo(x, y) } ctx.closePath(); ctx.fill() } ctx.restore()
+  }
+  if (hasLayer('silk-ribbons')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.lineCap = 'round'; for (let ribbon = 0; ribbon < 4; ribbon += 1) { ctx.strokeStyle = ribbon % 2 ? accent : glow; ctx.lineWidth = minSide * (.012 + ribbon * .004); ctx.globalAlpha = .2 + ribbon * .09; ctx.beginPath(); for (let i = 0; i <= 70; i += 1) { const a = i / 70 * Math.PI * 2; const r = radius * (1 + ribbon * .18 + Math.sin(a * 3 + time * .001 + ribbon) * .08); const x = centerX + Math.cos(a) * r; const y = centerY + Math.sin(a) * r * .62; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('polar-stars') || hasLayer('light-dust')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 70; i += 1) { const x = ((i * 61.3) % 100) / 100 * width; const y = ((i * 37.9) % 100) / 100 * height; const twinkle = .2 + Math.abs(Math.sin(time * .0015 + i * 1.2)) * .8; ctx.fillStyle = i % 7 ? '#fff' : glow; ctx.globalAlpha = .12 + twinkle * .48; ctx.beginPath(); ctx.arc(x, y, minSide * (.001 + i % 4 * .0006), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+  if (hasLayer('ribbon-spectrum')) {
+    ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .006; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .012; ctx.beginPath(); for (let i = 0; i < 64; i += 1) { const value = spectrumValue(i, 64, 4); const x = width * (.08 + i / 63 * .84); const y = height * .82 - value * minSide * .12 + Math.sin(i * .22 + time * .002) * minSide * .015; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke(); ctx.restore()
+  }
+  if (hasLayer('glass-horizon')) { ctx.save(); ctx.globalAlpha = .28; ctx.translate(0, height * 1.25); ctx.scale(1, -.42); const reflection = ctx.createLinearGradient(0, 0, width, 0); reflection.addColorStop(0, `${glow}00`); reflection.addColorStop(.5, `${accent}55`); reflection.addColorStop(1, `${glow}00`); ctx.fillStyle = reflection; ctx.fillRect(0, 0, width, height * .45); ctx.restore() }
+
+  if (hasLayer('paper-fibers')) { ctx.save(); ctx.strokeStyle = 'rgba(220,229,242,.14)'; ctx.lineWidth = 1; for (let i = 0; i < 50; i += 1) { const x = ((i * 29) % 97) / 97 * width; const y = ((i * 61) % 89) / 89 * height; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + minSide * (.018 + i % 4 * .008), y + Math.sin(i) * minSide * .006); ctx.stroke() } ctx.restore() }
+  if (hasLayer('ink-moon')) { ctx.save(); const moon = ctx.createRadialGradient(centerX - radius * .18, centerY - radius * .25, 0, centerX, centerY, radius * 1.08); moon.addColorStop(0, '#fff'); moon.addColorStop(.18, glow); moon.addColorStop(.72, `${glow}55`); moon.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = moon; ctx.globalAlpha = .55 + reaction * .22; ctx.beginPath(); ctx.arc(centerX, centerY, radius * (.84 + reaction * .04), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+  if (hasLayer('brush-waves')) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (let wave = 0; wave < 5; wave += 1) { ctx.strokeStyle = wave % 2 ? accent : glow; ctx.lineWidth = minSide * (.003 + wave * .003); ctx.globalAlpha = .2 + wave * .1; ctx.beginPath(); for (let i = 0; i <= 96; i += 1) { const x = width * (.04 + i / 96 * .92); const y = height * (.68 + wave * .045) + Math.sin(i * .128 + time * .0014 + wave) * minSide * (.022 + reaction * .025); if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore()
+  }
+  if (hasLayer('rain-strokes')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineCap = 'round'; for (let i = 0; i < 48; i += 1) { const phase = (time * .00018 + i * .043) % 1; const x = ((i * 47.3) % 100) / 100 * width; const y = phase * height; const len = minSide * (.018 + i % 5 * .007); ctx.globalAlpha = .12 + (i % 4) * .08; ctx.lineWidth = minSide * (.001 + i % 3 * .0006); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - len * .2, y + len); ctx.stroke() } ctx.restore() }
+  if (hasLayer('ink-blooms')) { ctx.save(); ctx.globalCompositeOperation = 'multiply'; for (let i = 0; i < 9; i += 1) { const x = width * (.12 + ((i * 31) % 78) / 100); const y = height * (.14 + ((i * 47) % 72) / 100); const r = minSide * (.035 + i % 3 * .02 + reaction * .014); const bloom = ctx.createRadialGradient(x, y, 0, x, y, r); bloom.addColorStop(0, `${accent}65`); bloom.addColorStop(.5, `${accent}28`); bloom.addColorStop(1, `${accent}00`); ctx.fillStyle = bloom; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+  if (hasLayer('koi-orbit')) {
+    ctx.save(); ctx.translate(centerX, centerY); for (let i = 0; i < 6; i += 1) { const a = i / 6 * Math.PI * 2 + time * .00022; const r = radius * (1.08 + (i % 2) * .28); const x = Math.cos(a) * r; const y = Math.sin(a) * r * .62; ctx.save(); ctx.translate(x, y); ctx.rotate(a + Math.PI / 2); ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .48 + reaction * .35; ctx.beginPath(); ctx.ellipse(0, 0, minSide * .018, minSide * .0065, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, minSide * .012); ctx.lineTo(-minSide * .009, minSide * .023); ctx.lineTo(minSide * .009, minSide * .023); ctx.closePath(); ctx.fill(); ctx.restore() } ctx.restore()
+  }
+  if (hasLayer('seal-frame')) { ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .005; ctx.globalAlpha = .58; const inset = minSide * .055; ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2); ctx.fillStyle = accent; ctx.globalAlpha = .75; const seal = minSide * .055; ctx.fillRect(width - inset - seal, height - inset - seal, seal, seal); ctx.restore() }
+}
+
+function drawExpansionThemeLayers(ctx, state) {
+  const { theme, width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue } = state
+  ctx.save()
+  if (theme === 'topographic') {
+    const scale = 1 + reaction * .035
+    ctx.translate(centerX + Math.sin(time * .006) * reaction * minSide * .004, centerY - reaction * minSide * .008)
+    ctx.scale(scale, scale)
+    ctx.translate(-centerX, -centerY)
+  } else if (theme === 'holo') {
+    const scale = 1 + reaction * .055
+    ctx.translate(centerX, centerY)
+    ctx.rotate(Math.sin(time * .003) * reaction * .016)
+    ctx.scale(scale, scale)
+    ctx.translate(-centerX, -centerY)
+  } else if (theme === 'mosaic') {
+    const scale = 1 + reaction * .028
+    ctx.translate(centerX, centerY - reaction * minSide * .006)
+    ctx.scale(scale, scale)
+    ctx.translate(-centerX, -centerY)
+  } else if (theme === 'storm') {
+    const shake = bass * minSide * .009
+    ctx.translate(Math.sin(time * .026) * shake, Math.cos(time * .021) * shake * .55)
+    const scale = 1 + reaction * .022
+    ctx.translate(centerX, centerY)
+    ctx.scale(scale, scale)
+    ctx.translate(-centerX, -centerY)
+  } else if (theme === 'origami') {
+    ctx.translate(centerX, centerY - reaction * minSide * .018)
+    ctx.scale(1 + reaction * .018, 1 + reaction * .035)
+    ctx.translate(-centerX, -centerY)
+  }
+
+  if (hasLayer('torn-frame')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .007; ctx.lineJoin = 'round'; ctx.globalAlpha = .58; ctx.beginPath(); const inset = minSide * .045; for (let i = 0; i <= 48; i += 1) { const x = inset + (width - inset * 2) * i / 48; const y = inset + Math.sin(i * 2.3) * minSide * .004; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } for (let i = 0; i <= 32; i += 1) ctx.lineTo(width - inset + Math.sin(i * 2.1) * minSide * .004, inset + (height - inset * 2) * i / 32); for (let i = 48; i >= 0; i -= 1) ctx.lineTo(inset + (width - inset * 2) * i / 48, height - inset + Math.sin(i * 1.9) * minSide * .004); for (let i = 32; i >= 0; i -= 1) ctx.lineTo(inset + Math.sin(i * 2.4) * minSide * .004, inset + (height - inset * 2) * i / 32); ctx.closePath(); ctx.stroke(); ctx.restore() }
+  if (hasLayer('paper-clouds')) { ctx.save(); ctx.globalAlpha = .34; for (let i = 0; i < 9; i += 1) { const x = width * (-.04 + i * .13); const y = height * (.12 + i % 3 * .055); ctx.fillStyle = i % 2 ? `${accent}88` : `${glow}88`; ctx.shadowColor = 'rgba(0,0,0,.38)'; ctx.shadowOffsetY = minSide * .008; ctx.beginPath(); ctx.arc(x, y, minSide * (.055 + i % 3 * .012), 0, Math.PI * 2); ctx.arc(x + minSide * .055, y + minSide * .012, minSide * .045, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+
+  if (hasLayer('scan-line')) { const y = ((time * .00014) % 1.16 - .08) * height; ctx.save(); const scan = ctx.createLinearGradient(0, y - minSide * .025, 0, y + minSide * .025); scan.addColorStop(0, `${accent}00`); scan.addColorStop(.5, `${accent}aa`); scan.addColorStop(1, `${accent}00`); ctx.fillStyle = scan; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .012; ctx.fillRect(0, y - minSide * .025, width, minSide * .05); ctx.restore() }
+  if (hasLayer('bio-cells')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .0017; for (let i = 0; i < 26; i += 1) { const a = i * 2.399 + time * .00005; const r = radius * (1.15 + (i % 6) * .19); const x = centerX + Math.cos(a) * r; const y = centerY + Math.sin(a) * r * .72; const size = minSide * (.009 + i % 4 * .003); ctx.globalAlpha = .18 + reaction * .35; ctx.beginPath(); for (let p = 0; p < 6; p += 1) { const pa = p * Math.PI / 3; const px = x + Math.cos(pa) * size; const py = y + Math.sin(pa) * size; if (!p) ctx.moveTo(px, py); else ctx.lineTo(px, py) } ctx.closePath(); ctx.stroke() } ctx.restore() }
+
+  if (hasLayer('brass-rings')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00006); for (let i = 0; i < 5; i += 1) { ctx.strokeStyle = i % 2 ? glow : accent; ctx.globalAlpha = .25 + i * .08; ctx.lineWidth = minSide * (.002 + i * .0006); ctx.beginPath(); ctx.ellipse(0, 0, radius * (1 + i * .18), radius * (.42 + i * .1), i * .33, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+  if (hasLayer('escapement')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(Math.sin(time * .0016) * .18); ctx.strokeStyle = glow; ctx.fillStyle = accent; ctx.lineWidth = minSide * .004; ctx.beginPath(); ctx.moveTo(-radius * .65, -radius * .18); ctx.lineTo(0, radius * .18); ctx.lineTo(radius * .65, -radius * .18); ctx.stroke(); ctx.beginPath(); ctx.arc(-radius * .68, -radius * .2, minSide * (.012 + bass * .008), 0, Math.PI * 2); ctx.arc(radius * .68, -radius * .2, minSide * (.012 + bass * .008), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+
+  if (hasLayer('ice-crystals')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .0017; for (let i = 0; i < 22; i += 1) { const x = ((i * 47) % 101) / 101 * width; const y = ((i * 71) % 97) / 97 * height; const s = minSide * (.009 + i % 3 * .003); ctx.globalAlpha = .18 + (i % 5) * .09; for (let arm = 0; arm < 3; arm += 1) { const a = arm * Math.PI / 3; ctx.beginPath(); ctx.moveTo(x - Math.cos(a) * s, y - Math.sin(a) * s); ctx.lineTo(x + Math.cos(a) * s, y + Math.sin(a) * s); ctx.stroke() } } ctx.restore() }
+  if (hasLayer('polar-mist')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 5; i += 1) { const x = width * (.15 + i * .18 + Math.sin(time * .00009 + i) * .04); const y = height * (.42 + i % 2 * .12); const mist = ctx.createRadialGradient(x, y, 0, x, y, minSide * .22); mist.addColorStop(0, i % 2 ? `${accent}24` : `${glow}20`); mist.addColorStop(1, `${glow}00`); ctx.fillStyle = mist; ctx.beginPath(); ctx.arc(x, y, minSide * .22, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+
+  if (hasLayer('bamboo-silhouette')) { ctx.save(); ctx.strokeStyle = `${accent}b8`; ctx.fillStyle = `${glow}78`; ctx.lineCap = 'round'; for (let stem = 0; stem < 5; stem += 1) { const x = width * (.08 + stem * .055); ctx.lineWidth = minSide * (.004 + stem % 2 * .0015); ctx.beginPath(); ctx.moveTo(x, height); ctx.quadraticCurveTo(x + minSide * .018, height * .55, x - minSide * .012, height * .18); ctx.stroke(); for (let leaf = 0; leaf < 5; leaf += 1) { const y = height * (.28 + leaf * .12); ctx.beginPath(); ctx.ellipse(x + (leaf % 2 ? -1 : 1) * minSide * .022, y, minSide * .024, minSide * .007, leaf % 2 ? -.55 : .55, 0, Math.PI * 2); ctx.fill() } } ctx.restore() }
+  if (hasLayer('ink-splatter')) { ctx.save(); ctx.fillStyle = accent; for (let i = 0; i < 38; i += 1) { const a = i * 2.399 + time * .00003; const r = radius * (.75 + (i * 17 % 80) / 55); const size = minSide * (.0016 + i % 5 * .0012); ctx.globalAlpha = .12 + i % 6 * .08; ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * r, centerY + Math.sin(a) * r * .72, size, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+
+  if (hasLayer('coordinate-grid')) { ctx.save(); ctx.strokeStyle = `${glow}38`; ctx.lineWidth = Math.max(1, minSide * .001); for (let x = width * .08; x < width * .96; x += minSide * .08) { ctx.beginPath(); ctx.moveTo(x, height * .06); ctx.lineTo(x, height * .94); ctx.stroke() } for (let y = height * .08; y < height * .96; y += minSide * .08) { ctx.beginPath(); ctx.moveTo(width * .04, y); ctx.lineTo(width * .96, y); ctx.stroke() } ctx.restore() }
+  if (hasLayer('route-trails')) { ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .004; ctx.lineCap = 'round'; ctx.setLineDash([minSide * .012, minSide * .014]); ctx.lineDashOffset = -time * .00012 * minSide; for (let route = 0; route < 3; route += 1) { ctx.globalAlpha = .32 + route * .12; ctx.beginPath(); ctx.moveTo(-width * .04, height * (.32 + route * .18)); ctx.bezierCurveTo(width * .28, height * (.08 + route * .12), width * .64, height * (.8 - route * .13), width * 1.04, height * (.28 + route * .16)); ctx.stroke() } ctx.restore() }
+
+  if (hasLayer('prism-beams')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.translate(centerX, centerY); ctx.rotate(time * .00005); for (let i = 0; i < 8; i += 1) { const a = i / 8 * Math.PI * 2; ctx.fillStyle = i % 2 ? `${accent}24` : `${glow}20`; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, radius * 2.1, a - .05, a + .05); ctx.closePath(); ctx.fill() } ctx.restore() }
+  if (hasLayer('hologram-grid')) { ctx.save(); ctx.strokeStyle = `${glow}48`; ctx.lineWidth = minSide * .0014; ctx.globalAlpha = .42; for (let i = -8; i <= 8; i += 1) { ctx.beginPath(); ctx.moveTo(centerX, height * .45); ctx.lineTo(centerX + i * width * .09, height); ctx.stroke() } for (let i = 0; i < 8; i += 1) { const y = height * (.48 + i * i * .0075); ctx.beginPath(); ctx.moveTo(width * .05, y); ctx.lineTo(width * .95, y); ctx.stroke() } ctx.restore() }
+
+  if (hasLayer('lancet-windows')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .004; for (let i = 0; i < 5; i += 1) { const x = width * (.18 + i * .16); const w = width * .1; const base = height * .78; ctx.globalAlpha = .28 + i % 3 * .15; ctx.beginPath(); ctx.moveTo(x - w / 2, base); ctx.lineTo(x - w / 2, height * .38); ctx.quadraticCurveTo(x, height * .18, x + w / 2, height * .38); ctx.lineTo(x + w / 2, base); ctx.closePath(); ctx.stroke() } ctx.restore() }
+  if (hasLayer('glass-sparks')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 44; i += 1) { const x = ((i * 61) % 103) / 103 * width; const y = ((i * 37) % 97) / 97 * height; const s = minSide * (.002 + i % 4 * .0009); ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .18 + Math.abs(Math.sin(time * .0014 + i)) * .52; ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-s, -s, s * 2, s * 2); ctx.restore() } ctx.restore() }
+
+  if (hasLayer('wind-streams')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .002; ctx.lineCap = 'round'; for (let band = 0; band < 9; band += 1) { ctx.globalAlpha = .14 + band % 4 * .07; ctx.beginPath(); for (let i = 0; i <= 72; i += 1) { const x = width * i / 72; const y = height * (.16 + band * .085) + Math.sin(i * .14 + time * .0014 + band) * minSide * .018; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore() }
+  if (hasLayer('cloud-flashes')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; const pulse = Math.pow(Math.max(0, Math.sin(time * .004)), 12) * (.35 + bass * .65); const flash = ctx.createRadialGradient(centerX, height * .18, 0, centerX, height * .18, minSide * .65); flash.addColorStop(0, `rgba(255,255,255,${pulse})`); flash.addColorStop(.28, `${glow}${Math.round(pulse * 160).toString(16).padStart(2, '0')}`); flash.addColorStop(1, `${glow}00`); ctx.fillStyle = flash; ctx.fillRect(0, 0, width, height); ctx.restore() }
+
+  if (hasLayer('paper-lanterns')) { ctx.save(); for (let i = 0; i < 11; i += 1) { const x = width * (.08 + (i * 37 % 84) / 100); const y = height * (.12 + ((i * 29 + time * .008) % 64) / 100); const s = minSide * (.012 + i % 3 * .004); ctx.fillStyle = i % 2 ? accent : glow; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = minSide * .012; ctx.globalAlpha = .38 + i % 4 * .12; ctx.beginPath(); ctx.moveTo(x - s, y); ctx.quadraticCurveTo(x, y - s * .65, x + s, y); ctx.quadraticCurveTo(x, y + s * 1.4, x - s, y); ctx.fill() } ctx.restore() }
+  if (hasLayer('fold-lines')) { ctx.save(); ctx.strokeStyle = `${glow}58`; ctx.lineWidth = minSide * .0015; const points = [[.08,.18],[.28,.08],[.49,.26],[.7,.1],[.92,.22],[.83,.62],[.58,.86],[.31,.72],[.11,.9]]; points.forEach((point, i) => { const next = points[(i + 1) % points.length]; ctx.beginPath(); ctx.moveTo(width * point[0], height * point[1]); ctx.lineTo(width * next[0], height * next[1]); ctx.lineTo(centerX, centerY); ctx.closePath(); ctx.globalAlpha = .18 + i % 4 * .08; ctx.stroke() }); ctx.restore() }
+
+  if (hasLayer('contour-field')) {
+    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = Math.max(1, minSide * .0015); ctx.globalAlpha = .28
+    for (let band = 0; band < 12; band += 1) {
+      ctx.beginPath()
+      for (let i = 0; i <= 80; i += 1) {
+        const x = width * i / 80
+        const y = height * (.08 + band * .074) + Math.sin(i * .19 + band * .8 + time * .00032) * minSide * (.015 + band * .0015) + Math.sin(i * .055 - band) * minSide * .018
+        if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+    }
+    ctx.restore()
+  }
+  if (hasLayer('elevation-rings')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .002
+    for (let ring = 0; ring < 7; ring += 1) {
+      ctx.globalAlpha = .22 + ring * .055; ctx.beginPath()
+      for (let i = 0; i <= 96; i += 1) {
+        const a = i / 96 * Math.PI * 2
+        const wobble = 1 + Math.sin(a * 3 + ring + time * .00025) * .045 + Math.sin(a * 7 - ring) * .02
+        const r = radius * (.58 + ring * .19) * wobble
+        const x = Math.cos(a) * r; const y = Math.sin(a) * r * .68
+        if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+      }
+      ctx.closePath(); ctx.stroke()
+    }
+    ctx.restore()
+  }
+  if (hasLayer('terrain-scan')) {
+    const scanY = ((time * .00011) % 1.18 - .08) * height
+    ctx.save(); const scan = ctx.createLinearGradient(0, scanY - minSide * .05, 0, scanY + minSide * .05); scan.addColorStop(0, `${glow}00`); scan.addColorStop(.5, `${glow}66`); scan.addColorStop(1, `${glow}00`); ctx.fillStyle = scan; ctx.fillRect(0, scanY - minSide * .05, width, minSide * .1); ctx.restore()
+  }
+  if (hasLayer('ridge-spectrum')) {
+    ctx.save(); ctx.strokeStyle = accent; ctx.fillStyle = `${accent}24`; ctx.lineJoin = 'round'; ctx.lineWidth = minSide * .004; ctx.beginPath(); ctx.moveTo(width * .04, height * .91)
+    for (let i = 0; i < 72; i += 1) { const x = width * (.04 + i / 71 * .92); const value = spectrumValue(i, 72, 4); const y = height * .91 - minSide * (.025 + value * .17); ctx.lineTo(x, y) }
+    ctx.lineTo(width * .96, height); ctx.lineTo(width * .04, height); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore()
+  }
+  if (hasLayer('map-nodes')) {
+    ctx.save(); ctx.strokeStyle = `${glow}72`; ctx.fillStyle = accent; ctx.lineWidth = minSide * .0015
+    const nodes = Array.from({ length: 14 }, (_, i) => ({ x: width * (.09 + ((i * 37) % 82) / 100), y: height * (.1 + ((i * 61) % 78) / 100) }))
+    nodes.forEach((node, i) => { if (i) { ctx.globalAlpha = .22; ctx.beginPath(); ctx.moveTo(nodes[i - 1].x, nodes[i - 1].y); ctx.lineTo(node.x, node.y); ctx.stroke() } ctx.globalAlpha = .45 + reaction * .4; ctx.beginPath(); ctx.arc(node.x, node.y, minSide * (.003 + i % 3 * .0015), 0, Math.PI * 2); ctx.fill() }); ctx.restore()
+  }
+  if (hasLayer('compass-sweep')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00024); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .002; ctx.globalAlpha = .45; ctx.beginPath(); ctx.arc(0, 0, radius * 1.52, 0, Math.PI * 2); ctx.stroke(); const beam = ctx.createLinearGradient(0, 0, radius * 1.55, 0); beam.addColorStop(0, `${glow}00`); beam.addColorStop(1, `${glow}88`); ctx.strokeStyle = beam; ctx.lineWidth = minSide * .008; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(radius * 1.52, 0); ctx.stroke(); ctx.restore()
+  }
+  if (hasLayer('topo-grain')) { ctx.save(); ctx.fillStyle = '#d9ffd7'; for (let i = 0; i < 80; i += 1) { ctx.globalAlpha = .025 + (i % 5) * .008; ctx.fillRect(((i * 67) % 101) / 101 * width, ((i * 43) % 97) / 97 * height, 1 + i % 2, 1 + i % 2) } ctx.restore() }
+
+  if (hasLayer('holo-bloom') || hasLayer('chroma-disc')) {
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; const bloom = ctx.createRadialGradient(centerX - radius * .18, centerY - radius * .22, 0, centerX, centerY, radius * 1.2); bloom.addColorStop(0, '#ffffffcc'); bloom.addColorStop(.18, `${glow}aa`); bloom.addColorStop(.52, `${accent}58`); bloom.addColorStop(1, `${accent}00`); ctx.fillStyle = bloom; ctx.globalAlpha = .5 + reaction * .25; ctx.beginPath(); ctx.arc(centerX, centerY, radius * (1 + reaction * .08), 0, Math.PI * 2); ctx.fill(); ctx.restore()
+  }
+  if (hasLayer('iris-petals')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00011); ctx.globalCompositeOperation = 'screen'
+    for (let i = 0; i < 14; i += 1) { const a = i / 14 * Math.PI * 2; ctx.save(); ctx.rotate(a); const petal = ctx.createLinearGradient(radius * .35, 0, radius * 1.48, 0); petal.addColorStop(0, `${accent}18`); petal.addColorStop(.5, i % 2 ? `${glow}88` : `${accent}88`); petal.addColorStop(1, `${glow}00`); ctx.fillStyle = petal; ctx.beginPath(); ctx.ellipse(radius * .88, 0, radius * .62, radius * .13, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore() } ctx.restore()
+  }
+  if (hasLayer('spectral-cage')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-time * .00008); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .002; for (let i = 0; i < 4; i += 1) { ctx.globalAlpha = .24 + i * .1; ctx.beginPath(); ctx.ellipse(0, 0, radius * (1.05 + i * .17), radius * (.32 + i * .13), i * .44, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+  if (hasLayer('laser-pollen')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 46; i += 1) { const a = i * 2.399 + time * .00016; const r = radius * (1.05 + ((i * 19) % 75) / 48); const pulse = .25 + Math.abs(Math.sin(time * .0015 + i)) * .75; ctx.fillStyle = i % 3 ? glow : accent; ctx.globalAlpha = .15 + pulse * .5; ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * r, centerY + Math.sin(a) * r * .72, minSide * (.0014 + i % 4 * .0008), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+  if (hasLayer('diffraction-bars')) { ctx.save(); for (let i = 0; i < 48; i += 1) { const value = spectrumValue(i, 48, 4); const h = minSide * (.018 + value * .12); ctx.fillStyle = i % 3 === 0 ? glow : accent; ctx.globalAlpha = .16 + value * .48; ctx.fillRect(width * (.08 + i / 48 * .84), height * .9 - h, width * .84 / 64, h) } ctx.restore() }
+  if (hasLayer('glass-flare')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; const x = ((time * .00013) % 1.4 - .2) * width; const flare = ctx.createLinearGradient(x - width * .09, 0, x + width * .09, 0); flare.addColorStop(0, 'rgba(255,255,255,0)'); flare.addColorStop(.48, `${accent}26`); flare.addColorStop(.5, 'rgba(255,255,255,.55)'); flare.addColorStop(.52, `${glow}26`); flare.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = flare; ctx.transform(1, 0, -.25, 1, 0, 0); ctx.fillRect(x - width * .1, 0, width * .2, height); ctx.restore() }
+
+  if (hasLayer('cathedral-rays')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 9; i += 1) { ctx.fillStyle = i % 2 ? `${accent}16` : `${glow}12`; ctx.beginPath(); ctx.moveTo(centerX, -height * .05); ctx.lineTo(width * (i / 9 - .08), height); ctx.lineTo(width * ((i + .62) / 9), height); ctx.closePath(); ctx.fill() } ctx.restore() }
+  if (hasLayer('rose-window')) {
+    ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .000035); for (let i = 0; i < 16; i += 1) { const a = i / 16 * Math.PI * 2; ctx.fillStyle = i % 3 === 0 ? `${glow}88` : `${accent}72`; ctx.strokeStyle = 'rgba(5,9,20,.7)'; ctx.lineWidth = minSide * .003; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, radius * (.96 + reaction * .05), a, a + Math.PI * 2 / 16); ctx.closePath(); ctx.fill(); ctx.stroke() } ctx.beginPath(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .006; ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2); ctx.stroke(); ctx.restore()
+  }
+  if (hasLayer('glass-shards')) { ctx.save(); ctx.translate(centerX, centerY); for (let i = 0; i < 20; i += 1) { const a = i / 20 * Math.PI * 2; const r = radius * (1.15 + (i % 4) * .16); ctx.fillStyle = i % 2 ? `${accent}32` : `${glow}2e`; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .72, Math.sin(a) * radius * .72); ctx.lineTo(Math.cos(a - .1) * r, Math.sin(a - .1) * r); ctx.lineTo(Math.cos(a + .13) * r * .94, Math.sin(a + .13) * r * .94); ctx.closePath(); ctx.fill() } ctx.restore() }
+  if (hasLayer('lead-grid')) { ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = 'rgba(5,7,16,.7)'; ctx.lineWidth = minSide * .003; for (let i = 0; i < 8; i += 1) { const a = i / 8 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * radius * 1.65, Math.sin(a) * radius * 1.65); ctx.stroke() } for (let i = 1; i <= 3; i += 1) { ctx.beginPath(); ctx.arc(0, 0, radius * i * .48, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+  if (hasLayer('mosaic-spectrum')) { ctx.save(); const count = 30; for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 3); ctx.fillStyle = i % 3 === 0 ? accent : glow; ctx.globalAlpha = .28 + value * .58; const tile = width * .8 / count; ctx.fillRect(width * .1 + i * tile, height * .88 - value * minSide * .12, tile * .78, minSide * (.018 + value * .04)) } ctx.restore() }
+  if (hasLayer('arch-frame')) { ctx.save(); ctx.strokeStyle = `${glow}99`; ctx.lineWidth = minSide * .006; ctx.globalAlpha = .7; const inset = minSide * .07; ctx.beginPath(); ctx.moveTo(inset, height - inset); ctx.lineTo(inset, height * .34); ctx.quadraticCurveTo(centerX, -height * .18, width - inset, height * .34); ctx.lineTo(width - inset, height - inset); ctx.stroke(); ctx.restore() }
+  if (hasLayer('color-dust')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 56; i += 1) { const x = ((i * 53) % 101) / 101 * width; const y = ((i * 31 + time * .002) % 97) / 97 * height; ctx.fillStyle = i % 3 ? accent : glow; ctx.globalAlpha = .1 + (i % 5) * .06; ctx.beginPath(); ctx.arc(x, y, minSide * (.001 + i % 3 * .0008), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+
+  if (hasLayer('storm-clouds')) { ctx.save(); for (let i = 0; i < 11; i += 1) { const x = width * (-.04 + i * .105); const y = height * (.08 + (i % 3) * .045); const cloud = ctx.createRadialGradient(x, y, 0, x, y, minSide * .16); cloud.addColorStop(0, i % 2 ? `${glow}26` : `${accent}30`); cloud.addColorStop(1, `${accent}00`); ctx.fillStyle = cloud; ctx.beginPath(); ctx.arc(x, y, minSide * .16, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+  if (hasLayer('lightning-branches')) { ctx.save(); ctx.strokeStyle = glow; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .015; ctx.lineWidth = minSide * .003; ctx.globalAlpha = .34 + bass * .55; for (let bolt = 0; bolt < 5; bolt += 1) { let x = width * (.16 + bolt * .17); let y = height * .08; ctx.beginPath(); ctx.moveTo(x, y); for (let p = 1; p <= 8; p += 1) { x += Math.sin(bolt * 7 + p * 2.1 + time * .0009) * minSide * .025; y = height * (.08 + p * .075); ctx.lineTo(x, y) } ctx.stroke() } ctx.restore() }
+  if (hasLayer('rain-wall')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineCap = 'round'; for (let i = 0; i < 80; i += 1) { const phase = (time * .00032 + i * .037) % 1; const x = ((i * 47) % 103) / 103 * width; const y = phase * height; const len = minSide * (.018 + i % 5 * .006); ctx.globalAlpha = .1 + i % 4 * .06; ctx.lineWidth = minSide * .0012; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - len * .32, y + len); ctx.stroke() } ctx.restore() }
+  if (hasLayer('electric-mist')) { const mist = ctx.createRadialGradient(centerX, centerY, radius * .3, centerX, centerY, radius * 2.1); mist.addColorStop(0, `${glow}18`); mist.addColorStop(.45, `${accent}16`); mist.addColorStop(1, `${accent}00`); ctx.fillStyle = mist; ctx.fillRect(0, 0, width, height) }
+  if (hasLayer('thunder-ring')) { ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = glow; ctx.shadowColor = glow; ctx.shadowBlur = minSide * .012; for (let i = 0; i < 4; i += 1) { const phase = (time * .00025 + i * .25) % 1; ctx.globalAlpha = (1 - phase) * .5; ctx.lineWidth = minSide * (.006 - phase * .004); ctx.beginPath(); ctx.arc(0, 0, radius * (.58 + phase * 1.25), 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+  if (hasLayer('pressure-wave')) { ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .005; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .01; ctx.beginPath(); for (let i = 0; i <= 96; i += 1) { const x = width * i / 96; const y = height * .76 + Math.sin(i * .22 + time * .002) * minSide * (.012 + reaction * .035) + Math.sin(i * .07) * minSide * .02; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke(); ctx.restore() }
+  if (hasLayer('storm-spectrum')) { ctx.save(); const count = 44; for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 4); const x = width * (.08 + i / count * .84); const h = minSide * (.025 + value * .16); ctx.strokeStyle = i % 5 ? accent : glow; ctx.globalAlpha = .26 + value * .58; ctx.lineWidth = minSide * .0025; ctx.beginPath(); ctx.moveTo(x, height * .93); ctx.lineTo(x + Math.sin(i) * minSide * .009, height * .93 - h * .52); ctx.lineTo(x, height * .93 - h); ctx.stroke() } ctx.restore() }
+
+  if (hasLayer('sunset-disc')) { ctx.save(); const sun = ctx.createRadialGradient(centerX, centerY * .88, 0, centerX, centerY * .88, radius * 1.35); sun.addColorStop(0, '#fff7cf'); sun.addColorStop(.25, glow); sun.addColorStop(.72, `${accent}88`); sun.addColorStop(1, `${accent}00`); ctx.fillStyle = sun; ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(centerX, centerY * .88, radius * (1.12 + reaction * .04), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+  if (hasLayer('paper-city')) { ctx.save(); const base = height * .88; for (let i = 0; i < 17; i += 1) { const x = width * (.02 + i * .059); const w = width * (.045 + i % 3 * .008); const h = minSide * (.1 + (i * 37 % 110) / 620); ctx.fillStyle = i % 2 ? `${accent}bb` : `${glow}a8`; ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x, base - h * .72); ctx.lineTo(x + w * .5, base - h); ctx.lineTo(x + w, base - h * .72); ctx.lineTo(x + w, base); ctx.closePath(); ctx.fill() } ctx.restore() }
+  if (hasLayer('folded-towers')) { ctx.save(); for (let i = 0; i < 9; i += 1) { const x = width * (.1 + i * .1); const y = height * .72; const h = minSide * (.13 + i % 4 * .035); ctx.fillStyle = i % 2 ? `${accent}55` : `${glow}52`; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + width * .045, y - h); ctx.lineTo(x + width * .09, y); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.moveTo(x + width * .045, y - h); ctx.lineTo(x + width * .045, y); ctx.stroke() } ctx.restore() }
+  if (hasLayer('perspective-streets')) { ctx.save(); ctx.strokeStyle = `${glow}55`; ctx.lineWidth = minSide * .002; for (let i = -7; i <= 7; i += 1) { ctx.beginPath(); ctx.moveTo(centerX, centerY * 1.12); ctx.lineTo(centerX + i * width * .09, height); ctx.stroke() } for (let i = 0; i < 7; i += 1) { const y = height * (.58 + i * i * .008); ctx.beginPath(); ctx.moveTo(width * .08, y); ctx.lineTo(width * .92, y); ctx.stroke() } ctx.restore() }
+  if (hasLayer('window-pulse')) { ctx.save(); for (let i = 0; i < 42; i += 1) { const x = width * (.08 + (i * 37 % 84) / 100); const y = height * (.58 + (i * 23 % 26) / 100); ctx.fillStyle = i % 3 ? glow : '#fff'; ctx.globalAlpha = .16 + Math.abs(Math.sin(time * .002 + i)) * .62; ctx.fillRect(x, y, minSide * .006, minSide * .009) } ctx.restore() }
+  if (hasLayer('flying-cranes')) { ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .003; ctx.lineCap = 'round'; for (let i = 0; i < 8; i += 1) { const x = width * (.12 + (i * 31 % 78) / 100); const y = height * (.12 + (i * 47 % 34) / 100); const s = minSide * (.018 + i % 3 * .005); ctx.globalAlpha = .35 + i % 4 * .12; ctx.beginPath(); ctx.moveTo(x - s, y + s * .15); ctx.quadraticCurveTo(x - s * .4, y - s * .55, x, y); ctx.quadraticCurveTo(x + s * .4, y - s * .55, x + s, y + s * .15); ctx.stroke() } ctx.restore() }
+  if (hasLayer('skyline-spectrum')) { ctx.save(); const count = 54; for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 4); const w = width * .84 / count; ctx.fillStyle = i % 4 ? accent : glow; ctx.globalAlpha = .25 + value * .5; ctx.fillRect(width * .08 + i * w, height * .92 - minSide * value * .14, w * .7, minSide * value * .14) } ctx.restore() }
+  ctx.restore()
+}
+
+function applyThemeBeatTransform(ctx, theme, { centerX, centerY, minSide, time, reaction, bass }) {
+  const aroundCenter = (scaleX, scaleY = scaleX, rotation = 0, offsetX = 0, offsetY = 0) => {
+    ctx.translate(centerX + offsetX, centerY + offsetY)
+    if (rotation) ctx.rotate(rotation)
+    ctx.scale(scaleX, scaleY)
+    ctx.translate(-centerX, -centerY)
+  }
+  if (theme === 'pulse') aroundCenter(1 + reaction * .05)
+  else if (theme === 'universe') aroundCenter(1 + reaction * .028, 1 + reaction * .028, Math.sin(time * .0018) * reaction * .014)
+  else if (theme === 'neon') aroundCenter(1 + reaction * .035, 1 + reaction * .012, 0, Math.sin(time * .008) * reaction * minSide * .009)
+  else if (theme === 'slime') aroundCenter(1 + reaction * .05, 1 - reaction * .018, Math.sin(time * .004) * reaction * .012)
+  else if (theme === 'bubbles') aroundCenter(1 + reaction * .025, 1 + reaction * .04, 0, 0, -reaction * minSide * .016)
+  else if (theme === 'inferno') aroundCenter(1 + reaction * .045, 1 + reaction * .06, 0, 0, -reaction * minSide * .02)
+  else if (theme === 'ocean') aroundCenter(1 + reaction * .02, 1 + reaction * .035, Math.sin(time * .0025) * reaction * .014, Math.sin(time * .004) * reaction * minSide * .008)
+  else if (theme === 'minimal') aroundCenter(1 + reaction * .014, 1 + reaction * .014, 0, reaction * minSide * .005, -reaction * minSide * .005)
+  else if (theme === 'retro') aroundCenter(1 + reaction * .045, 1 + reaction * .018, 0, Math.sin(time * .007) * reaction * minSide * .006)
+  else if (theme === 'gold') aroundCenter(1 + reaction * .032, 1 + reaction * .042, 0, 0, -reaction * minSide * .009)
+  else if (theme === 'crystal') aroundCenter(1 + reaction * .04, 1 + reaction * .04, Math.sin(time * .003) * reaction * .012)
+  else if (theme === 'chrome') {
+    const shake = bass * minSide * .006
+    aroundCenter(1 + reaction * .026, 1 + reaction * .026, 0, Math.sin(time * .028) * shake, Math.cos(time * .023) * shake * .55)
+  } else if (theme === 'paper') aroundCenter(1 + reaction * .036, 1 + reaction * .045, Math.sin(time * .003) * reaction * .008, 0, -reaction * minSide * .01)
+  else if (theme === 'circuit') aroundCenter(1 + reaction * .03, 1 + reaction * .03, 0, Math.sin(time * .012) * reaction * minSide * .007)
+  else if (theme === 'clockwork') aroundCenter(1 + reaction * .024, 1 + reaction * .024, Math.sin(time * .004) * reaction * .018)
+  else if (theme === 'aurora') aroundCenter(1 + reaction * .018, 1 + reaction * .045, Math.sin(time * .002) * reaction * .008, Math.sin(time * .005) * reaction * minSide * .01)
+  else if (theme === 'ink') aroundCenter(1 + reaction * .025, 1 + reaction * .035, Math.sin(time * .0025) * reaction * .01, Math.sin(time * .006) * reaction * minSide * .008, -reaction * minSide * .008)
+}
+
 function drawComposition(ctx, video, options, frequencyData, time) {
   const { width, height } = ctx.canvas
   drawCover(ctx, video, width, height, options.fit)
@@ -485,6 +1019,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = steelFalloff
     ctx.fillRect(0, 0, width, height)
   }
+  drawSignatureThemeAtmosphere(ctx, options.theme, width, height, options.color, options.glowColor, time)
 
   const values = frequencyData?.length ? frequencyData : new Uint8Array(64).fill(42)
   const sampleCount = Math.min(72, values.length)
@@ -515,6 +1050,9 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     const denominator = wrap ? count : Math.max(1, count - 1)
     return smoothFrequencyBin(index / denominator * (sampleCount - 1), kernel, wrap)
   }
+
+  ctx.save()
+  applyThemeBeatTransform(ctx, options.theme, { centerX, centerY, minSide, time, reaction, bass })
 
   if (hasLayer('bass-glow')) {
     const gradient = ctx.createRadialGradient(centerX, centerY, radius * .2, centerX, centerY, minSide * .62)
@@ -1883,8 +2421,17 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.restore()
   }
 
+  drawSignatureThemeLayers(ctx, {
+    width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue,
+  })
+  drawExpansionThemeLayers(ctx, {
+    theme: options.theme, width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue,
+  })
+  ctx.restore()
+
   if (hasLayer('title') && options.title.trim()) {
-    const fontSize = Math.max(24, minSide * (options.titleSize / 100))
+    const fontSize = Math.max(24, minSide * (options.titleSize / 100)) * (1 + reaction * .045)
+    const titleY = centerY - reaction * minSide * .008
     ctx.save()
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -1892,11 +2439,11 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.lineJoin = 'round'
     ctx.lineWidth = Math.max(2, fontSize * .08)
     ctx.strokeStyle = 'rgba(4, 10, 20, .72)'
-    ctx.strokeText(options.title.toUpperCase(), centerX, centerY)
+    ctx.strokeText(options.title.toUpperCase(), centerX, titleY)
     ctx.shadowColor = glow
     ctx.shadowBlur = fontSize * .34 * (1 + reaction)
     ctx.fillStyle = '#ffffff'
-    ctx.fillText(options.title.toUpperCase(), centerX, centerY)
+    ctx.fillText(options.title.toUpperCase(), centerX, titleY)
     ctx.restore()
   }
 
