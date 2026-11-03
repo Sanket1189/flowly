@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, AudioLines, Captions, Check, CircleAlert, Download, FileMusic, Film,
-  FastForward, Layers3, LockKeyhole, Pause, Play, Plus, Rewind, RotateCcw, Search, Sparkles, Upload, X,
+  FastForward, Image as ImageIcon, Layers3, LockKeyhole, Pause, Play, Plus, Rewind, RotateCcw, Search, Sparkles, Upload, X,
 } from 'lucide-react'
 import FlowSelect from './FlowSelect.jsx'
 import './music-visualizer.css'
@@ -698,8 +698,11 @@ const exportVideoBitrate = (quality, aspect, fps = 30) => {
   return Math.round(bitrate * frameRateMultiplier)
 }
 
-function drawCover(ctx, video, width, height, fit) {
-  if (!video || video.readyState < 2 || !video.videoWidth) {
+function drawCover(ctx, media, width, height, fit) {
+  const sourceWidth = media?.videoWidth || media?.naturalWidth || 0
+  const sourceHeight = media?.videoHeight || media?.naturalHeight || 0
+  const mediaReady = media?.tagName === 'VIDEO' ? media.readyState >= 2 : Boolean(media?.complete)
+  if (!media || !mediaReady || !sourceWidth || !sourceHeight) {
     const gradient = ctx.createLinearGradient(0, 0, width, height)
     gradient.addColorStop(0, '#121827')
     gradient.addColorStop(.55, '#402348')
@@ -709,13 +712,13 @@ function drawCover(ctx, video, width, height, fit) {
     return
   }
   const scale = fit === 'contain'
-    ? Math.min(width / video.videoWidth, height / video.videoHeight)
-    : Math.max(width / video.videoWidth, height / video.videoHeight)
-  const drawWidth = video.videoWidth * scale
-  const drawHeight = video.videoHeight * scale
+    ? Math.min(width / sourceWidth, height / sourceHeight)
+    : Math.max(width / sourceWidth, height / sourceHeight)
+  const drawWidth = sourceWidth * scale
+  const drawHeight = sourceHeight * scale
   ctx.fillStyle = '#080b10'
   ctx.fillRect(0, 0, width, height)
-  ctx.drawImage(video, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight)
+  ctx.drawImage(media, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight)
 }
 
 function drawSignatureThemeAtmosphere(ctx, theme, width, height, accent, glow, time) {
@@ -1124,11 +1127,19 @@ function applyThemeBeatTransform(ctx, theme, { centerX, centerY, minSide, time, 
   else if (theme === 'clockwork') aroundCenter(1 + reaction * .024, 1 + reaction * .024, Math.sin(time * .004) * reaction * .018)
   else if (theme === 'aurora') aroundCenter(1 + reaction * .018, 1 + reaction * .045, Math.sin(time * .002) * reaction * .008, Math.sin(time * .005) * reaction * minSide * .01)
   else if (theme === 'ink') aroundCenter(1 + reaction * .025, 1 + reaction * .035, Math.sin(time * .0025) * reaction * .01, Math.sin(time * .006) * reaction * minSide * .008, -reaction * minSide * .008)
+  else if (theme === 'topographic') aroundCenter(1 + reaction * .018, 1 + reaction * .052, 0, Math.sin(time * .004) * reaction * minSide * .006, -reaction * minSide * .012)
+  else if (theme === 'holo') aroundCenter(1 + reaction * .052, 1 + reaction * .052, Math.sin(time * .0035) * reaction * .018)
+  else if (theme === 'mosaic') aroundCenter(1 + reaction * .034, 1 + reaction * .034, Math.sin(time * .0022) * reaction * .012, 0, -reaction * minSide * .006)
+  else if (theme === 'storm') {
+    const shake = bass * minSide * .009
+    aroundCenter(1 + reaction * .026, 1 + reaction * .055, 0, Math.sin(time * .034) * shake, -reaction * minSide * .014 + Math.cos(time * .029) * shake * .45)
+  } else if (theme === 'origami') aroundCenter(1 + reaction * .044, 1 + reaction * .022, Math.sin(time * .0045) * reaction * .014, Math.sin(time * .008) * reaction * minSide * .007, -reaction * minSide * .008)
   else if (theme === 'lunar') aroundCenter(1 + reaction * .028, 1 + reaction * .04, Math.sin(time * .002) * reaction * .012, 0, -reaction * minSide * .01)
   else if (theme === 'quantum') aroundCenter(1 + reaction * .065, 1 + reaction * .065, Math.sin(time * .004) * reaction * .018)
   else if (theme === 'mirage') aroundCenter(1 + reaction * .018, 1 + reaction * .038, 0, Math.sin(time * .003) * reaction * minSide * .007, -reaction * minSide * .008)
   else if (theme === 'arctic') aroundCenter(1 + reaction * .025, 1 + reaction * .045, Math.sin(time * .002) * reaction * .008)
   else if (theme === 'cinema') aroundCenter(1 + reaction * .022, 1 + reaction * .022, 0, 0, -reaction * minSide * .008)
+  else aroundCenter(1 + reaction * .03, 1 + reaction * .03, Math.sin(time * .003) * reaction * .008)
 }
 
 function drawComposition(ctx, video, options, frequencyData, time) {
@@ -2687,6 +2698,7 @@ export default function MusicVisualizer({ onExit }) {
   const lyricFontInputRef = useRef(null)
   const lyricFontFaceRef = useRef(null)
   const videoRef = useRef(null)
+  const imageRef = useRef(null)
   const audioRef = useRef(null)
   const frameRef = useRef(0)
   const audioGraphRef = useRef(null)
@@ -2696,8 +2708,10 @@ export default function MusicVisualizer({ onExit }) {
   const exportTimerRef = useRef(0)
   const exportCancelledRef = useRef(false)
   const [videoFile, setVideoFile] = useState(null)
+  const [imageFile, setImageFile] = useState(null)
   const [audioFile, setAudioFile] = useState(null)
   const [videoUrl, setVideoUrl] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [audioUrl, setAudioUrl] = useState('')
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -2726,6 +2740,7 @@ export default function MusicVisualizer({ onExit }) {
   const [theme, setTheme] = useState('pulse')
   const [themeLayerSelections, setThemeLayerSelections] = useState(defaultThemeLayers)
   const [staticThemeLayers, setStaticThemeLayers] = useState({})
+  const [staticFlowThemeLayers, setStaticFlowThemeLayers] = useState({})
   const [layerContextMenu, setLayerContextMenu] = useState(null)
   const [layerLibraryOpen, setLayerLibraryOpen] = useState(false)
   const [layerSearch, setLayerSearch] = useState('')
@@ -2735,6 +2750,7 @@ export default function MusicVisualizer({ onExit }) {
   const [error, setError] = useState('')
   const layers = themeLayerSelections[theme]
   const staticLayers = useMemo(() => staticThemeLayers[theme] || [], [staticThemeLayers, theme])
+  const staticFlowLayers = useMemo(() => staticFlowThemeLayers[theme] || [], [staticFlowThemeLayers, theme])
   const layerGroups = themeLibraries[theme]
   const allLayerGroups = useMemo(() => {
     const query = layerSearch.trim().toLowerCase()
@@ -2806,9 +2822,9 @@ export default function MusicVisualizer({ onExit }) {
   }
 
   const options = useMemo(() => ({
-    fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, theme,
+    fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, staticFlowLayers, theme,
     lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFontFamily: lyricsFont.family,
-  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, theme,
+  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, staticFlowLayers, theme,
     lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFont.family])
 
   useEffect(() => {
@@ -2849,24 +2865,48 @@ export default function MusicVisualizer({ onExit }) {
         time,
         frequencyData: frequencyData?.length ? new Uint8Array(frequencyData) : new Uint8Array(64).fill(42),
       }
-      const movingLayers = options.layers.filter(layerId => !options.staticLayers.includes(layerId))
-      const frozenLayers = options.layers.filter(layerId => options.staticLayers.includes(layerId))
-      drawComposition(ctx, videoRef.current, {
+      const visualSource = imageFile ? imageRef.current : videoRef.current
+      drawComposition(ctx, visualSource, {
         ...options,
-        layers: movingLayers,
+        layers: [],
+        lyricsEnabled: false,
         playbackTime: audioRef.current?.currentTime || 0,
         playbackDuration: audioRef.current?.duration || 0,
       }, frequencyData, time)
-      frozenLayers.forEach(layerId => {
-        const snapshot = frozenLayerSnapshotsRef.current[options.theme]?.[layerId] || motionFrameRef.current
-        drawComposition(ctx, videoRef.current, {
+
+      const visualLayers = options.layers.filter(layerId => layerId !== 'title')
+      const motionGroups = new Map()
+      visualLayers.forEach(layerId => {
+        const beatFrozen = options.staticLayers.includes(layerId)
+        const flowFrozen = options.staticFlowLayers.includes(layerId)
+        const motionKey = `${beatFrozen ? 'beat-static' : 'beat-live'}:${flowFrozen ? 'flow-static' : 'flow-live'}`
+        const key = beatFrozen || flowFrozen ? `${motionKey}:${layerId}` : motionKey
+        if (!motionGroups.has(key)) motionGroups.set(key, { beatFrozen, flowFrozen, layers: [] })
+        motionGroups.get(key).layers.push(layerId)
+      })
+      motionGroups.forEach(group => {
+        const sampleLayer = group.layers[0]
+        const snapshot = frozenLayerSnapshotsRef.current[options.theme]?.[sampleLayer] || motionFrameRef.current
+        drawComposition(ctx, visualSource, {
           ...options,
-          layers: [layerId],
+          layers: group.layers,
           overlayOnly: true,
+          lyricsEnabled: false,
           playbackTime: audioRef.current?.currentTime || 0,
           playbackDuration: audioRef.current?.duration || 0,
-        }, snapshot.frequencyData, snapshot.time)
+        }, group.beatFrozen ? snapshot.frequencyData : frequencyData, group.flowFrozen ? snapshot.time : time)
       })
+
+      const titleSnapshot = frozenLayerSnapshotsRef.current[options.theme]?.title || motionFrameRef.current
+      const titleBeatFrozen = options.staticLayers.includes('title')
+      const titleFlowFrozen = options.staticFlowLayers.includes('title')
+      drawComposition(ctx, visualSource, {
+        ...options,
+        layers: options.layers.includes('title') ? ['title'] : [],
+        overlayOnly: true,
+        playbackTime: audioRef.current?.currentTime || 0,
+        playbackDuration: audioRef.current?.duration || 0,
+      }, titleBeatFrozen ? titleSnapshot.frequencyData : frequencyData, titleFlowFrozen ? titleSnapshot.time : time)
       const layerPreviewCanvas = layerPreviewCanvasRef.current
       if (layerLibraryOpen && layerPreviewCanvas) {
         if (layerPreviewCanvas.width !== canvas.width || layerPreviewCanvas.height !== canvas.height) {
@@ -2884,9 +2924,10 @@ export default function MusicVisualizer({ onExit }) {
       cancelAnimationFrame(frameRef.current)
       window.clearTimeout(renderTimer)
     }
-  }, [options, aspect, videoUrl, layerLibraryOpen, exporting, exportFps])
+  }, [options, aspect, videoUrl, imageUrl, imageFile, layerLibraryOpen, exporting, exportFps])
 
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
+  useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl) }, [imageUrl])
   useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl) }, [audioUrl])
   useEffect(() => () => { if (result?.url) URL.revokeObjectURL(result.url) }, [result])
   useEffect(() => () => { audioGraphRef.current?.context?.close().catch(() => {}) }, [])
@@ -2918,9 +2959,30 @@ export default function MusicVisualizer({ onExit }) {
 
   const loadVideo = file => {
     if (!file?.type.startsWith('video/')) { setError('Choose a video file such as MP4, WebM or MOV.'); return }
+    videoRef.current?.pause()
+    audioRef.current?.pause()
     if (videoUrl) URL.revokeObjectURL(videoUrl)
+    if (imageUrl) URL.revokeObjectURL(imageUrl)
+    setImageFile(null)
+    setImageUrl('')
     setVideoFile(file)
     setVideoUrl(URL.createObjectURL(file))
+    setPlaying(false)
+    setResult(null)
+    setError('')
+  }
+
+  const loadImage = file => {
+    if (!file?.type.startsWith('image/')) { setError('Choose an image file such as PNG, JPEG or WebP.'); return }
+    videoRef.current?.pause()
+    audioRef.current?.pause()
+    if (imageUrl) URL.revokeObjectURL(imageUrl)
+    if (videoUrl) URL.revokeObjectURL(videoUrl)
+    setVideoFile(null)
+    setVideoUrl('')
+    setImageFile(file)
+    setImageUrl(URL.createObjectURL(file))
+    setPlaying(false)
     setResult(null)
     setError('')
   }
@@ -2960,7 +3022,7 @@ export default function MusicVisualizer({ onExit }) {
 
   const togglePlay = async () => {
     setError('')
-    if (!videoFile && !audioFile) { setError('Add a loop video and a song to start previewing.'); return }
+    if (!videoFile && !imageFile && !audioFile) { setError('Add a video or image and a song to start previewing.'); return }
     if (playing) {
       videoRef.current?.pause()
       audioRef.current?.pause()
@@ -3015,7 +3077,7 @@ export default function MusicVisualizer({ onExit }) {
 
   const exportMp4 = async () => {
     setError('')
-    if (!videoFile || !audioFile) { setError('Add both a loop video and a song before exporting.'); return }
+    if ((!videoFile && !imageFile) || !audioFile) { setError('Add a video or image plus a song before exporting.'); return }
     if (!mp4Type) { setError('This browser cannot create a genuine MP4. Open this utility in the latest Chrome or Edge on desktop.'); return }
     const duration = durationMode === 'full'
       ? Math.min(audioRef.current.duration || 0, 300)
@@ -3092,9 +3154,9 @@ export default function MusicVisualizer({ onExit }) {
     }
     recorderRef.current = recorder
     exportCancelledRef.current = false
-    videoRef.current.currentTime = 0
+    if (videoRef.current && videoFile) videoRef.current.currentTime = 0
     audioRef.current.currentTime = 0
-    videoRef.current.loop = true
+    if (videoRef.current && videoFile) videoRef.current.loop = true
     audioRef.current.loop = false
     setResult(null)
     setExporting(true)
@@ -3102,7 +3164,7 @@ export default function MusicVisualizer({ onExit }) {
     // Smaller chunks keep the browser from buffering a huge 4K/90 FPS segment
     // and dropping the much smaller audio stream under encoder pressure.
     recorder.start(250)
-    await videoRef.current.play()
+    if (videoRef.current && videoFile) await videoRef.current.play()
     await audioRef.current.play()
     setPlaying(true)
     let lastProgressPaint = -Infinity
@@ -3135,7 +3197,7 @@ export default function MusicVisualizer({ onExit }) {
     event.preventDefault()
     event.stopPropagation()
     const menuWidth = 224
-    const menuHeight = 112
+    const menuHeight = 174
     setLayerContextMenu({
       id: layer.id,
       label: layer.label,
@@ -3144,33 +3206,36 @@ export default function MusicVisualizer({ onExit }) {
     })
   }
 
+  const updateLayerSnapshot = (layerId, property, value) => {
+    const themeSnapshots = frozenLayerSnapshotsRef.current[theme] || {}
+    const layerSnapshot = { ...(themeSnapshots[layerId] || {}) }
+    if (value === undefined) delete layerSnapshot[property]
+    else layerSnapshot[property] = value
+    const nextThemeSnapshots = { ...themeSnapshots }
+    if (Object.keys(layerSnapshot).length) nextThemeSnapshots[layerId] = layerSnapshot
+    else delete nextThemeSnapshots[layerId]
+    frozenLayerSnapshotsRef.current = {
+      ...frozenLayerSnapshotsRef.current,
+      [theme]: nextThemeSnapshots,
+    }
+  }
+
   const toggleLayerMotion = layerId => {
+    const isFrozen = staticLayers.includes(layerId)
+    updateLayerSnapshot(layerId, 'frequencyData', isFrozen ? undefined : new Uint8Array(motionFrameRef.current.frequencyData))
     setStaticThemeLayers(current => {
       const frozen = current[theme] || []
-      const isFrozen = frozen.includes(layerId)
-      const themeSnapshots = frozenLayerSnapshotsRef.current[theme] || {}
-      if (isFrozen) {
-        const remainingSnapshots = { ...themeSnapshots }
-        delete remainingSnapshots[layerId]
-        frozenLayerSnapshotsRef.current = { ...frozenLayerSnapshotsRef.current, [theme]: remainingSnapshots }
-      } else {
-        const frame = motionFrameRef.current
-        frozenLayerSnapshotsRef.current = {
-          ...frozenLayerSnapshotsRef.current,
-          [theme]: {
-            ...themeSnapshots,
-            [layerId]: { time: frame.time, frequencyData: new Uint8Array(frame.frequencyData) },
-          },
-        }
-      }
-      return {
-        ...current,
-        [theme]: isFrozen
-          ? frozen.filter(id => id !== layerId)
-          : [...frozen, layerId],
-      }
+      return { ...current, [theme]: isFrozen ? frozen.filter(id => id !== layerId) : [...frozen, layerId] }
     })
-    setLayerContextMenu(null)
+  }
+
+  const toggleLayerFlow = layerId => {
+    const isFrozen = staticFlowLayers.includes(layerId)
+    updateLayerSnapshot(layerId, 'time', isFrozen ? undefined : motionFrameRef.current.time)
+    setStaticFlowThemeLayers(current => {
+      const frozen = current[theme] || []
+      return { ...current, [theme]: isFrozen ? frozen.filter(id => id !== layerId) : [...frozen, layerId] }
+    })
   }
 
   const setThemeGroupLayers = (items, selected) => {
@@ -3209,8 +3274,8 @@ export default function MusicVisualizer({ onExit }) {
     </header>
 
     <section className="music-visualizer-intro">
-      <div><span>FLOWLY UTILITY</span><h1>Loop video. Add music. Make it move.</h1></div>
-      <p>Turn a short animation and a song into a beat-reactive video. Your media stays on this device while you preview and export.</p>
+      <div><span>FLOWLY UTILITY</span><h1>Add a visual. Add music. Make it move.</h1></div>
+      <p>Turn a short animation or still image and a song into a beat-reactive video. Your media stays on this device while you preview and export.</p>
     </section>
 
     <section className="music-visualizer-workspace" id="music-studio">
@@ -3218,18 +3283,20 @@ export default function MusicVisualizer({ onExit }) {
         <div className="music-panel-heading"><span><Layers3 size={18}/></span><div><small>COMPOSITION</small><h2>Build your visual</h2></div></div>
         <div className="music-upload-grid">
           <label className={videoFile ? 'loaded' : ''}><input type="file" accept="video/*" onChange={event => loadVideo(event.target.files?.[0])}/><Film size={20}/><span><strong>{videoFile ? videoFile.name : 'Loop video'}</strong><small>{videoFile ? formatBytes(videoFile.size) : 'MP4, WebM or MOV'}</small></span><Upload size={16}/></label>
+          <label className={imageFile ? 'loaded' : ''}><input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={event => loadImage(event.target.files?.[0])}/><ImageIcon size={20}/><span><strong>{imageFile ? imageFile.name : 'Add image'}</strong><small>{imageFile ? formatBytes(imageFile.size) : 'PNG, JPEG, WebP, GIF or AVIF'}</small></span><Upload size={16}/></label>
           <label className={audioFile ? 'loaded' : ''}><input type="file" accept="audio/*" onChange={event => loadAudio(event.target.files?.[0])}/><FileMusic size={20}/><span><strong>{audioFile ? audioFile.name : 'Add song'}</strong><small>{audioFile ? formatBytes(audioFile.size) : 'MP3, WAV, M4A or OGG'}</small></span><Upload size={16}/></label>
         </div>
 
         <div className="music-control-section">
           <FlowSelect label="Visualizer theme" value={theme} options={themeOptions} onChange={changeTheme}/>
           <div className="music-section-title"><span>Beat layer library</span><small>{layers.length} selected</small></div>
-          <p className="music-layer-help">Mix spectra, shapes and effects. Right-click any layer to make it beat-reactive or keep it static.</p>
+          <p className="music-layer-help">Mix spectra, shapes and effects. Right-click any layer to control its beat response and continuous flow.</p>
           <button type="button" className="music-open-layer-browser" onClick={() => setLayerLibraryOpen(true)}><Layers3 size={16}/><span><strong>All theme layers</strong><small>Mix visual layers from every theme</small></span><Plus size={16}/></button>
           <div className="music-layer-library">
             {layerGroups.map(group => <section key={group.name}><header><span>{group.name}</span><small>{group.items.filter(item => layers.includes(item.id)).length}/{group.items.length}</small></header><div>{group.items.map(item => {
               const moving = !staticLayers.includes(item.id)
-              return <button type="button" key={item.id} className={layers.includes(item.id) ? 'active' : ''} aria-pressed={layers.includes(item.id)} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · ${moving ? 'Moves with beat' : 'Static layer'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Static layer'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{layers.includes(item.id) ? 'Added to canvas' : 'Click to add'}</small></span><b style={layers.includes(item.id) ? undefined : { background: 'transparent' }}>{layers.includes(item.id) && <Check size={11}/>}</b></button>
+              const flowing = !staticFlowLayers.includes(item.id)
+              return <button type="button" key={item.id} className={layers.includes(item.id) ? 'active' : ''} aria-pressed={layers.includes(item.id)} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · Beat ${moving ? 'on' : 'off'} · Flow ${flowing ? 'on' : 'off'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Beat movement off'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{layers.includes(item.id) ? 'Added to canvas' : 'Click to add'}</small></span><b style={layers.includes(item.id) ? undefined : { background: 'transparent' }}>{layers.includes(item.id) && <Check size={11}/>}</b></button>
             })}</div></section>)}
           </div>
           <label className="music-text-field">Title text<input value={title} maxLength={32} onChange={event => setTitle(event.target.value)} placeholder="Your title"/></label>
@@ -3250,7 +3317,7 @@ export default function MusicVisualizer({ onExit }) {
             <label className="music-range-field"><span>Backdrop <output>{lyricsBackdrop}%</output></span><input disabled={!lyricsEnabled} type="range" min="0" max="90" value={lyricsBackdrop} onChange={event => setLyricsBackdrop(Number(event.target.value))}/></label>
           </section>
           <label className="music-range-field"><span>Beat movement <output>{intensity}%</output></span><input type="range" min="20" max="120" value={intensity} onChange={event => setIntensity(Number(event.target.value))}/></label>
-          <label className="music-range-field"><span>Video tint <output>{tint}%</output></span><input type="range" min="0" max="55" value={tint} onChange={event => setTint(Number(event.target.value))}/></label>
+          <label className="music-range-field"><span>Visual tint <output>{tint}%</output></span><input type="range" min="0" max="55" value={tint} onChange={event => setTint(Number(event.target.value))}/></label>
           <div className={`music-colour-lock ${preserveColors ? 'enabled' : ''}`}><span><LockKeyhole size={16}/><span><strong>Keep colours across themes</strong><small>{preserveColors ? 'Your Primary and Glow colours will stay selected.' : 'Each theme uses its recommended colour pair.'}</small></span></span><button type="button" role="switch" aria-label="Keep selected colours when changing themes" aria-checked={preserveColors} onClick={togglePreserveColors}><i/></button></div>
           <div className="music-colors"><label>Primary colour<span><input type="color" value={color} onChange={event => setColor(event.target.value)}/>{color}</span></label><label>Glow colour<span><input type="color" value={glowColor} onChange={event => setGlowColor(event.target.value)}/>{glowColor}</span></label></div>
         </div>
@@ -3263,13 +3330,13 @@ export default function MusicVisualizer({ onExit }) {
           <FlowSelect label="Export quality" value={exportQuality} options={exportQualityOptions} onChange={setExportQuality}/>
           <FlowSelect label="Animation smoothness" value={exportFps} options={exportFrameRateOptions} onChange={setExportFps}/>
           <FlowSelect label="Export length" value={durationMode} options={durationOptions} onChange={setDurationMode}/>
-          <div className="music-fit"><span>Video fit</span><div><button type="button" className={fit === 'cover' ? 'active' : ''} onClick={() => setFit('cover')}>Fill canvas</button><button type="button" className={fit === 'contain' ? 'active' : ''} onClick={() => setFit('contain')}>Show all</button></div></div>
+          <div className="music-fit"><span>Visual fit</span><div><button type="button" className={fit === 'cover' ? 'active' : ''} onClick={() => setFit('cover')}>Fill canvas</button><button type="button" className={fit === 'contain' ? 'active' : ''} onClick={() => setFit('contain')}>Show all</button></div></div>
         </details>
       </aside>
 
       <section className="music-visualizer-preview">
-        <div className="music-preview-toolbar"><div><small>LIVE PREVIEW</small><strong>{videoFile || audioFile ? 'Your composition' : 'Add media to begin'}</strong></div><div><button type="button" onClick={() => seekBy(-5)} aria-label="Go back 5 seconds"><Rewind size={17}/></button><button type="button" onClick={() => seekBy(5)} aria-label="Go forward 5 seconds"><FastForward size={17}/></button><button type="button" onClick={restart} aria-label="Restart preview"><RotateCcw size={17}/></button><button type="button" className="play" onClick={togglePlay}>{playing ? <Pause size={17}/> : <Play size={17}/>} {playing ? 'Pause' : 'Preview'}</button></div></div>
-        <div className={`music-canvas-shell ${aspect}`}><canvas ref={canvasRef}/>{!videoFile && !audioFile && <div className="music-canvas-empty"><span><Sparkles size={25}/></span><strong>Your beat visualizer appears here</strong><p>Add a short loop video and a song. Then choose which objects move with the beat.</p></div>}</div>
+        <div className="music-preview-toolbar"><div><small>LIVE PREVIEW</small><strong>{videoFile || imageFile || audioFile ? 'Your composition' : 'Add media to begin'}</strong></div><div><button type="button" onClick={() => seekBy(-5)} aria-label="Go back 5 seconds"><Rewind size={17}/></button><button type="button" onClick={() => seekBy(5)} aria-label="Go forward 5 seconds"><FastForward size={17}/></button><button type="button" onClick={restart} aria-label="Restart preview"><RotateCcw size={17}/></button><button type="button" className="play" onClick={togglePlay}>{playing ? <Pause size={17}/> : <Play size={17}/>} {playing ? 'Pause' : 'Preview'}</button></div></div>
+        <div className={`music-canvas-shell ${aspect}`}><canvas ref={canvasRef}/>{!videoFile && !imageFile && !audioFile && <div className="music-canvas-empty"><span><Sparkles size={25}/></span><strong>Your beat visualizer appears here</strong><p>Add a short loop video or still image, then add a song and choose which objects move with the beat.</p></div>}</div>
         <div className="music-timeline"><span>{formatTime(audioRef.current?.currentTime || 0)}</span><div role="slider" tabIndex="0" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress)} onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); seekFromTimeline(event) }} onPointerMove={event => { if (event.currentTarget.hasPointerCapture(event.pointerId)) seekFromTimeline(event) }} onKeyDown={handleTimelineKey}><i style={{ width: `${progress}%` }}/><b style={{ left: `${progress}%` }}/></div><span>{formatTime(audioRef.current?.duration || selectedDuration)}</span></div>
         <div className="music-preview-note"><AudioLines size={17}/><span><strong>Beat-reactive preview</strong><small>Click or drag the timeline to jump through the song. Use the 5-second buttons for precise skipping.</small></span></div>
         {error && <div className="music-error" role="alert"><CircleAlert size={17}/><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="Dismiss"><X size={15}/></button></div>}
@@ -3289,20 +3356,23 @@ export default function MusicVisualizer({ onExit }) {
           return <section key={group.value}><header><div><i style={{ '--group-a': themePresets[group.value].color, '--group-b': themePresets[group.value].glow }}/><span><strong>{group.label}</strong><small>{group.description}</small></span></div><div className="music-layer-group-actions"><small>{selectedCount}/{group.allItems.length} added</small><div><button type="button" disabled={allSelected} onClick={() => setThemeGroupLayers(group.allItems, true)} aria-label={`Select all ${group.label} layers`}>Select all</button><button type="button" disabled={noneSelected} onClick={() => setThemeGroupLayers(group.allItems, false)} aria-label={`Deselect all ${group.label} layers`}>Deselect all</button></div></div></header><div>{group.items.map(item => {
             const selected = layers.includes(item.id)
             const moving = !staticLayers.includes(item.id)
-            return <button type="button" key={`${group.value}-${item.id}`} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · ${moving ? 'Moves with beat' : 'Static layer'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Static layer'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{group.label} · {item.section}</small></span><b>{selected ? <Check size={13}/> : <Plus size={13}/>}</b></button>
+            const flowing = !staticFlowLayers.includes(item.id)
+            return <button type="button" key={`${group.value}-${item.id}`} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · Beat ${moving ? 'on' : 'off'} · Flow ${flowing ? 'on' : 'off'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Beat movement off'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{group.label} · {item.section}</small></span><b>{selected ? <Check size={13}/> : <Plus size={13}/>}</b></button>
           })}</div></section>
         })}</div>
         {!allLayerGroups.length && <div className="music-layer-empty"><Search size={24}/><strong>No matching layers</strong><p>Try another layer name or theme.</p></div>}
-      </div><aside className="music-layer-live-preview"><header><span><small>LIVE COMPOSITION</small><strong>{themeOptions.find(option => option.value === theme)?.label}</strong></span><b>{layers.filter(id => id !== 'title').length} layers</b></header><div className={`music-layer-preview-canvas ${aspect}`}><canvas ref={layerPreviewCanvasRef}/>{!videoFile && !audioFile && <span>Theme preview · add media anytime</span>}</div><p>Select or deselect any layer—the preview updates instantly.</p></aside></div>
+      </div><aside className="music-layer-live-preview"><header><span><small>LIVE COMPOSITION</small><strong>{themeOptions.find(option => option.value === theme)?.label}</strong></span><b>{layers.filter(id => id !== 'title').length} layers</b></header><div className={`music-layer-preview-canvas ${aspect}`}><canvas ref={layerPreviewCanvasRef}/>{!videoFile && !imageFile && !audioFile && <span>Theme preview · add media anytime</span>}</div><p>Select or deselect any layer—the preview updates instantly.</p></aside></div>
       <footer><span><strong>{layers.filter(id => id !== 'title').length}</strong> visual layers selected for this composition</span><button type="button" onClick={() => setLayerLibraryOpen(false)}>Done mixing</button></footer>
     </section></div>}
 
     {layerContextMenu && <div className="music-layer-context-menu" role="menu" aria-label={`${layerContextMenu.label} movement settings`} style={{ left: layerContextMenu.x, top: layerContextMenu.y }} onPointerDown={event => event.stopPropagation()}>
-      <header><span className={`music-layer-motion-dot ${staticLayers.includes(layerContextMenu.id) ? 'static' : 'moving'}`}/><span><strong>{layerContextMenu.label}</strong><small>{staticLayers.includes(layerContextMenu.id) ? 'Static layer' : 'Moves with beat'}</small></span></header>
-      <button type="button" role="switch" aria-checked={!staticLayers.includes(layerContextMenu.id)} onClick={() => toggleLayerMotion(layerContextMenu.id)}><span><strong>Beat movement</strong><small>{staticLayers.includes(layerContextMenu.id) ? 'Enable animation' : 'Disable animation'}</small></span><i><b/></i></button>
+      <header><span className={`music-layer-motion-dot ${!staticLayers.includes(layerContextMenu.id) || !staticFlowLayers.includes(layerContextMenu.id) ? 'moving' : 'static'}`}/><span><strong>{layerContextMenu.label}</strong><small>Beat {staticLayers.includes(layerContextMenu.id) ? 'off' : 'on'} · Flow {staticFlowLayers.includes(layerContextMenu.id) ? 'off' : 'on'}</small></span></header>
+      <button type="button" role="switch" aria-checked={!staticLayers.includes(layerContextMenu.id)} onClick={() => toggleLayerMotion(layerContextMenu.id)}><span><strong>Beat movement</strong><small>{staticLayers.includes(layerContextMenu.id) ? 'React to the audio' : 'Ignore the audio'}</small></span><i><b/></i></button>
+      <button type="button" role="switch" aria-checked={!staticFlowLayers.includes(layerContextMenu.id)} onClick={() => toggleLayerFlow(layerContextMenu.id)}><span><strong>Flow movement</strong><small>{staticFlowLayers.includes(layerContextMenu.id) ? 'Resume continuous motion' : 'Stop drift and rotation'}</small></span><i><b/></i></button>
     </div>}
 
     <video ref={videoRef} src={videoUrl || undefined} muted playsInline loop className="music-hidden-media"/>
+    <img ref={imageRef} src={imageUrl || undefined} alt="" className="music-hidden-media"/>
     <audio ref={audioRef} src={audioUrl || undefined} className="music-hidden-media" onTimeUpdate={event => setProgress(event.currentTarget.duration ? (event.currentTarget.currentTime / event.currentTarget.duration) * 100 : 0)} onEnded={() => setPlaying(false)}/>
   </main>
 }
