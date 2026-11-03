@@ -89,6 +89,11 @@ const themeOptions = [
   { value: 'mosaic', label: 'Mosaic Cathedral', description: 'Stained glass, rose windows and radiant architecture' },
   { value: 'storm', label: 'Storm Chamber', description: 'Lightning, pressure waves and cinematic rain' },
   { value: 'origami', label: 'Origami City', description: 'Folded skylines, paper streets and flying cranes' },
+  { value: 'lunar', label: 'Moon Garden', description: 'Luminous flowers, crescent orbits and midnight fireflies' },
+  { value: 'quantum', label: 'Quantum Tunnel', description: 'Warped space, photon rails and dimensional motion' },
+  { value: 'mirage', label: 'Desert Mirage', description: 'Layered dunes, sun haze and drifting golden sand' },
+  { value: 'arctic', label: 'Arctic Prism', description: 'Ice caverns, polar light and crystalline snow' },
+  { value: 'cinema', label: 'Velvet Cinema', description: 'Theatre curtains, film reels and projector light' },
 ]
 
 const themePresets = {
@@ -114,6 +119,11 @@ const themePresets = {
   mosaic: { color: '#ffb34d', glow: '#6d8dff', tint: 27 },
   storm: { color: '#8ca8ff', glow: '#e9f2ff', tint: 36 },
   origami: { color: '#ff7b65', glow: '#ffd56f', tint: 18 },
+  lunar: { color: '#d59cff', glow: '#b8f3dc', tint: 30 },
+  quantum: { color: '#32e6ff', glow: '#ff5bd6', tint: 34 },
+  mirage: { color: '#f4a64f', glow: '#ffe3a3', tint: 24 },
+  arctic: { color: '#74d7ff', glow: '#e1f8ff', tint: 28 },
+  cinema: { color: '#d93f63', glow: '#ffd36e', tint: 36 },
 }
 
 const themeLibraries = {
@@ -481,6 +491,86 @@ const themeLibraries = {
     ] },
     { name: 'Text', items: [{ id: 'title', label: 'City title', preview: 'title' }] },
   ],
+  lunar: [
+    { name: 'Moon garden', items: [
+      { id: 'moon-orb', label: 'Moon orb', preview: 'cosmic-rings' },
+      { id: 'lunar-petals', label: 'Lunar petals', preview: 'iris-petals' },
+      { id: 'vine-arcs', label: 'Orbiting vines', preview: 'orbit-arcs' },
+      { id: 'crescent-rings', label: 'Crescent rings', preview: 'rings' },
+      { id: 'star-bloom', label: 'Star bloom', preview: 'stars' },
+    ] },
+    { name: 'Night life', items: [
+      { id: 'lunar-fireflies', label: 'Fireflies', preview: 'particles' },
+      { id: 'dew-spectrum', label: 'Dew spectrum', preview: 'bubble-spectrum' },
+      { id: 'night-mist', label: 'Night mist', preview: 'nebula' },
+      { id: 'blossom-wave', label: 'Blossom wave', preview: 'wave' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Moonlit title', preview: 'title' }] },
+  ],
+  quantum: [
+    { name: 'Dimension', items: [
+      { id: 'tunnel-portal', label: 'Tunnel portal', preview: 'event-horizon' },
+      { id: 'warp-grid', label: 'Warp grid', preview: 'grid' },
+      { id: 'photon-streams', label: 'Photon streams', preview: 'light-trails' },
+      { id: 'phase-rings', label: 'Phase rings', preview: 'cosmic-rings' },
+      { id: 'singularity', label: 'Singularity', preview: 'core-disc' },
+    ] },
+    { name: 'Particles', items: [
+      { id: 'quantum-nodes', label: 'Quantum nodes', preview: 'scan-nodes' },
+      { id: 'particle-rails', label: 'Particle rails', preview: 'lasers' },
+      { id: 'flux-spectrum', label: 'Flux spectrum', preview: 'neon-eq' },
+      { id: 'scan-slices', label: 'Dimensional slices', preview: 'scan' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Quantum title', preview: 'title' }] },
+  ],
+  mirage: [
+    { name: 'Desert', items: [
+      { id: 'desert-sun', label: 'Desert sun', preview: 'retro-sun' },
+      { id: 'dune-layers', label: 'Layered dunes', preview: 'mountains' },
+      { id: 'mirage-ripples', label: 'Mirage ripples', preview: 'ripples' },
+      { id: 'heat-haze', label: 'Heat haze', preview: 'heat' },
+      { id: 'oasis-ring', label: 'Oasis ring', preview: 'sonar' },
+    ] },
+    { name: 'Horizon', items: [
+      { id: 'sand-particles', label: 'Sand particles', preview: 'particles' },
+      { id: 'caravan-lights', label: 'Caravan lights', preview: 'beat-markers' },
+      { id: 'horizon-spectrum', label: 'Dune spectrum', preview: 'spectrum' },
+      { id: 'sun-rays', label: 'Sun rays', preview: 'deco-rays' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Mirage title', preview: 'title' }] },
+  ],
+  arctic: [
+    { name: 'Ice field', items: [
+      { id: 'ice-cave', label: 'Ice cave', preview: 'deco-arch' },
+      { id: 'glacier-shards', label: 'Glacier shards', preview: 'crystal-shards' },
+      { id: 'aurora-river', label: 'Aurora river', preview: 'aurora-band' },
+      { id: 'frost-rings', label: 'Frost rings', preview: 'fine-ring' },
+      { id: 'polar-beam', label: 'Polar beam', preview: 'light-sweep' },
+    ] },
+    { name: 'Snow', items: [
+      { id: 'snow-drift', label: 'Snow drift', preview: 'particles' },
+      { id: 'crystal-spectrum', label: 'Crystal spectrum', preview: 'prism-spectrum' },
+      { id: 'ice-fog', label: 'Ice fog', preview: 'polar-mist' },
+      { id: 'frozen-stars', label: 'Frozen stars', preview: 'stars' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Arctic title', preview: 'title' }] },
+  ],
+  cinema: [
+    { name: 'Theatre', items: [
+      { id: 'velvet-curtains', label: 'Velvet curtains', preview: 'silk-ribbons' },
+      { id: 'marquee-frame', label: 'Marquee frame', preview: 'editorial-frame' },
+      { id: 'film-reels', label: 'Film reels', preview: 'gear-train' },
+      { id: 'projector-beam', label: 'Projector beam', preview: 'prism-beams' },
+      { id: 'aperture-ring', label: 'Camera aperture', preview: 'radial' },
+    ] },
+    { name: 'Film', items: [
+      { id: 'film-strip', label: 'Film strip', preview: 'vhs-lines' },
+      { id: 'spotlight-dust', label: 'Spotlight dust', preview: 'champagne' },
+      { id: 'clap-spectrum', label: 'Cinema spectrum', preview: 'block-eq' },
+      { id: 'theater-lights', label: 'Theatre lights', preview: 'pearl-dust' },
+    ] },
+    { name: 'Text', items: [{ id: 'title', label: 'Feature title', preview: 'title' }] },
+  ],
 }
 
 const defaultThemeLayers = {
@@ -506,6 +596,11 @@ const defaultThemeLayers = {
   mosaic: ['rose-window', 'glass-shards', 'lead-grid', 'mosaic-spectrum', 'cathedral-rays', 'arch-frame', 'color-dust', 'lancet-windows', 'glass-sparks', 'title'],
   storm: ['storm-clouds', 'lightning-branches', 'rain-wall', 'electric-mist', 'thunder-ring', 'pressure-wave', 'storm-spectrum', 'wind-streams', 'cloud-flashes', 'title'],
   origami: ['sunset-disc', 'paper-city', 'folded-towers', 'perspective-streets', 'window-pulse', 'flying-cranes', 'skyline-spectrum', 'paper-lanterns', 'fold-lines', 'title'],
+  lunar: ['moon-orb', 'lunar-petals', 'vine-arcs', 'crescent-rings', 'star-bloom', 'lunar-fireflies', 'dew-spectrum', 'night-mist', 'blossom-wave', 'title'],
+  quantum: ['tunnel-portal', 'warp-grid', 'photon-streams', 'phase-rings', 'singularity', 'quantum-nodes', 'particle-rails', 'flux-spectrum', 'scan-slices', 'title'],
+  mirage: ['desert-sun', 'dune-layers', 'mirage-ripples', 'heat-haze', 'oasis-ring', 'sand-particles', 'caravan-lights', 'horizon-spectrum', 'sun-rays', 'title'],
+  arctic: ['ice-cave', 'glacier-shards', 'aurora-river', 'frost-rings', 'polar-beam', 'snow-drift', 'crystal-spectrum', 'ice-fog', 'frozen-stars', 'title'],
+  cinema: ['velvet-curtains', 'marquee-frame', 'film-reels', 'projector-beam', 'aperture-ring', 'film-strip', 'spotlight-dust', 'clap-spectrum', 'theater-lights', 'title'],
 }
 
 const formatTime = value => {
@@ -939,6 +1034,70 @@ function drawExpansionThemeLayers(ctx, state) {
   ctx.restore()
 }
 
+function drawNewThemeLayers(ctx, state) {
+  const { theme, width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue } = state
+
+  if (theme === 'lunar') {
+    if (hasLayer('night-mist')) { const mist = ctx.createRadialGradient(centerX, centerY, radius * .2, centerX, centerY, minSide * .72); mist.addColorStop(0, `${accent}18`); mist.addColorStop(.55, `${glow}0d`); mist.addColorStop(1, 'rgba(2,7,18,0)'); ctx.fillStyle = mist; ctx.fillRect(0, 0, width, height) }
+    if (hasLayer('moon-orb')) { ctx.save(); const moon = ctx.createRadialGradient(centerX - radius * .22, centerY - radius * .24, 0, centerX, centerY, radius * 1.05); moon.addColorStop(0, '#fff'); moon.addColorStop(.22, glow); moon.addColorStop(.68, `${accent}9a`); moon.addColorStop(1, `${accent}00`); ctx.fillStyle = moon; ctx.shadowColor = glow; ctx.shadowBlur = minSide * (.025 + reaction * .035); ctx.beginPath(); ctx.arc(centerX, centerY, radius * (.86 + reaction * .055), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+    if (hasLayer('lunar-petals')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00008); for (let i = 0; i < 16; i += 1) { ctx.save(); ctx.rotate(i / 16 * Math.PI * 2); ctx.fillStyle = i % 2 ? `${accent}65` : `${glow}72`; ctx.beginPath(); ctx.ellipse(radius * (1.05 + reaction * .08), 0, radius * .38, radius * .105, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore() } ctx.restore() }
+    if (hasLayer('vine-arcs')) { ctx.save(); ctx.strokeStyle = `${glow}88`; ctx.lineWidth = minSide * .003; for (let i = 0; i < 5; i += 1) { const a = time * .00008 + i * 1.26; ctx.beginPath(); ctx.arc(centerX, centerY, radius * (1.18 + i * .13), a, a + Math.PI * (1.05 + reaction * .18)); ctx.stroke() } ctx.restore() }
+    if (hasLayer('crescent-rings')) { ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = accent; ctx.lineCap = 'round'; for (let i = 0; i < 3; i += 1) { ctx.globalAlpha = .35 + i * .13; ctx.lineWidth = minSide * (.007 - i * .0014); ctx.beginPath(); ctx.arc(0, 0, radius * (1.28 + i * .2), -.72 + i * .32, 1.88 + i * .32); ctx.stroke() } ctx.restore() }
+    if (hasLayer('star-bloom')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-time * .00005); ctx.strokeStyle = glow; for (let i = 0; i < 12; i += 1) { const a = i / 12 * Math.PI * 2; ctx.globalAlpha = .25 + reaction * .45; ctx.lineWidth = minSide * .0018; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .42, Math.sin(a) * radius * .42); ctx.lineTo(Math.cos(a) * radius * (1.65 + reaction * .22), Math.sin(a) * radius * (1.65 + reaction * .22)); ctx.stroke() } ctx.restore() }
+    if (hasLayer('lunar-fireflies')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let i = 0; i < 48; i += 1) { const x = ((i * 61 + time * .004) % 103) / 103 * width; const y = height * (.08 + ((i * 37 + Math.sin(time * .001 + i) * 9) % 84) / 100); const size = minSide * (.0015 + i % 4 * .0008) * (1 + reaction); ctx.fillStyle = i % 3 ? glow : accent; ctx.globalAlpha = .2 + Math.abs(Math.sin(time * .002 + i)) * .65; ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('dew-spectrum')) { ctx.save(); for (let i = 0; i < 36; i += 1) { const value = spectrumValue(i, 36, 3); const x = width * (.1 + i / 35 * .8); const r = minSide * (.004 + value * .012); ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .25 + value * .6; ctx.lineWidth = minSide * .002; ctx.beginPath(); ctx.arc(x, height * .9 - value * minSide * .08, r, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+    if (hasLayer('blossom-wave')) { ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .004; ctx.shadowColor = accent; ctx.shadowBlur = minSide * .008; ctx.beginPath(); for (let i = 0; i <= 90; i += 1) { const x = width * i / 90; const y = height * .78 + Math.sin(i * .18 + time * .002) * minSide * (.012 + reaction * .035) + Math.sin(i * .055) * minSide * .012; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke(); ctx.restore() }
+  }
+
+  if (theme === 'quantum') {
+    if (hasLayer('warp-grid')) { ctx.save(); ctx.strokeStyle = `${glow}42`; ctx.lineWidth = minSide * .0015; for (let ray = 0; ray < 24; ray += 1) { const a = ray / 24 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a) * radius * .35, centerY + Math.sin(a) * radius * .35); ctx.lineTo(centerX + Math.cos(a) * minSide, centerY + Math.sin(a) * minSide); ctx.stroke() } for (let ring = 1; ring <= 8; ring += 1) { ctx.globalAlpha = .12 + ring * .035; ctx.beginPath(); ctx.arc(centerX, centerY, radius * ring * .34, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+    if (hasLayer('tunnel-portal')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .0001); for (let i = 0; i < 12; i += 1) { const phase = (i / 12 + time * .00012) % 1; ctx.strokeStyle = i % 2 ? glow : accent; ctx.globalAlpha = (1 - phase) * .5; ctx.lineWidth = minSide * (.006 - phase * .004); ctx.beginPath(); ctx.ellipse(0, 0, radius * (.35 + phase * 1.65), radius * (.18 + phase * .9), phase * .5, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+    if (hasLayer('photon-streams')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let stream = 0; stream < 9; stream += 1) { ctx.strokeStyle = stream % 2 ? accent : glow; ctx.globalAlpha = .18 + stream % 4 * .08; ctx.lineWidth = minSide * (.0018 + reaction * .002); ctx.beginPath(); for (let i = 0; i <= 70; i += 1) { const x = width * i / 70; const y = centerY + Math.sin(i * .16 + stream + time * .0025) * minSide * (.08 + stream * .008) * (1 + reaction * .6); if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore() }
+    if (hasLayer('phase-rings')) { ctx.save(); ctx.translate(centerX, centerY); for (let i = 0; i < 5; i += 1) { ctx.rotate(.24); ctx.strokeStyle = i % 2 ? glow : accent; ctx.globalAlpha = .28 + i * .08; ctx.lineWidth = minSide * .0023; ctx.beginPath(); ctx.ellipse(0, 0, radius * (1 + i * .17 + reaction * .08), radius * (.28 + i * .1), time * .00012 + i, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+    if (hasLayer('singularity')) { ctx.save(); const core = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * .9); core.addColorStop(0, '#000'); core.addColorStop(.28, '#02050e'); core.addColorStop(.48, accent); core.addColorStop(.6, glow); core.addColorStop(1, `${glow}00`); ctx.fillStyle = core; ctx.globalAlpha = .78; ctx.beginPath(); ctx.arc(centerX, centerY, radius * (.72 + bass * .12), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+    if (hasLayer('quantum-nodes')) { ctx.save(); for (let i = 0; i < 28; i += 1) { const a = i * 2.399 + time * .0002; const r = radius * (.75 + (i % 7) * .18); ctx.fillStyle = i % 3 ? glow : accent; ctx.globalAlpha = .24 + reaction * .58; ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * r, centerY + Math.sin(a) * r * .7, minSide * (.0025 + i % 3 * .001), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('particle-rails')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(-time * .00009); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .002; for (let i = 0; i < 10; i += 1) { const a = i / 10 * Math.PI * 2; ctx.globalAlpha = .25 + reaction * .35; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .48, Math.sin(a) * radius * .48); ctx.lineTo(Math.cos(a) * radius * (1.9 + reaction * .25), Math.sin(a) * radius * (1.9 + reaction * .25)); ctx.stroke() } ctx.restore() }
+    if (hasLayer('flux-spectrum')) { ctx.save(); for (let i = 0; i < 52; i += 1) { const value = spectrumValue(i, 52, 4); const w = width * .8 / 52; ctx.fillStyle = i % 3 ? accent : glow; ctx.globalAlpha = .24 + value * .6; ctx.fillRect(width * .1 + i * w, height * .92 - value * minSide * .16, w * .56, minSide * (.01 + value * .16)) } ctx.restore() }
+    if (hasLayer('scan-slices')) { ctx.save(); ctx.fillStyle = `${glow}18`; for (let i = 0; i < 11; i += 1) { const x = ((time * .00018 + i / 11) % 1) * width; ctx.globalAlpha = .1 + i % 3 * .08; ctx.fillRect(x, 0, minSide * (.004 + i % 2 * .004), height) } ctx.restore() }
+  }
+
+  if (theme === 'mirage') {
+    if (hasLayer('heat-haze')) { ctx.save(); const haze = ctx.createLinearGradient(0, 0, 0, height); haze.addColorStop(0, `${glow}10`); haze.addColorStop(.58, `${accent}18`); haze.addColorStop(1, `${accent}3a`); ctx.fillStyle = haze; ctx.fillRect(0, 0, width, height); ctx.restore() }
+    if (hasLayer('desert-sun')) { ctx.save(); const sun = ctx.createRadialGradient(centerX, height * .35, 0, centerX, height * .35, radius * 1.12); sun.addColorStop(0, '#fff8d4'); sun.addColorStop(.34, glow); sun.addColorStop(.76, `${accent}7a`); sun.addColorStop(1, `${accent}00`); ctx.fillStyle = sun; ctx.beginPath(); ctx.arc(centerX, height * .35, radius * (1 + reaction * .055), 0, Math.PI * 2); ctx.fill(); ctx.restore() }
+    if (hasLayer('dune-layers')) { ctx.save(); for (let dune = 0; dune < 5; dune += 1) { const base = height * (.62 + dune * .08); ctx.fillStyle = dune % 2 ? `${accent}${(55 + dune * 22).toString(16)}` : `${glow}${(42 + dune * 20).toString(16)}`; ctx.beginPath(); ctx.moveTo(0, height); ctx.lineTo(0, base); for (let i = 0; i <= 50; i += 1) { const x = width * i / 50; const y = base - Math.sin(i * .1 + dune + time * .00018) * minSide * (.025 + dune * .004) - Math.sin(i * .035 + dune) * minSide * .03; ctx.lineTo(x, y) } ctx.lineTo(width, height); ctx.closePath(); ctx.fill() } ctx.restore() }
+    if (hasLayer('mirage-ripples')) { ctx.save(); ctx.strokeStyle = `${glow}72`; ctx.lineWidth = minSide * .002; for (let line = 0; line < 8; line += 1) { ctx.globalAlpha = .12 + line * .045; ctx.beginPath(); for (let i = 0; i <= 80; i += 1) { const x = width * i / 80; const y = height * (.48 + line * .037) + Math.sin(i * .2 + time * .002 + line) * minSide * (.006 + reaction * .008); if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore() }
+    if (hasLayer('oasis-ring')) { ctx.save(); ctx.translate(centerX, height * .69); ctx.scale(1, .28); ctx.strokeStyle = glow; ctx.lineWidth = minSide * .007; ctx.globalAlpha = .48 + reaction * .3; ctx.beginPath(); ctx.arc(0, 0, radius * (1.05 + reaction * .12), 0, Math.PI * 2); ctx.stroke(); ctx.restore() }
+    if (hasLayer('sand-particles')) { ctx.save(); for (let i = 0; i < 72; i += 1) { const x = ((i * 47 + time * .012) % 107) / 107 * width; const y = ((i * 71 + Math.sin(time * .001 + i) * 11) % 97) / 97 * height; ctx.fillStyle = i % 4 ? glow : accent; ctx.globalAlpha = .08 + i % 5 * .055; ctx.beginPath(); ctx.arc(x, y, minSide * (.0008 + i % 3 * .0005), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('caravan-lights')) { ctx.save(); for (let i = 0; i < 12; i += 1) { const x = width * (.1 + i * .073); const y = height * .73 + Math.sin(i * .7 + time * .001) * minSide * .01; ctx.fillStyle = i % 2 ? glow : accent; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = minSide * (.008 + reaction * .01); ctx.globalAlpha = .38 + reaction * .48; ctx.beginPath(); ctx.arc(x, y, minSide * .004, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('horizon-spectrum')) { ctx.save(); ctx.strokeStyle = accent; ctx.lineWidth = minSide * .003; for (let i = 0; i < 48; i += 1) { const value = spectrumValue(i, 48, 4); const x = width * (.08 + i / 47 * .84); ctx.globalAlpha = .2 + value * .55; ctx.beginPath(); ctx.moveTo(x, height * .9); ctx.lineTo(x, height * .9 - minSide * (.015 + value * .12)); ctx.stroke() } ctx.restore() }
+    if (hasLayer('sun-rays')) { ctx.save(); ctx.translate(centerX, height * .35); ctx.rotate(time * .000025); for (let i = 0; i < 24; i += 1) { const a = i / 24 * Math.PI * 2; ctx.strokeStyle = i % 2 ? accent : glow; ctx.globalAlpha = .12 + reaction * .28; ctx.lineWidth = minSide * .002; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * 1.15, Math.sin(a) * radius * 1.15); ctx.lineTo(Math.cos(a) * radius * 1.72, Math.sin(a) * radius * 1.72); ctx.stroke() } ctx.restore() }
+  }
+
+  if (theme === 'arctic') {
+    if (hasLayer('ice-fog')) { ctx.save(); const fog = ctx.createLinearGradient(0, 0, 0, height); fog.addColorStop(0, `${glow}20`); fog.addColorStop(.55, `${accent}0e`); fog.addColorStop(1, `${glow}26`); ctx.fillStyle = fog; ctx.fillRect(0, 0, width, height); ctx.restore() }
+    if (hasLayer('ice-cave')) { ctx.save(); ctx.fillStyle = `${accent}3a`; ctx.strokeStyle = `${glow}8a`; ctx.lineWidth = minSide * .004; ctx.beginPath(); ctx.moveTo(0, 0); for (let i = 0; i <= 20; i += 1) { const x = width * i / 20; const y = minSide * (.04 + (i % 4) * .035 + Math.sin(i * 1.7) * .018); ctx.lineTo(x, y) } ctx.lineTo(width, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, height); for (let i = 0; i <= 20; i += 1) { const x = width * i / 20; const y = height - minSide * (.04 + ((i + 2) % 4) * .028 + Math.sin(i * 1.4) * .015); ctx.lineTo(x, y) } ctx.lineTo(width, height); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore() }
+    if (hasLayer('glacier-shards')) { ctx.save(); ctx.translate(centerX, centerY); for (let i = 0; i < 18; i += 1) { const a = i / 18 * Math.PI * 2 + time * .00004; const r = radius * (1.05 + i % 4 * .18 + reaction * .08); ctx.fillStyle = i % 2 ? `${accent}52` : `${glow}44`; ctx.strokeStyle = `${glow}70`; ctx.lineWidth = minSide * .0015; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .58, Math.sin(a) * radius * .58); ctx.lineTo(Math.cos(a - .1) * r, Math.sin(a - .1) * r); ctx.lineTo(Math.cos(a + .12) * r * .9, Math.sin(a + .12) * r * .9); ctx.closePath(); ctx.fill(); ctx.stroke() } ctx.restore() }
+    if (hasLayer('aurora-river')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; for (let band = 0; band < 4; band += 1) { ctx.strokeStyle = band % 2 ? accent : glow; ctx.globalAlpha = .16 + band * .08; ctx.lineWidth = minSide * (.025 - band * .004); ctx.beginPath(); for (let i = 0; i <= 80; i += 1) { const x = width * i / 80; const y = height * (.24 + band * .055) + Math.sin(i * .1 + time * .001 + band) * minSide * (.06 + reaction * .025); if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y) } ctx.stroke() } ctx.restore() }
+    if (hasLayer('frost-rings')) { ctx.save(); ctx.translate(centerX, centerY); ctx.strokeStyle = glow; ctx.setLineDash([minSide * .008, minSide * .012]); ctx.lineDashOffset = -time * .00008 * minSide; for (let i = 0; i < 4; i += 1) { ctx.globalAlpha = .25 + i * .1; ctx.lineWidth = minSide * .002; ctx.beginPath(); ctx.arc(0, 0, radius * (.75 + i * .25 + reaction * .06), 0, Math.PI * 2); ctx.stroke() } ctx.restore() }
+    if (hasLayer('polar-beam')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .0001); const beam = ctx.createLinearGradient(0, 0, radius * 2.2, 0); beam.addColorStop(0, `${glow}00`); beam.addColorStop(.75, `${glow}42`); beam.addColorStop(1, `${accent}00`); ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, radius * 2.2, -.09, .09); ctx.closePath(); ctx.fill(); ctx.restore() }
+    if (hasLayer('snow-drift')) { ctx.save(); for (let i = 0; i < 66; i += 1) { const phase = (time * .00008 + i * .047) % 1; const x = ((i * 53 + Math.sin(time * .0007 + i) * 12) % 105) / 105 * width; const y = phase * height; ctx.fillStyle = i % 4 ? '#fff' : glow; ctx.globalAlpha = .18 + i % 5 * .09; ctx.beginPath(); ctx.arc(x, y, minSide * (.0012 + i % 4 * .0007) * (1 + reaction * .45), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('crystal-spectrum')) { ctx.save(); for (let i = 0; i < 42; i += 1) { const value = spectrumValue(i, 42, 3); const x = width * (.08 + i / 41 * .84); const w = width * .84 / 52; ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .22 + value * .62; ctx.beginPath(); ctx.moveTo(x, height * .91); ctx.lineTo(x + w * .5, height * .91 - minSide * (.02 + value * .14)); ctx.lineTo(x + w, height * .91); ctx.closePath(); ctx.fill() } ctx.restore() }
+    if (hasLayer('frozen-stars')) { ctx.save(); ctx.strokeStyle = glow; for (let i = 0; i < 30; i += 1) { const x = ((i * 67) % 101) / 101 * width; const y = ((i * 41) % 89) / 89 * height; const s = minSide * (.003 + i % 3 * .0015); ctx.globalAlpha = .18 + Math.abs(Math.sin(time * .0014 + i)) * .55; ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.moveTo(x, y - s); ctx.lineTo(x, y + s); ctx.stroke() } ctx.restore() }
+  }
+
+  if (theme === 'cinema') {
+    if (hasLayer('velvet-curtains')) { ctx.save(); const curtain = ctx.createLinearGradient(0, 0, width, 0); curtain.addColorStop(0, `${accent}e6`); curtain.addColorStop(.14, `${accent}72`); curtain.addColorStop(.3, 'rgba(30,2,14,.08)'); curtain.addColorStop(.5, 'rgba(12,2,10,0)'); curtain.addColorStop(.7, 'rgba(30,2,14,.08)'); curtain.addColorStop(.86, `${accent}72`); curtain.addColorStop(1, `${accent}e6`); ctx.fillStyle = curtain; ctx.fillRect(0, 0, width, height); for (let i = 0; i < 12; i += 1) { ctx.strokeStyle = i % 2 ? `${glow}12` : 'rgba(0,0,0,.14)'; ctx.lineWidth = width * .018; ctx.beginPath(); ctx.moveTo(i < 6 ? i * width * .035 : width - (i - 6) * width * .035, 0); ctx.lineTo(i < 6 ? i * width * .055 : width - (i - 6) * width * .055, height); ctx.stroke() } ctx.restore() }
+    if (hasLayer('marquee-frame')) { ctx.save(); const inset = minSide * .045; ctx.strokeStyle = glow; ctx.lineWidth = minSide * .008; ctx.globalAlpha = .72; ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2); ctx.fillStyle = glow; const bulbs = 38; for (let i = 0; i < bulbs; i += 1) { const t = i / bulbs; const x = inset + t * (width - inset * 2); const pulse = .35 + Math.abs(Math.sin(time * .003 + i)) * .65; ctx.globalAlpha = pulse; ctx.beginPath(); ctx.arc(x, inset, minSide * .004, 0, Math.PI * 2); ctx.arc(x, height - inset, minSide * .004, 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('film-reels')) { ctx.save(); const drawReel = (x, y, r, direction) => { ctx.save(); ctx.translate(x, y); ctx.rotate(time * .00028 * direction); ctx.strokeStyle = glow; ctx.fillStyle = `${accent}55`; ctx.lineWidth = minSide * .004; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); for (let i = 0; i < 6; i += 1) { const a = i / 6 * Math.PI * 2; ctx.beginPath(); ctx.arc(Math.cos(a) * r * .48, Math.sin(a) * r * .48, r * .16, 0, Math.PI * 2); ctx.stroke() } ctx.restore() }; drawReel(width * .24, height * .28, radius * .42, 1); drawReel(width * .76, height * .28, radius * .42, -1); ctx.restore() }
+    if (hasLayer('projector-beam')) { ctx.save(); ctx.globalCompositeOperation = 'screen'; const beam = ctx.createLinearGradient(0, 0, width, height); beam.addColorStop(0, `${glow}00`); beam.addColorStop(.48, `${glow}2f`); beam.addColorStop(1, `${accent}00`); ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(width * .12, height * .16); ctx.lineTo(width * .88, height * .76); ctx.lineTo(width * .78, height); ctx.closePath(); ctx.fill(); ctx.restore() }
+    if (hasLayer('aperture-ring')) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(time * .00008); for (let i = 0; i < 10; i += 1) { const a = i / 10 * Math.PI * 2; ctx.fillStyle = i % 2 ? `${accent}66` : `${glow}5c`; ctx.beginPath(); ctx.moveTo(Math.cos(a) * radius * .42, Math.sin(a) * radius * .42); ctx.lineTo(Math.cos(a + .34) * radius * (1.1 + reaction * .08), Math.sin(a + .34) * radius * (1.1 + reaction * .08)); ctx.lineTo(Math.cos(a + .63) * radius * .78, Math.sin(a + .63) * radius * .78); ctx.closePath(); ctx.fill() } ctx.restore() }
+    if (hasLayer('film-strip')) { ctx.save(); ctx.translate(0, height * .8); ctx.rotate(-.055); ctx.fillStyle = 'rgba(6,7,12,.72)'; ctx.fillRect(-width * .05, 0, width * 1.1, minSide * .095); ctx.fillStyle = glow; for (let i = 0; i < 26; i += 1) { const x = width * (i / 25); ctx.globalAlpha = .28 + reaction * .35; ctx.fillRect(x, minSide * .008, minSide * .018, minSide * .015); ctx.fillRect(x, minSide * .07, minSide * .018, minSide * .015) } ctx.restore() }
+    if (hasLayer('spotlight-dust')) { ctx.save(); for (let i = 0; i < 58; i += 1) { const x = ((i * 71 + time * .003) % 103) / 103 * width; const y = ((i * 43) % 97) / 97 * height; ctx.fillStyle = i % 5 ? glow : accent; ctx.globalAlpha = .08 + Math.abs(Math.sin(time * .0018 + i)) * .38; ctx.beginPath(); ctx.arc(x, y, minSide * (.0008 + i % 3 * .0006), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+    if (hasLayer('clap-spectrum')) { ctx.save(); const count = 32; for (let i = 0; i < count; i += 1) { const value = spectrumValue(i, count, 3); const w = width * .72 / count; ctx.fillStyle = i % 2 ? accent : glow; ctx.globalAlpha = .25 + value * .58; ctx.fillRect(width * .14 + i * w, height * .91 - minSide * value * .13, w * .68, minSide * (.012 + value * .13)) } ctx.restore() }
+    if (hasLayer('theater-lights')) { ctx.save(); for (let i = 0; i < 8; i += 1) { const x = width * (.1 + i * .115); const pulse = .25 + Math.abs(Math.sin(time * .0024 + i * .7)) * (.45 + reaction * .3); ctx.fillStyle = i % 2 ? glow : accent; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = minSide * .018; ctx.globalAlpha = pulse; ctx.beginPath(); ctx.arc(x, height * .12, minSide * (.006 + reaction * .003), 0, Math.PI * 2); ctx.fill() } ctx.restore() }
+  }
+}
+
 function applyThemeBeatTransform(ctx, theme, { centerX, centerY, minSide, time, reaction, bass }) {
   const aroundCenter = (scaleX, scaleY = scaleX, rotation = 0, offsetX = 0, offsetY = 0) => {
     ctx.translate(centerX + offsetX, centerY + offsetY)
@@ -965,14 +1124,21 @@ function applyThemeBeatTransform(ctx, theme, { centerX, centerY, minSide, time, 
   else if (theme === 'clockwork') aroundCenter(1 + reaction * .024, 1 + reaction * .024, Math.sin(time * .004) * reaction * .018)
   else if (theme === 'aurora') aroundCenter(1 + reaction * .018, 1 + reaction * .045, Math.sin(time * .002) * reaction * .008, Math.sin(time * .005) * reaction * minSide * .01)
   else if (theme === 'ink') aroundCenter(1 + reaction * .025, 1 + reaction * .035, Math.sin(time * .0025) * reaction * .01, Math.sin(time * .006) * reaction * minSide * .008, -reaction * minSide * .008)
+  else if (theme === 'lunar') aroundCenter(1 + reaction * .028, 1 + reaction * .04, Math.sin(time * .002) * reaction * .012, 0, -reaction * minSide * .01)
+  else if (theme === 'quantum') aroundCenter(1 + reaction * .065, 1 + reaction * .065, Math.sin(time * .004) * reaction * .018)
+  else if (theme === 'mirage') aroundCenter(1 + reaction * .018, 1 + reaction * .038, 0, Math.sin(time * .003) * reaction * minSide * .007, -reaction * minSide * .008)
+  else if (theme === 'arctic') aroundCenter(1 + reaction * .025, 1 + reaction * .045, Math.sin(time * .002) * reaction * .008)
+  else if (theme === 'cinema') aroundCenter(1 + reaction * .022, 1 + reaction * .022, 0, 0, -reaction * minSide * .008)
 }
 
 function drawComposition(ctx, video, options, frequencyData, time) {
   const { width, height } = ctx.canvas
-  drawCover(ctx, video, width, height, options.fit)
-  ctx.fillStyle = `rgba(5, 8, 18, ${options.tint / 100})`
-  ctx.fillRect(0, 0, width, height)
-  if (options.theme === 'neon') {
+  if (!options.overlayOnly) {
+    drawCover(ctx, video, width, height, options.fit)
+    ctx.fillStyle = `rgba(5, 8, 18, ${options.tint / 100})`
+    ctx.fillRect(0, 0, width, height)
+  }
+  if (!options.overlayOnly && options.theme === 'neon') {
     const noir = ctx.createLinearGradient(0, 0, 0, height)
     noir.addColorStop(0, 'rgba(4, 10, 24, .18)')
     noir.addColorStop(.58, 'rgba(5, 9, 25, .08)')
@@ -980,7 +1146,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = noir
     ctx.fillRect(0, 0, width, height)
   }
-  if (options.theme === 'slime') {
+  if (!options.overlayOnly && options.theme === 'slime') {
     const liquid = ctx.createRadialGradient(width * .5, height * .44, 0, width * .5, height * .44, Math.max(width, height) * .72)
     liquid.addColorStop(0, 'rgba(35, 83, 68, .08)')
     liquid.addColorStop(.68, 'rgba(8, 30, 27, .2)')
@@ -988,7 +1154,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = liquid
     ctx.fillRect(0, 0, width, height)
   }
-  if (options.theme === 'crystal') {
+  if (!options.overlayOnly && options.theme === 'crystal') {
     const crystalAtmosphere = ctx.createRadialGradient(width * .5, height * .42, 0, width * .5, height * .46, Math.max(width, height) * .76)
     crystalAtmosphere.addColorStop(0, 'rgba(142, 224, 255, .13)')
     crystalAtmosphere.addColorStop(.32, 'rgba(92, 96, 190, .12)')
@@ -1004,7 +1170,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = crystalLight
     ctx.fillRect(0, 0, width, height)
   }
-  if (options.theme === 'chrome') {
+  if (!options.overlayOnly && options.theme === 'chrome') {
     const studio = ctx.createRadialGradient(width * .5, height * .39, 0, width * .5, height * .44, Math.max(width, height) * .82)
     studio.addColorStop(0, 'rgba(178, 215, 238, .14)')
     studio.addColorStop(.28, 'rgba(54, 72, 94, .17)')
@@ -1019,7 +1185,7 @@ function drawComposition(ctx, video, options, frequencyData, time) {
     ctx.fillStyle = steelFalloff
     ctx.fillRect(0, 0, width, height)
   }
-  drawSignatureThemeAtmosphere(ctx, options.theme, width, height, options.color, options.glowColor, time)
+  if (!options.overlayOnly) drawSignatureThemeAtmosphere(ctx, options.theme, width, height, options.color, options.glowColor, time)
 
   const values = frequencyData?.length ? frequencyData : new Uint8Array(64).fill(42)
   const sampleCount = Math.min(72, values.length)
@@ -2427,6 +2593,9 @@ function drawComposition(ctx, video, options, frequencyData, time) {
   drawExpansionThemeLayers(ctx, {
     theme: options.theme, width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue,
   })
+  drawNewThemeLayers(ctx, {
+    theme: options.theme, width, height, centerX, centerY, minSide, radius, accent, glow, time, reaction, bass, hasLayer, spectrumValue,
+  })
   ctx.restore()
 
   if (hasLayer('title') && options.title.trim()) {
@@ -2521,6 +2690,8 @@ export default function MusicVisualizer({ onExit }) {
   const audioRef = useRef(null)
   const frameRef = useRef(0)
   const audioGraphRef = useRef(null)
+  const motionFrameRef = useRef({ time: 0, frequencyData: new Uint8Array(64).fill(42) })
+  const frozenLayerSnapshotsRef = useRef({})
   const recorderRef = useRef(null)
   const exportTimerRef = useRef(0)
   const exportCancelledRef = useRef(false)
@@ -2554,6 +2725,8 @@ export default function MusicVisualizer({ onExit }) {
   const [centerY, setCenterY] = useState(50)
   const [theme, setTheme] = useState('pulse')
   const [themeLayerSelections, setThemeLayerSelections] = useState(defaultThemeLayers)
+  const [staticThemeLayers, setStaticThemeLayers] = useState({})
+  const [layerContextMenu, setLayerContextMenu] = useState(null)
   const [layerLibraryOpen, setLayerLibraryOpen] = useState(false)
   const [layerSearch, setLayerSearch] = useState('')
   const [exporting, setExporting] = useState(false)
@@ -2561,6 +2734,7 @@ export default function MusicVisualizer({ onExit }) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const layers = themeLayerSelections[theme]
+  const staticLayers = useMemo(() => staticThemeLayers[theme] || [], [staticThemeLayers, theme])
   const layerGroups = themeLibraries[theme]
   const allLayerGroups = useMemo(() => {
     const query = layerSearch.trim().toLowerCase()
@@ -2600,6 +2774,22 @@ export default function MusicVisualizer({ onExit }) {
     }
   }, [layerLibraryOpen])
 
+  useEffect(() => {
+    if (!layerContextMenu) return undefined
+    const closeMenu = () => setLayerContextMenu(null)
+    const closeOnEscape = event => { if (event.key === 'Escape') closeMenu() }
+    window.addEventListener('pointerdown', closeMenu)
+    window.addEventListener('resize', closeMenu)
+    window.addEventListener('scroll', closeMenu, true)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeMenu)
+      window.removeEventListener('resize', closeMenu)
+      window.removeEventListener('scroll', closeMenu, true)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [layerContextMenu])
+
   const insertLyricPause = () => {
     const cueTime = audioRef.current?.currentTime || 0
     const cue = `[${formatLyricTime(cueTime)}] [pause]`
@@ -2616,9 +2806,9 @@ export default function MusicVisualizer({ onExit }) {
   }
 
   const options = useMemo(() => ({
-    fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
+    fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, theme,
     lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFontFamily: lyricsFont.family,
-  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, theme,
+  }), [fit, title, titleSize, color, glowColor, intensity, tint, centerX, centerY, layers, staticLayers, theme,
     lyricsEnabled, lyricsLines, lyricsSize, lyricsPosition, lyricsBackdrop, lyricsColor, lyricsFont.family])
 
   useEffect(() => {
@@ -2655,11 +2845,28 @@ export default function MusicVisualizer({ onExit }) {
         frequencyData = graph.data
         graph.analyser.getByteFrequencyData(frequencyData)
       }
+      motionFrameRef.current = {
+        time,
+        frequencyData: frequencyData?.length ? new Uint8Array(frequencyData) : new Uint8Array(64).fill(42),
+      }
+      const movingLayers = options.layers.filter(layerId => !options.staticLayers.includes(layerId))
+      const frozenLayers = options.layers.filter(layerId => options.staticLayers.includes(layerId))
       drawComposition(ctx, videoRef.current, {
         ...options,
+        layers: movingLayers,
         playbackTime: audioRef.current?.currentTime || 0,
         playbackDuration: audioRef.current?.duration || 0,
       }, frequencyData, time)
+      frozenLayers.forEach(layerId => {
+        const snapshot = frozenLayerSnapshotsRef.current[options.theme]?.[layerId] || motionFrameRef.current
+        drawComposition(ctx, videoRef.current, {
+          ...options,
+          layers: [layerId],
+          overlayOnly: true,
+          playbackTime: audioRef.current?.currentTime || 0,
+          playbackDuration: audioRef.current?.duration || 0,
+        }, snapshot.frequencyData, snapshot.time)
+      })
       const layerPreviewCanvas = layerPreviewCanvasRef.current
       if (layerLibraryOpen && layerPreviewCanvas) {
         if (layerPreviewCanvas.width !== canvas.width || layerPreviewCanvas.height !== canvas.height) {
@@ -2924,6 +3131,48 @@ export default function MusicVisualizer({ onExit }) {
     [theme]: current[theme].includes(key) ? current[theme].filter(item => item !== key) : [...current[theme], key],
   }))
 
+  const openLayerContextMenu = (event, layer) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const menuWidth = 224
+    const menuHeight = 112
+    setLayerContextMenu({
+      id: layer.id,
+      label: layer.label,
+      x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8)),
+    })
+  }
+
+  const toggleLayerMotion = layerId => {
+    setStaticThemeLayers(current => {
+      const frozen = current[theme] || []
+      const isFrozen = frozen.includes(layerId)
+      const themeSnapshots = frozenLayerSnapshotsRef.current[theme] || {}
+      if (isFrozen) {
+        const remainingSnapshots = { ...themeSnapshots }
+        delete remainingSnapshots[layerId]
+        frozenLayerSnapshotsRef.current = { ...frozenLayerSnapshotsRef.current, [theme]: remainingSnapshots }
+      } else {
+        const frame = motionFrameRef.current
+        frozenLayerSnapshotsRef.current = {
+          ...frozenLayerSnapshotsRef.current,
+          [theme]: {
+            ...themeSnapshots,
+            [layerId]: { time: frame.time, frequencyData: new Uint8Array(frame.frequencyData) },
+          },
+        }
+      }
+      return {
+        ...current,
+        [theme]: isFrozen
+          ? frozen.filter(id => id !== layerId)
+          : [...frozen, layerId],
+      }
+    })
+    setLayerContextMenu(null)
+  }
+
   const setThemeGroupLayers = (items, selected) => {
     const groupIds = items.map(item => item.id)
     const groupIdSet = new Set(groupIds)
@@ -2975,10 +3224,13 @@ export default function MusicVisualizer({ onExit }) {
         <div className="music-control-section">
           <FlowSelect label="Visualizer theme" value={theme} options={themeOptions} onChange={changeTheme}/>
           <div className="music-section-title"><span>Beat layer library</span><small>{layers.length} selected</small></div>
-          <p className="music-layer-help">Mix different spectra, shapes and motion effects. Every selected layer reacts to the song.</p>
+          <p className="music-layer-help">Mix spectra, shapes and effects. Right-click any layer to make it beat-reactive or keep it static.</p>
           <button type="button" className="music-open-layer-browser" onClick={() => setLayerLibraryOpen(true)}><Layers3 size={16}/><span><strong>All theme layers</strong><small>Mix visual layers from every theme</small></span><Plus size={16}/></button>
           <div className="music-layer-library">
-            {layerGroups.map(group => <section key={group.name}><header><span>{group.name}</span><small>{group.items.filter(item => layers.includes(item.id)).length}/{group.items.length}</small></header><div>{group.items.map(item => <button type="button" key={item.id} className={layers.includes(item.id) ? 'active' : ''} aria-pressed={layers.includes(item.id)} onClick={() => toggleLayer(item.id)}><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{layers.includes(item.id) ? 'Added to canvas' : 'Click to add'}</small></span><b style={layers.includes(item.id) ? undefined : { background: 'transparent' }}>{layers.includes(item.id) && <Check size={11}/>}</b></button>)}</div></section>)}
+            {layerGroups.map(group => <section key={group.name}><header><span>{group.name}</span><small>{group.items.filter(item => layers.includes(item.id)).length}/{group.items.length}</small></header><div>{group.items.map(item => {
+              const moving = !staticLayers.includes(item.id)
+              return <button type="button" key={item.id} className={layers.includes(item.id) ? 'active' : ''} aria-pressed={layers.includes(item.id)} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · ${moving ? 'Moves with beat' : 'Static layer'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Static layer'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{layers.includes(item.id) ? 'Added to canvas' : 'Click to add'}</small></span><b style={layers.includes(item.id) ? undefined : { background: 'transparent' }}>{layers.includes(item.id) && <Check size={11}/>}</b></button>
+            })}</div></section>)}
           </div>
           <label className="music-text-field">Title text<input value={title} maxLength={32} onChange={event => setTitle(event.target.value)} placeholder="Your title"/></label>
           <label className="music-range-field"><span>Title size <output>{titleSize}%</output></span><input type="range" min="4" max="13" value={titleSize} onChange={event => setTitleSize(Number(event.target.value))}/></label>
@@ -3036,13 +3288,19 @@ export default function MusicVisualizer({ onExit }) {
           const noneSelected = selectedCount === 0
           return <section key={group.value}><header><div><i style={{ '--group-a': themePresets[group.value].color, '--group-b': themePresets[group.value].glow }}/><span><strong>{group.label}</strong><small>{group.description}</small></span></div><div className="music-layer-group-actions"><small>{selectedCount}/{group.allItems.length} added</small><div><button type="button" disabled={allSelected} onClick={() => setThemeGroupLayers(group.allItems, true)} aria-label={`Select all ${group.label} layers`}>Select all</button><button type="button" disabled={noneSelected} onClick={() => setThemeGroupLayers(group.allItems, false)} aria-label={`Deselect all ${group.label} layers`}>Deselect all</button></div></div></header><div>{group.items.map(item => {
             const selected = layers.includes(item.id)
-            return <button type="button" key={`${group.value}-${item.id}`} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => toggleLayer(item.id)}><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{group.label} · {item.section}</small></span><b>{selected ? <Check size={13}/> : <Plus size={13}/>}</b></button>
+            const moving = !staticLayers.includes(item.id)
+            return <button type="button" key={`${group.value}-${item.id}`} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => toggleLayer(item.id)} onContextMenu={event => openLayerContextMenu(event, item)} title={`Right-click for motion settings · ${moving ? 'Moves with beat' : 'Static layer'}`}><em className={`music-layer-motion-dot ${moving ? 'moving' : 'static'}`} aria-label={moving ? 'Moves with beat' : 'Static layer'}/><i className={`music-layer-preview ${item.preview}`}/><span><strong>{item.label}</strong><small>{group.label} · {item.section}</small></span><b>{selected ? <Check size={13}/> : <Plus size={13}/>}</b></button>
           })}</div></section>
         })}</div>
         {!allLayerGroups.length && <div className="music-layer-empty"><Search size={24}/><strong>No matching layers</strong><p>Try another layer name or theme.</p></div>}
       </div><aside className="music-layer-live-preview"><header><span><small>LIVE COMPOSITION</small><strong>{themeOptions.find(option => option.value === theme)?.label}</strong></span><b>{layers.filter(id => id !== 'title').length} layers</b></header><div className={`music-layer-preview-canvas ${aspect}`}><canvas ref={layerPreviewCanvasRef}/>{!videoFile && !audioFile && <span>Theme preview · add media anytime</span>}</div><p>Select or deselect any layer—the preview updates instantly.</p></aside></div>
       <footer><span><strong>{layers.filter(id => id !== 'title').length}</strong> visual layers selected for this composition</span><button type="button" onClick={() => setLayerLibraryOpen(false)}>Done mixing</button></footer>
     </section></div>}
+
+    {layerContextMenu && <div className="music-layer-context-menu" role="menu" aria-label={`${layerContextMenu.label} movement settings`} style={{ left: layerContextMenu.x, top: layerContextMenu.y }} onPointerDown={event => event.stopPropagation()}>
+      <header><span className={`music-layer-motion-dot ${staticLayers.includes(layerContextMenu.id) ? 'static' : 'moving'}`}/><span><strong>{layerContextMenu.label}</strong><small>{staticLayers.includes(layerContextMenu.id) ? 'Static layer' : 'Moves with beat'}</small></span></header>
+      <button type="button" role="switch" aria-checked={!staticLayers.includes(layerContextMenu.id)} onClick={() => toggleLayerMotion(layerContextMenu.id)}><span><strong>Beat movement</strong><small>{staticLayers.includes(layerContextMenu.id) ? 'Enable animation' : 'Disable animation'}</small></span><i><b/></i></button>
+    </div>}
 
     <video ref={videoRef} src={videoUrl || undefined} muted playsInline loop className="music-hidden-media"/>
     <audio ref={audioRef} src={audioUrl || undefined} className="music-hidden-media" onTimeUpdate={event => setProgress(event.currentTarget.duration ? (event.currentTarget.currentTime / event.currentTarget.duration) * 100 : 0)} onEnded={() => setPlaying(false)}/>

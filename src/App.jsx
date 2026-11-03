@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowRight, ArrowUpRight, AudioLines, BookOpenCheck, Braces, BriefcaseBusiness, CalendarHeart, CarFront,
   Check, ChevronRight, Dumbbell, FileJson2, FilePenLine, HeartHandshake, Home, ImageDown, ImagePlus, IndianRupee, LifeBuoy, ListChecks, Menu, MicVocal, Palette, Plane, Scaling, Search, ShieldCheck, Sparkles,
-  WalletCards, X,
+  SlidersHorizontal, WalletCards, X,
 } from 'lucide-react'
 import MedicalSite from './MedicalSite.jsx'
 import HomeServicesSite from './HomeServicesSite.jsx'
@@ -17,6 +17,7 @@ import PngMaker from './PngMaker.jsx'
 import ColorPalette from './ColorPalette.jsx'
 import MusicVisualizer from './MusicVisualizer.jsx'
 import AudioLyricsConverter from './AudioLyricsConverter.jsx'
+import StemSplitter from './StemSplitter.jsx'
 import VehicleRentalSite from './VehicleRentalSite.jsx'
 import { cleanUrlHash, currentRoutePath, handleSectionLink, navigateTo, routeUrl, scrollToSection } from './navigation.js'
 import { applySeoPage } from './seo.js'
@@ -29,8 +30,8 @@ const workflows = [
   { id: 'routine', category: 'Life', title: 'Daily routine builder', description: 'Build different routines for weekdays, weekends or custom day groups, then export one weekly PDF.', icon: ListChecks, tone: 'peach', tag: 'Ready to use', availability: 'ready' },
   { id: 'medical', category: 'Health', title: 'Medical booking', description: 'Explore a polished doctor-discovery and appointment-booking experience.', icon: CalendarHeart, tone: 'sage', tag: 'Provider demo', availability: 'demo' },
   { id: 'home', category: 'Home', title: 'Home services', description: 'Preview a marketplace experience for finding and booking trusted home professionals.', icon: Home, tone: 'sand', tag: 'Provider demo', availability: 'demo' },
-  { id: 'fitness', category: 'Health', title: 'Fitness coaching', description: 'Preview a guided flow for choosing a goal and finding the right fitness coach.', icon: Dumbbell, tone: 'lilac', tag: 'Provider demo', availability: 'demo' },
-  { id: 'career', category: 'Work', title: 'Career mentor', description: 'Preview a focused experience for finding support with roles, interviews, and career decisions.', icon: BriefcaseBusiness, tone: 'peach', tag: 'Provider demo', availability: 'demo' },
+  { id: 'fitness', category: 'Health', title: 'Fitness coaching', description: 'Shape an adaptive training week around your goal, energy, equipment and real availability.', icon: Dumbbell, tone: 'lilac', tag: 'Experience demo', availability: 'demo' },
+  { id: 'career', category: 'Work', title: 'Career mentor', description: 'Turn your experience into evidence, a clearer direction and a practical 30-day roadmap.', icon: BriefcaseBusiness, tone: 'peach', tag: 'Experience demo', availability: 'demo' },
   { id: 'vehicle-rental', category: 'Travel', title: 'Vehicle rental', description: 'Compare vehicles, customise protection and extras, then review a complete rental price before the road.', icon: CarFront, tone: 'blue', tag: 'Service demo', availability: 'demo' },
 ]
 
@@ -44,12 +45,13 @@ const utilities = [
   { id: 'color-palette', category: 'Utilities', title: 'Color palette', description: 'Generate harmonious colour combinations, preview them in a UI and copy developer-ready HEX, RGB, HSL and CSS.', icon: Palette, tone: 'lilac', tag: 'Developer utility', availability: 'utility' },
   { id: 'music-visualizer', category: 'Utilities', title: 'Music visualizer', description: 'Loop a short video with a song, add beat-reactive rings, bars, particles and title text, then export the composition as MP4.', icon: AudioLines, tone: 'blue', tag: 'Video utility', availability: 'utility' },
   { id: 'audio-lyrics', category: 'Utilities', title: 'Audio to phonetic lyrics', description: 'Auto-detect mixed-language vocals, keep their pronunciation in English letters, then edit and download complete lyrics.', icon: MicVocal, tone: 'lime', tag: 'Audio utility', availability: 'utility' },
+  { id: 'stem-splitter', category: 'Utilities', title: 'Stem splitter', description: 'Inspect a song across twelve detailed frequency lines, then mute, solo and balance each part privately in your browser.', icon: SlidersHorizontal, tone: 'peach', tag: 'Audio utility', availability: 'utility' },
 ]
 
 const catalog = [...workflows, ...utilities]
 
 const filters = ['All workflows', 'Health', 'Home', 'Travel', 'Finance', 'Education', 'Life', 'Work']
-const workflowPaths = { utilities: '/utilities', medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', 'vehicle-rental': '/vehicle-rental', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter', 'image-compressor': '/utilities/image-compressor', 'image-resizer': '/utilities/image-resizer', 'png-maker': '/utilities/png-maker', 'color-palette': '/utilities/color-palette', 'music-visualizer': '/utilities/music-visualizer', 'audio-lyrics': '/utilities/audio-lyrics' }
+const workflowPaths = { utilities: '/utilities', medical: '/medical', home: '/home-services', travel: '/trip-planner', fitness: '/fitness-coaching', finance: '/money-planning', career: '/career-mentor', 'vehicle-rental': '/vehicle-rental', study: '/study-planner', routine: '/daily-routine', 'pdf-maker': '/utilities/pdf-maker', 'json-diff': '/utilities/json-diff', 'json-formatter': '/utilities/json-formatter', 'image-compressor': '/utilities/image-compressor', 'image-resizer': '/utilities/image-resizer', 'png-maker': '/utilities/png-maker', 'color-palette': '/utilities/color-palette', 'music-visualizer': '/utilities/music-visualizer', 'audio-lyrics': '/utilities/audio-lyrics', 'stem-splitter': '/utilities/stem-splitter' }
 const donationUpiId = import.meta.env.VITE_DONATION_UPI_ID || ''
 const donationUrl = import.meta.env.VITE_DONATION_URL || ''
 
@@ -94,7 +96,7 @@ function App() {
   const [donationOpen, setDonationOpen] = useState(false)
   const [donationAmount, setDonationAmount] = useState(199)
   const [customDonation, setCustomDonation] = useState('')
-  const resolvePath = () => ({ '/utilities': 'utilities', '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/vehicle-rental': 'vehicle-rental', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter', '/utilities/image-compressor': 'image-compressor', '/utilities/image-resizer': 'image-resizer', '/utilities/png-maker': 'png-maker', '/utilities/color-palette': 'color-palette', '/utilities/music-visualizer': 'music-visualizer', '/utilities/audio-lyrics': 'audio-lyrics' }[currentRoutePath()] || null)
+  const resolvePath = () => ({ '/utilities': 'utilities', '/medical': 'medical', '/home-services': 'home', '/trip-planner': 'travel', '/fitness-coaching': 'fitness', '/money-planning': 'finance', '/career-mentor': 'career', '/vehicle-rental': 'vehicle-rental', '/study-planner': 'study', '/daily-routine': 'routine', '/utilities/pdf-maker': 'pdf-maker', '/utilities/json-diff': 'json-diff', '/utilities/json-formatter': 'json-formatter', '/utilities/image-compressor': 'image-compressor', '/utilities/image-resizer': 'image-resizer', '/utilities/png-maker': 'png-maker', '/utilities/color-palette': 'color-palette', '/utilities/music-visualizer': 'music-visualizer', '/utilities/audio-lyrics': 'audio-lyrics', '/utilities/stem-splitter': 'stem-splitter' }[currentRoutePath()] || null)
   const [activeWorkflow, setActiveWorkflow] = useState(resolvePath)
 
   useEffect(() => {
@@ -104,7 +106,7 @@ function App() {
     return () => window.removeEventListener('popstate', syncRoute)
   }, [])
 
-  useEffect(() => { applySeoPage(activeWorkflow || 'home') }, [activeWorkflow])
+  useEffect(() => { applySeoPage(activeWorkflow === 'home' ? 'home-services' : activeWorkflow || 'home') }, [activeWorkflow])
 
   useEffect(() => {
     if (!infoDialog && !donationOpen) return undefined
@@ -234,6 +236,7 @@ function App() {
   if (activeWorkflow === 'color-palette') return <ColorPalette onExit={openUtilities} />
   if (activeWorkflow === 'music-visualizer') return <MusicVisualizer onExit={openUtilities} />
   if (activeWorkflow === 'audio-lyrics') return <AudioLyricsConverter onExit={openUtilities} />
+  if (activeWorkflow === 'stem-splitter') return <StemSplitter onExit={openUtilities} />
 
   return (
     <main id="top">
@@ -273,7 +276,7 @@ function App() {
         </div>
       </section>
 
-      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>planning tools</small><strong>9</strong><small>browser utilities</small><strong>5</strong><small>service UI demos</small></section>
+      <section className="trust-strip shell"><span>One thoughtful portal</span><strong>4</strong><small>planning tools</small><strong>10</strong><small>browser utilities</small><strong>5</strong><small>service UI demos</small></section>
 
       <section className="workflow-section shell" id="workflows">
         <div className="section-heading">

@@ -35,12 +35,14 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
   const [month, setMonth] = useState(0)
   const [date, setDate] = useState(2)
   const [time, setTime] = useState('10:30 AM')
+  const [visitMode, setVisitMode] = useState('video')
   const [form, setForm] = useState({ name: '', email: '', phone: '', reason: '' })
   const [error, setError] = useState('')
 
   const selectedDoctor = useMemo(() => doctors.find((item) => item.id === doctor), [doctor])
   const selectedCare = careTypes.find((item) => item.id === care)
   const dates = schedules[month].dates
+  const visitPrice = visitMode === 'video' ? 799 : 1099
 
   const changeMonth = (direction) => {
     const nextMonth = Math.max(0, Math.min(schedules.length - 1, month + direction))
@@ -108,8 +110,10 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
               <div className="date-row">{dates.map((item, index) => <button key={item.date} className={date === index ? 'selected' : ''} onClick={() => setDate(index)}><small>{item.day}</small><strong>{item.date}</strong>{index === 2 && <i>Earliest</i>}</button>)}</div>
               <div className="time-label"><Clock3 size={17} /> Available times</div>
               <div className="time-grid">{times.map((item) => <button key={item} className={time === item ? 'selected' : ''} onClick={() => setTime(item)}>{item}</button>)}</div>
+              <div className="time-label"><MapPin size={17}/> Visit format</div>
+              <div className="visit-mode-grid"><button className={visitMode==='video'?'selected':''} onClick={()=>setVisitMode('video')}><Video size={17}/><span><strong>Video visit</strong><small>Join securely from anywhere</small></span>{visitMode==='video'&&<Check size={14}/>}</button><button className={visitMode==='clinic'?'selected':''} onClick={()=>setVisitMode('clinic')}><MapPin size={17}/><span><strong>Carely Clinic</strong><small>Pune · Central clinic</small></span>{visitMode==='clinic'&&<Check size={14}/>}</button></div>
             </div>
-            <aside className="doctor-summary"><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><div><small>YOU’RE BOOKING WITH</small><h3>{selectedDoctor.name}</h3><p>{selectedDoctor.field}</p></div><hr/><span><CalendarDays size={16} /> {dates[date].day}, {schedules[month].long.slice(0, 3).toUpperCase()} {dates[date].date}</span><span><Clock3 size={16} /> {time}</span><span><Video size={16} /> Video or in-clinic</span></aside>
+            <aside className="doctor-summary"><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><div><small>YOU’RE BOOKING WITH</small><h3>{selectedDoctor.name}</h3><p>{selectedDoctor.field}</p></div><hr/><span><CalendarDays size={16} /> {dates[date].day}, {schedules[month].long.slice(0, 3).toUpperCase()} {dates[date].date}</span><span><Clock3 size={16} /> {time}</span><span>{visitMode==='video'?<Video size={16}/>:<MapPin size={16}/>} {visitMode==='video'?'Secure video visit':'Carely Clinic · Pune'}</span><span className="doctor-summary-price"><strong>₹{visitPrice.toLocaleString('en-IN')}</strong> clear visit price</span></aside>
           </div>
         </section>}
 
@@ -130,7 +134,7 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
           <div className="med-review-card">
             <div className="med-review-person"><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><span><small>DOCTOR</small><strong>{selectedDoctor.name}</strong><p>{selectedCare.name} · {selectedDoctor.field}</p></span><button onClick={() => setStep(2)}>Edit</button></div>
             <div className="med-review-grid">
-              <div><small>DATE & TIME</small><strong>{dates[date].day}, {schedules[month].long} {dates[date].date}, 2026</strong><span>{time}</span><button onClick={() => setStep(3)}>Edit schedule</button></div>
+              <div><small>DATE, TIME & FORMAT</small><strong>{dates[date].day}, {schedules[month].long} {dates[date].date}, 2026</strong><span>{time} · {visitMode==='video'?'Video visit':'Carely Clinic'} · ₹{visitPrice.toLocaleString('en-IN')}</span><button onClick={() => setStep(3)}>Edit schedule</button></div>
               <div><small>PATIENT</small><strong>{form.name}</strong><span>{form.email}</span><button onClick={() => setStep(4)}>Edit details</button></div>
             </div>
             {form.reason.trim() && <div className="med-review-note"><small>NOTE FOR THE DOCTOR</small><p>{form.reason}</p></div>}
@@ -142,13 +146,13 @@ export default function MedicalWorkflow({ onExit, initialCare = 'general', initi
           <div className="success-icon"><CheckCircle2 size={45} /></div><span className="med-kicker">APPOINTMENT REQUESTED</span><h1>You’re all set.</h1><p>We’ve saved your appointment details. This is a UI demo, so no real appointment was created.</p>
           <div className="confirmation-card">
             <div><span className="doctor-avatar" style={{ background: selectedDoctor.color }}>{selectedDoctor.initials}</span><span><small>APPOINTMENT WITH</small><strong>{selectedDoctor.name}</strong><p>{selectedDoctor.field}</p></span></div>
-            <hr/><div className="confirmation-details"><span><CalendarDays size={18} /> {dates[date].day}, {schedules[month].long} {dates[date].date}, 2026</span><span><Clock3 size={18} /> {time}</span><span><MapPin size={18} /> Video or Carely Clinic</span></div>
+            <hr/><div className="confirmation-details"><span><CalendarDays size={18} /> {dates[date].day}, {schedules[month].long} {dates[date].date}, 2026</span><span><Clock3 size={18} /> {time}</span><span>{visitMode==='video'?<Video size={18}/>:<MapPin size={18}/>} {visitMode==='video'?'Secure video link':'Carely Clinic · Pune'}</span><span><strong>₹{visitPrice.toLocaleString('en-IN')}</strong> visit price</span></div>
           </div>
           <button className="med-primary" onClick={onExit}>Return to Carely home <ArrowRight size={17} /></button>
         </section>}
       </div>
 
-      {step < 6 && <footer className="med-footer"><div><span className="mobile-step">Step {step} of 5</span><span className="med-summary-line">{selectedCare?.name} {step > 1 && `· ${selectedDoctor.name}`} {step > 2 && `· ${dates[date].day} ${dates[date].date}, ${time}`}</span></div><button className="med-primary" onClick={next}>{step === 5 ? 'Confirm request' : step === 4 ? 'Review appointment' : 'Continue'} <ArrowRight size={17} /></button></footer>}
+      {step < 6 && <footer className="med-footer"><div><span className="mobile-step">Step {step} of 5</span><span className="med-summary-line">{selectedCare?.name} {step > 1 && `· ${selectedDoctor.name}`} {step > 2 && `· ${dates[date].day} ${dates[date].date}, ${time} · ${visitMode==='video'?'Video':'Clinic'}`}</span></div><button className="med-primary" onClick={next}>{step === 5 ? 'Confirm request' : step === 4 ? 'Review appointment' : 'Continue'} <ArrowRight size={17} /></button></footer>}
     </main>
   )
 }

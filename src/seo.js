@@ -13,6 +13,34 @@ export const seoPages = {
     heading: 'Free Online Browser Utilities',
     type: 'collection',
   },
+  medical: {
+    path: '/medical',
+    title: 'Medical Booking Experience Demo | Flowly',
+    description: 'Explore a patient-friendly medical booking flow for choosing care, comparing doctors, selecting visit format and reviewing clear appointment pricing.',
+    heading: 'Medical Booking Experience Demo',
+    type: 'website',
+  },
+  'home-services': {
+    path: '/home-services',
+    title: 'Home Services Experience Demo | Flowly',
+    description: 'Explore a home-services flow for defining job scope, viewing a live estimate, choosing urgency and requesting a verified professional match.',
+    heading: 'Home Services Experience Demo',
+    type: 'website',
+  },
+  fitness: {
+    path: '/fitness-coaching',
+    title: 'Adaptive Fitness Coaching Demo | Flowly',
+    description: 'Build an adaptive training week around your goal, energy, equipment, available days and realistic session length.',
+    heading: 'Adaptive Fitness Coaching Experience',
+    type: 'website',
+  },
+  career: {
+    path: '/career-mentor',
+    title: 'Career Decision Workspace Demo | Flowly',
+    description: 'Turn career goals and proven experience into an evidence map and a practical 30-day professional roadmap.',
+    heading: 'Career Decision Workspace Experience',
+    type: 'website',
+  },
   'vehicle-rental': {
     path: '/vehicle-rental',
     title: 'Vehicle Rental Experience Demo | Flowly',
@@ -81,6 +109,13 @@ export const seoPages = {
     title: 'Audio to Phonetic Lyrics Converter | Flowly',
     description: 'Transcribe mixed-language vocals into editable phonetic lyrics written with English letters. Copy or download TXT and LRC files privately in your browser.',
     heading: 'Audio to Phonetic Lyrics Converter',
+    type: 'utility',
+  },
+  'stem-splitter': {
+    path: '/utilities/stem-splitter',
+    title: 'Free Audio Stem Splitter and Beat Mixer | Flowly',
+    description: 'Inspect music in twelve detailed frequency lines. Mute, solo and balance bass, beats, vocal presence, cymbals and highs privately in your browser.',
+    heading: 'Audio Stem Splitter and Beat Mixer',
     type: 'utility',
   },
 }
