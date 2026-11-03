@@ -48,6 +48,13 @@ export const seoPages = {
     heading: 'Vehicle Rental Experience Demo',
     type: 'website',
   },
+  'movie-tickets': {
+    path: '/movie-tickets',
+    title: 'Movie Ticket Booking Experience Demo | Flowly',
+    description: 'Explore a cinema ticket flow for discovering films, choosing showtimes and seats, adding snacks and receiving a polished digital ticket.',
+    heading: 'Movie Ticket Booking Experience Demo',
+    type: 'website',
+  },
   'pdf-maker': {
     path: '/utilities/pdf-maker',
     title: 'Free Online PDF Maker | Flowly',
